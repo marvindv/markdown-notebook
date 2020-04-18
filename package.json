@@ -1,0 +1,8 @@
+{
+  "name": "markdown-notebook",
+  "private": true,
+  "version": "0.1.0",
+  "repository": "git@github.com:marvindv/markdown-notebook.git",
+  "author": "Marvin Davieds <marvin.davieds@gmail.com>",
+  "license": "AGPL-3.0"
+}
