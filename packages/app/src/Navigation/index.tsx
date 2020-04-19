@@ -35,12 +35,11 @@ const Container = styled.div<{ showHiddenColumns: boolean }>`
     padding: 0.5rem 0;
     border-bottom: ${props => props.theme.borders.width} solid
       ${props => props.theme.borders.color};
-    border-right: ${props => props.theme.borders.width} solid
-      ${props => props.theme.borders.color};
 
     button {
       border: 0;
       background: transparent;
+      color: ${props => props.theme.buttons.secondaryBackground};
     }
   }
 

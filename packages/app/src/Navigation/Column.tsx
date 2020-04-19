@@ -22,11 +22,6 @@ const ColumnContainer = styled.div`
       ${props => props.theme.borders.color};
   }
 
-  &:last-of-type {
-    border-right: ${props => props.theme.borders.width} solid
-      ${props => props.theme.borders.color};
-  }
-
   button.add-element {
     width: 100%;
     background-color: ${props => props.theme.buttons.secondaryBackground};

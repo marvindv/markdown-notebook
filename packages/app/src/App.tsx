@@ -26,6 +26,10 @@ const PageContainer = styled.div`
 
   display: flex;
   flex-direction: column;
+  // Slightly adjusted material depth 3 shadow.
+  // From https://codepen.io/sdthornton/pen/wBZdXq
+  box-shadow: 0 0px 20px rgba(0, 0, 0, 0.19), 0 0px 6px rgba(0, 0, 0, 0.23);
+  z-index: 1;
 `;
 
 const PageContent = styled.div`
