@@ -1,14 +1,60 @@
-import React from 'react';
+import React, { useState } from 'react';
 import styled from 'styled-components';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import {
+  faBars,
+  faCog,
+  faSearch,
+  faTimes,
+} from '@fortawesome/free-solid-svg-icons';
 
 import Path, { SectionPath } from '../models/path';
 import Notebook from '../models/notebook';
 import Column from './Column';
 import Element from './Element';
 
-const Container = styled.div`
+const Container = styled.div<{ showHiddenColumns: boolean }>`
   display: flex;
   height: 100%;
+
+  .notebook-selector,
+  .section-page-selector {
+    flex-direction: column;
+    width: 100%;
+  }
+
+  .columns {
+    display: flex;
+    height: 100%;
+  }
+
+  .header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0.5rem 0;
+    border-bottom: ${props => props.theme.borders.width} solid
+      ${props => props.theme.borders.color};
+    border-right: ${props => props.theme.borders.width} solid
+      ${props => props.theme.borders.color};
+
+    button {
+      border: 0;
+      background: transparent;
+    }
+  }
+
+  .notebook-selector .header {
+    color: ${props => props.theme.typo.mutedColor};
+  }
+
+  .notebook-selector {
+    display: ${props => (props.showHiddenColumns ? 'flex' : 'none')};
+  }
+
+  .section-page-selector {
+    display: ${props => (props.showHiddenColumns ? 'none' : 'flex')};
+  }
 `;
 
 export interface NavigationProps {
@@ -28,6 +74,8 @@ export interface NavigationProps {
  * @returns
  */
 export default function Navigation(props: NavigationProps) {
+  const [showHiddenColumns, setShowHiddenColumns] = useState(false);
+
   const path = props.path;
 
   const handleNotebookClick = (title: string) => {
@@ -36,6 +84,7 @@ export default function Navigation(props: NavigationProps) {
       props.onPathChange?.({
         notebookTitle: title,
       });
+      setShowHiddenColumns(false);
     }
   };
   const notebooksColumn = (
@@ -115,10 +164,46 @@ export default function Navigation(props: NavigationProps) {
   }
 
   return (
-    <Container className={props.className}>
-      {notebooksColumn}
-      {sectionsColumn}
-      {pagesColumn}
+    <Container
+      className={props.className}
+      showHiddenColumns={showHiddenColumns}
+    >
+      <div className='notebook-selector'>
+        <div className='header'>
+          <button
+            type='button'
+            onClick={() => setShowHiddenColumns(!showHiddenColumns)}
+          >
+            <FontAwesomeIcon fixedWidth={true} icon={faTimes} />
+          </button>
+          <span>Notizbücher</span>
+          <button type='button'>
+            <FontAwesomeIcon fixedWidth={true} icon={faCog} />
+          </button>
+        </div>
+
+        <div className='columns'>{notebooksColumn}</div>
+      </div>
+
+      <div className='section-page-selector'>
+        <div className='header'>
+          <button
+            type='button'
+            onClick={() => setShowHiddenColumns(!showHiddenColumns)}
+          >
+            <FontAwesomeIcon fixedWidth={true} icon={faBars} />
+          </button>
+          <span className='notebook-title'>{path.notebookTitle}</span>
+          <button type='button'>
+            <FontAwesomeIcon fixedWidth={true} icon={faSearch} />
+          </button>
+        </div>
+
+        <div className='columns'>
+          {sectionsColumn}
+          {pagesColumn}
+        </div>
+      </div>
     </Container>
   );
 }

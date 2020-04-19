@@ -22,7 +22,7 @@ const ContentWrapper = styled.div`
 `;
 
 const PageContainer = styled.div`
-  flex: 1;
+  flex: 2;
 
   display: flex;
   flex-direction: column;
