@@ -13,45 +13,57 @@ import Notebook from '../models/notebook';
 import Column from './Column';
 import Element from './Element';
 
+const Header = styled.div`
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0.5rem 0;
+  border-bottom: ${props => props.theme.borders.width} solid
+    ${props => props.theme.borders.color};
+
+  button {
+    border: 0;
+    background: transparent;
+    color: ${props => props.theme.buttons.secondaryBackground};
+  }
+`;
+
+const Columns = styled.div`
+  display: flex;
+  height: 100%;
+`;
+
+/**
+ * Contains a Header and a number of columns wrapped in the Column element.
+ */
+const SelectorPane = styled.div`
+  flex-direction: column;
+  width: 100%;
+`;
+
+/**
+ * The selector pane for columns that can be collapsed.
+ */
+const CollapsedSelectorPane = styled(SelectorPane)`
+  ${Header} {
+    color: ${props => props.theme.typo.mutedColor};
+  }
+`;
+
+/**
+ * The selector pane for columns that are always visible.
+ */
+const PermanentSelectorPane = styled(SelectorPane)``;
+
 const Container = styled.div<{ showHiddenColumns: boolean }>`
   display: flex;
   height: 100%;
 
-  .notebook-selector,
-  .section-page-selector {
-    flex-direction: column;
-    width: 100%;
-  }
-
-  .columns {
-    display: flex;
-    height: 100%;
-  }
-
-  .header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    padding: 0.5rem 0;
-    border-bottom: ${props => props.theme.borders.width} solid
-      ${props => props.theme.borders.color};
-
-    button {
-      border: 0;
-      background: transparent;
-      color: ${props => props.theme.buttons.secondaryBackground};
-    }
-  }
-
-  .notebook-selector .header {
-    color: ${props => props.theme.typo.mutedColor};
-  }
-
-  .notebook-selector {
+  ${CollapsedSelectorPane} {
     display: ${props => (props.showHiddenColumns ? 'flex' : 'none')};
   }
 
-  .section-page-selector {
+  ${PermanentSelectorPane} {
     display: ${props => (props.showHiddenColumns ? 'none' : 'flex')};
   }
 `;
@@ -167,8 +179,8 @@ export default function Navigation(props: NavigationProps) {
       className={props.className}
       showHiddenColumns={showHiddenColumns}
     >
-      <div className='notebook-selector'>
-        <div className='header'>
+      <CollapsedSelectorPane>
+        <Header>
           <button
             type='button'
             onClick={() => setShowHiddenColumns(!showHiddenColumns)}
@@ -179,13 +191,13 @@ export default function Navigation(props: NavigationProps) {
           <button type='button'>
             <FontAwesomeIcon fixedWidth={true} icon={faCog} />
           </button>
-        </div>
+        </Header>
 
-        <div className='columns'>{notebooksColumn}</div>
-      </div>
+        <Columns>{notebooksColumn}</Columns>
+      </CollapsedSelectorPane>
 
-      <div className='section-page-selector'>
-        <div className='header'>
+      <PermanentSelectorPane>
+        <Header>
           <button
             type='button'
             onClick={() => setShowHiddenColumns(!showHiddenColumns)}
@@ -196,13 +208,13 @@ export default function Navigation(props: NavigationProps) {
           <button type='button'>
             <FontAwesomeIcon fixedWidth={true} icon={faSearch} />
           </button>
-        </div>
+        </Header>
 
-        <div className='columns'>
+        <Columns>
           {sectionsColumn}
           {pagesColumn}
-        </div>
-      </div>
+        </Columns>
+      </PermanentSelectorPane>
     </Container>
   );
 }
