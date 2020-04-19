@@ -71,12 +71,23 @@ export const DUMMY_NOTEBOOKS: Notebook[] = [
           },
         ],
       },
+      {
+        title: 'Markdown Notebook',
+        color: [0, 0, 0],
+        pages: [
+          {
+            title: 'Markdown Formatierung',
+            content:
+              '# Markdown Formatierung\n\n## Heading 2\n\n**Some bold text.**\n\n*Some italic text*\n\n> Some awesome blockquote\n\n1. first item\n2. second item\n3. third item\n\n`inline code`\n\n---\n\n- item 1\n- item 2\n  * subitem 1\n  * subitem 2\n- item 3\n\n',
+          },
+        ],
+      },
     ],
   },
 ];
 
 export const DUMMY_PATH = {
-  notebookTitle: 'Allgemein',
-  sectionTitle: 'Ein Abschnitt',
-  pageTitle: '01 - Foo',
+  notebookTitle: 'Tinkering',
+  sectionTitle: 'Markdown Notebook',
+  pageTitle: 'Markdown Formatierung',
 };
