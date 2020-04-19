@@ -11,15 +11,15 @@ export const DUMMY_NOTEBOOKS: Notebook[] = [
         pages: [
           {
             title: 'Übersicht',
-            content: `# Übersicht\nHier könnte ihr Content stehen.`,
+            content: `# Übersicht\n\nHier könnte ihr Content stehen.\n`,
           },
           {
             title: '01 - Foo',
-            content: `# Foo`,
+            content: `# Foo\n`,
           },
           {
             title: '02 - Bar',
-            content: `# Bar`,
+            content: `# Bar\n`,
           },
         ],
       },
@@ -29,11 +29,11 @@ export const DUMMY_NOTEBOOKS: Notebook[] = [
         pages: [
           {
             title: 'Hallo',
-            content: '# Hallo\nMit Absatz',
+            content: '# Hallo\n\nMit Absatz\n',
           },
           {
             title: 'Welt',
-            content: '# Welt\nToller Text',
+            content: '# Welt\n\nToller Text\n',
           },
         ],
       },
@@ -49,11 +49,11 @@ export const DUMMY_NOTEBOOKS: Notebook[] = [
         pages: [
           {
             title: 'Erste Seite',
-            content: '# Erste Seite',
+            content: '# Erste Seite\n',
           },
           {
             title: 'Zweite Seite',
-            content: '# Zweite Seite',
+            content: '# Zweite Seite\n',
           },
         ],
       },
@@ -63,11 +63,11 @@ export const DUMMY_NOTEBOOKS: Notebook[] = [
         pages: [
           {
             title: 'Erste Seite',
-            content: '# Erste Seite',
+            content: '# Erste Seite\n',
           },
           {
             title: 'Zweite Seite',
-            content: '# Zweite Seite',
+            content: '# Zweite Seite\n',
           },
         ],
       },
