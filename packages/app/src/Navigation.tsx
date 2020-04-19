@@ -1,7 +1,8 @@
 import React from 'react';
 import styled from 'styled-components';
+import { darken, lighten, opacify, transparentize } from 'polished';
 
-import Path from './models/path';
+import Path, { SectionPath } from './models/path';
 import Notebook from './models/notebook';
 
 const Container = styled.div`
@@ -9,40 +10,74 @@ const Container = styled.div`
   height: 100%;
 `;
 
-const Column = styled.ol`
+const ColumnContainer = styled.div`
   flex: 1;
   // https://stackoverflow.com/questions/26465745/ellipsis-in-flexbox-container
   min-width: 0;
-  list-style: none;
-  margin: 0;
-  padding: 0;
+  position: relative;
+  display: flex;
+  flex-direction: column;
+
+  ul {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    flex: 1;
+    overflow-y: auto;
+  }
 
   & + & {
-    border-left: 1px solid #ddd;
+    border-left: ${props => props.theme.borders.width} solid
+      ${props => props.theme.borders.color};
   }
 
   &:last-of-type {
-    border-right: 1px solid #ddd;
+    border-right: ${props => props.theme.borders.width} solid
+      ${props => props.theme.borders.color};
+  }
+
+  button.add-element {
+    width: 100%;
+    background-color: ${props => props.theme.buttons.secondaryBackground};
+    color: ${props => props.theme.buttons.secondaryForeground};
+    border: 0;
+    border-top: ${props => props.theme.buttons.borderWidth} solid
+      ${props => props.theme.buttons.secondaryBorder};
+
+    &:hover {
+      background-color: ${props => props.theme.buttons.secondaryHover};
+    }
   }
 `;
 
+const Column = (props: {
+  addButtonText: string;
+  onClick: () => void;
+  children: any;
+}) => (
+  <ColumnContainer>
+    <ul>{props.children}</ul>
+
+    <button type='button' className='add-element' onClick={props.onClick}>
+      {props.addButtonText}
+    </button>
+  </ColumnContainer>
+);
+
 const ElementContainer = styled.li`
-  & + & {
-    border-top: 1px solid #ddd;
-  }
-
   &.active {
-    background-color: rgba(0, 120, 0, 0.2);
+    background-color: ${props =>
+      transparentize(0.5, props.theme.borders.color)};
   }
 
-  &:not(.active):hover {
-    background-color: rgba(0, 120, 0, 0.1);
+  &:hover {
+    background-color: ${props =>
+      transparentize(0.25, props.theme.borders.color)};
   }
 `;
 
 const ElementButton = styled.button`
   width: 100%;
-  padding: 1rem;
   text-align: left;
   text-overflow: ellipsis;
   white-space: nowrap;
@@ -75,6 +110,7 @@ export interface NavigationProps {
   path: Path;
   notebooks: Notebook[];
   onPathChange?: (newPath: Path) => void;
+  onNewPage: (path: SectionPath, pageTitle: string) => void;
 }
 
 /**
@@ -97,7 +133,7 @@ export default function Navigation(props: NavigationProps) {
     }
   };
   const notebooksColumn = (
-    <Column>
+    <Column addButtonText='+ Notizbuch' onClick={() => {}}>
       {props.notebooks.map(n => (
         <Element
           key={n.title}
@@ -124,7 +160,7 @@ export default function Navigation(props: NavigationProps) {
     };
 
     sectionsColumn = (
-      <Column>
+      <Column addButtonText='+ Abschnitt' onClick={() => {}}>
         {notebook?.sections.map(section => (
           <Element
             key={section.title}
@@ -153,7 +189,12 @@ export default function Navigation(props: NavigationProps) {
     };
 
     pagesColumn = (
-      <Column>
+      <Column
+        addButtonText='+ Seite'
+        onClick={() =>
+          props.onNewPage({ ...path, pageTitle: undefined }, 'Neue Seite')
+        }
+      >
         {section?.pages.map(page => (
           <Element
             key={page.title}

@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import styled from 'styled-components';
 
 import Notebook from './models/notebook';
-import Path from './models/path';
+import Path, { SectionPath } from './models/path';
 import Navigation from './Navigation';
 import Breadcrumbs from './Breadcrumbs';
 import { DUMMY_NOTEBOOKS, DUMMY_PATH } from './models/dummy-data';
@@ -35,6 +35,52 @@ function App() {
   const [notebooks, setNotebooks] = useState<Notebook[]>(DUMMY_NOTEBOOKS);
   const [path, setPath] = useState<Path>(DUMMY_PATH);
 
+  const handleNewPage = (path: SectionPath, title: string) => {
+    const newNotebooks = notebooks.map(n => {
+      if (n.title !== path.notebookTitle) {
+        return n;
+      }
+
+      return {
+        ...n,
+        sections: n.sections.map(s => {
+          if (s.title !== path.sectionTitle) {
+            return s;
+          }
+
+          // Check for title collision.
+          let suffixNumber: number | null = null;
+          let colission = true;
+          while (colission) {
+            if (
+              s.pages.find(
+                p =>
+                  p.title === title + (suffixNumber ? ` ${suffixNumber}` : '')
+              )
+            ) {
+              suffixNumber = suffixNumber ? suffixNumber + 1 : 2;
+            } else {
+              colission = false;
+            }
+          }
+
+          const titleWithSuffix =
+            title + (suffixNumber ? ` ${suffixNumber}` : '');
+
+          return {
+            ...s,
+            pages: [
+              ...s.pages,
+              { title: titleWithSuffix, content: `# ${titleWithSuffix}\n\n` },
+            ],
+          };
+        }),
+      };
+    });
+
+    setNotebooks(newNotebooks);
+  };
+
   let pageContent;
   if (path.pageTitle) {
     const notebookIndex = notebooks.findIndex(
@@ -47,7 +93,7 @@ function App() {
     const section = notebook.sections[sectionIndex];
     const pageIndex = section?.pages.findIndex(p => p.title === path.pageTitle);
     const page = section.pages[pageIndex];
-    const handleChange = (newContent: string) => {
+    const handleContentChange = (newContent: string) => {
       const newNotebooks = notebooks.map((n, ni) => {
         if (ni !== notebookIndex) {
           return n;
@@ -80,7 +126,7 @@ function App() {
     if (page) {
       pageContent = (
         <PageContent>
-          <PageView content={page.content} onChange={handleChange} />
+          <PageView content={page.content} onChange={handleContentChange} />
         </PageContent>
       );
     }
@@ -92,9 +138,10 @@ function App() {
         notebooks={notebooks}
         path={path}
         onPathChange={path => setPath(path)}
+        onNewPage={handleNewPage}
       />
       <PageContainer>
-        <Breadcrumbs path={path} />
+        {<Breadcrumbs path={path} />}
         {pageContent}
       </PageContainer>
     </ContentWrapper>

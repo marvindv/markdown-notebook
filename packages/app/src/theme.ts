@@ -7,7 +7,7 @@ export const BASE_COLORS = {
 
 export const BORDERS = {
   width: '1px',
-  color: '#e0e0e0',
+  color: '#cfcfcf',
 };
 
 export const BUTTONS = {
