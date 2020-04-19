@@ -9,6 +9,8 @@ export interface Props {
 export default function PageView(props: Props) {
   const options: EditorConstructionOptions = {
     minimap: { enabled: false },
+    lineNumbersMinChars: 3,
+    automaticLayout: true,
   };
   return (
     <MonacoEditor
