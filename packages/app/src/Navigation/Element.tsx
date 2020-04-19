@@ -1,8 +1,20 @@
 import React from 'react';
-import styled from 'styled-components';
+import styled, { css } from 'styled-components';
 import { transparentize } from 'polished';
+import { RgbColor } from '../models/notebook';
 
-const ElementContainer = styled.li`
+const ElementContainer = styled.li<{ indexTabColor: RgbColor | undefined }>`
+  ${props =>
+    props.indexTabColor &&
+    css`
+      border-left: 6px solid
+        rgb(
+          ${props.indexTabColor[0]},
+          ${props.indexTabColor[1]},
+          ${props.indexTabColor[2]}
+        );
+    `}
+
   &.active {
     background-color: ${props =>
       transparentize(0.5, props.theme.borders.color)};
@@ -34,9 +46,13 @@ export default function Element(props: {
   onClick?: () => void;
   className: string;
   children: any;
+  indexTabColor?: RgbColor;
 }) {
   return (
-    <ElementContainer className={props.className}>
+    <ElementContainer
+      className={props.className}
+      indexTabColor={props.indexTabColor}
+    >
       <ElementButton type='button' onClick={props.onClick}>
         {props.children}
       </ElementButton>

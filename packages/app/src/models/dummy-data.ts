@@ -45,7 +45,7 @@ export const DUMMY_NOTEBOOKS: Notebook[] = [
     sections: [
       {
         title: 'Erster Abschnitt',
-        color: [10, 10, 10],
+        color: [115, 0, 230],
         pages: [
           {
             title: 'Erste Seite',
@@ -59,7 +59,7 @@ export const DUMMY_NOTEBOOKS: Notebook[] = [
       },
       {
         title: 'Zweiter Abschnitt',
-        color: [0, 0, 255],
+        color: [255, 51, 51],
         pages: [
           {
             title: 'Erste Seite',
@@ -73,7 +73,7 @@ export const DUMMY_NOTEBOOKS: Notebook[] = [
       },
       {
         title: 'Markdown Notebook',
-        color: [0, 0, 0],
+        color: [204, 204, 0],
         pages: [
           {
             title: 'Markdown Formatierung',

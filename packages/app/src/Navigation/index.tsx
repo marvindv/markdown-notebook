@@ -104,6 +104,7 @@ export default function Navigation(props: NavigationProps) {
         <Element
           key={n.title}
           className={n.title === path?.notebookTitle ? 'active' : ''}
+          indexTabColor={n.color}
           onClick={() => handleNotebookClick(n.title)}
         >
           {n.title}
@@ -131,6 +132,7 @@ export default function Navigation(props: NavigationProps) {
           <Element
             key={section.title}
             className={section.title === path?.sectionTitle ? 'active' : ''}
+            indexTabColor={section.color}
             onClick={() => handleClick(section.title)}
           >
             {section.title}
