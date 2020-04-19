@@ -11,10 +11,10 @@ export interface Props {
 const Container = styled.ol`
   list-style: none;
   margin: 0;
-  padding: 1rem;
+  padding: 0.5rem;
   display: flex;
-  justify-content: center;
-  color: #888;
+  color: ${props => props.theme.typo.mutedColor};
+  font-size: ${props => props.theme.typo.fontSizeSm};
 `;
 
 const Element = styled.li`

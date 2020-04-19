@@ -27,10 +27,16 @@ export const BUTTONS = {
   secondaryForeground: '#fff',
 };
 
+export const TYPO = {
+  fontSizeSm: '75%',
+  mutedColor: '#888',
+};
+
 export const THEME = {
   baseColors: BASE_COLORS,
   borders: BORDERS,
   buttons: BUTTONS,
+  typo: TYPO,
 };
 
 export default THEME;
