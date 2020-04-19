@@ -22,6 +22,7 @@ const ElementButton = styled.button`
   overflow: hidden;
   background: none;
   border: 0;
+  padding: 1rem;
 `;
 
 /**
