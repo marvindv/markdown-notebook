@@ -7,6 +7,7 @@ import Navigation from './Navigation';
 import Breadcrumbs from './Breadcrumbs';
 import { DUMMY_NOTEBOOKS, DUMMY_PATH } from './models/dummy-data';
 import PageView from './PageView';
+import { findPage } from './models/selection';
 
 const NavigationContainer = styled(Navigation)``;
 
@@ -89,50 +90,44 @@ function App() {
 
   let pageContent;
   if (path.pageTitle) {
-    const notebookIndex = notebooks.findIndex(
-      n => n.title === path.notebookTitle
-    );
-    const notebook = notebooks[notebookIndex];
-    const sectionIndex = notebook?.sections.findIndex(
-      s => s.title === path.sectionTitle
-    );
-    const section = notebook.sections[sectionIndex];
-    const pageIndex = section?.pages.findIndex(p => p.title === path.pageTitle);
-    const page = section.pages[pageIndex];
-    const handleContentChange = (newContent: string) => {
-      const newNotebooks = notebooks.map((n, ni) => {
-        if (ni !== notebookIndex) {
-          return n;
-        }
+    const pathComponents = findPage(path, notebooks);
 
-        return {
-          ...n,
-          sections: n.sections.map((s, si) => {
-            if (si !== sectionIndex) {
-              return s;
-            }
+    if (pathComponents) {
+      const { notebook, section, page } = pathComponents;
 
-            return {
-              ...s,
-              pages: s.pages.map((p, pi) => {
-                if (pi !== pageIndex) {
-                  return p;
-                }
+      const handleContentChange = (newContent: string) => {
+        const newNotebooks = notebooks.map(n => {
+          if (n !== notebook) {
+            return n;
+          }
 
-                return { ...p, content: newContent };
-              }),
-            };
-          }),
-        };
-      });
+          return {
+            ...n,
+            sections: n.sections.map(s => {
+              if (s !== section) {
+                return s;
+              }
 
-      setNotebooks(newNotebooks);
-    };
+              return {
+                ...s,
+                pages: s.pages.map(p => {
+                  if (p !== page) {
+                    return p;
+                  }
 
-    if (page) {
+                  return { ...p, content: newContent };
+                }),
+              };
+            }),
+          };
+        });
+
+        setNotebooks(newNotebooks);
+      };
+
       pageContent = (
         <PageContainer>
-          {<Breadcrumbs path={path} />}
+          <Breadcrumbs path={path} />
           <PageContent>
             <PageView content={page.content} onChange={handleContentChange} />
           </PageContent>
@@ -141,10 +136,19 @@ function App() {
     }
   }
 
+  // If we have no path or the path does not match any page, display a
+  // placeholder instead.
   if (!pageContent) {
+    let text;
+    if (!path.sectionTitle) {
+      text = 'Wähle einen Abschnitt aus.';
+    } else {
+      text = 'Wähle eine Seite aus.';
+    }
+
     pageContent = (
       <PageContainer>
-        <NoPageNotice>Wähle eine Seite aus</NoPageNotice>
+        <NoPageNotice>{text}</NoPageNotice>
       </PageContainer>
     );
   }
