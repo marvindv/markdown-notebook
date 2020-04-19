@@ -31,6 +31,12 @@ const PageContent = styled.div`
   flex: 1;
 `;
 
+const NoPageNotice = styled.div`
+  flex: 0;
+  margin: auto;
+  color: ${props => props.theme.typo.mutedColor};
+`;
+
 function App() {
   const [notebooks, setNotebooks] = useState<Notebook[]>(DUMMY_NOTEBOOKS);
   const [path, setPath] = useState<Path>(DUMMY_PATH);
@@ -125,11 +131,22 @@ function App() {
 
     if (page) {
       pageContent = (
-        <PageContent>
-          <PageView content={page.content} onChange={handleContentChange} />
-        </PageContent>
+        <PageContainer>
+          {<Breadcrumbs path={path} />}
+          <PageContent>
+            <PageView content={page.content} onChange={handleContentChange} />
+          </PageContent>
+        </PageContainer>
       );
     }
+  }
+
+  if (!pageContent) {
+    pageContent = (
+      <PageContainer>
+        <NoPageNotice>Wähle eine Seite aus</NoPageNotice>
+      </PageContainer>
+    );
   }
 
   return (
@@ -140,10 +157,7 @@ function App() {
         onPathChange={path => setPath(path)}
         onNewPage={handleNewPage}
       />
-      <PageContainer>
-        {<Breadcrumbs path={path} />}
-        {pageContent}
-      </PageContainer>
+      {pageContent}
     </ContentWrapper>
   );
 }
