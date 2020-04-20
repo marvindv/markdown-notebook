@@ -1,7 +1,7 @@
 import React from 'react';
 import styled, { css } from 'styled-components';
 import { transparentize } from 'polished';
-import { RgbColor } from '../models/notebook';
+import { RgbColor } from 'features/notebooks/model';
 
 const ElementContainer = styled.li<{ indexTabColor: RgbColor | undefined }>`
   ${props =>

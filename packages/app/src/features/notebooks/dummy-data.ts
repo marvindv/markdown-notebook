@@ -1,4 +1,4 @@
-import Notebook from './notebook';
+import Notebook from './model';
 
 export const DUMMY_NOTEBOOKS: Notebook[] = [
   {
@@ -85,9 +85,3 @@ export const DUMMY_NOTEBOOKS: Notebook[] = [
     ],
   },
 ];
-
-export const DUMMY_PATH = {
-  notebookTitle: 'Tinkering',
-  sectionTitle: 'Markdown Notebook',
-  pageTitle: 'Markdown Formatierung',
-};

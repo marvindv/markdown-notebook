@@ -1,7 +1,6 @@
 import React from 'react';
 import styled from 'styled-components';
-
-import Path from './models/path';
+import Path from 'features/path/model';
 
 export interface Props {
   path: Path;

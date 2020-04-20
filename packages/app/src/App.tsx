@@ -1,13 +1,14 @@
-import React, { useState } from 'react';
+import React from 'react';
+import { useDispatch, useSelector } from 'react-redux';
 import styled from 'styled-components';
-
-import Notebook from './models/notebook';
-import Path, { SectionPath } from './models/path';
-import Navigation from './Navigation';
+import { addPage, changePageContent } from 'features/notebooks/notebooksSlice';
+import { changeCurrentPath } from 'features/path/currentPathSlice';
+import { SectionPath } from 'features/path/model';
 import Breadcrumbs from './Breadcrumbs';
-import { DUMMY_NOTEBOOKS, DUMMY_PATH } from './models/dummy-data';
+import { findPage } from './features/notebooks/selection';
+import Navigation from './Navigation';
 import PageView from './PageView';
-import { findPage } from './models/selection';
+import { RootState } from './reducers';
 
 const NavigationContainer = styled(Navigation)``;
 
@@ -43,90 +44,48 @@ const NoPageNotice = styled.div`
 `;
 
 function App() {
-  const [notebooks, setNotebooks] = useState<Notebook[]>(DUMMY_NOTEBOOKS);
-  const [path, setPath] = useState<Path>(DUMMY_PATH);
+  const notebooks = useSelector((state: RootState) => state.notebooks);
+  const path = useSelector((state: RootState) => state.currentPath);
+  const dispatch = useDispatch();
 
   const handleNewPage = (path: SectionPath, title: string) => {
-    const newNotebooks = notebooks.map(n => {
-      if (n.title !== path.notebookTitle) {
-        return n;
+    const notebook = notebooks.find(n => n.title === path.notebookTitle);
+    const section = notebook?.sections.find(s => s.title === path.sectionTitle);
+    if (section) {
+      // Find out if the new page title collides with an existing page.
+      let suffixNumber: number | null = null;
+      let colission = true;
+      while (colission) {
+        if (
+          section.pages.find(
+            p => p.title === title + (suffixNumber ? ` ${suffixNumber}` : '')
+          )
+        ) {
+          suffixNumber = suffixNumber ? suffixNumber + 1 : 2;
+        } else {
+          colission = false;
+        }
       }
 
-      return {
-        ...n,
-        sections: n.sections.map(s => {
-          if (s.title !== path.sectionTitle) {
-            return s;
-          }
-
-          // Check for title collision.
-          let suffixNumber: number | null = null;
-          let colission = true;
-          while (colission) {
-            if (
-              s.pages.find(
-                p =>
-                  p.title === title + (suffixNumber ? ` ${suffixNumber}` : '')
-              )
-            ) {
-              suffixNumber = suffixNumber ? suffixNumber + 1 : 2;
-            } else {
-              colission = false;
-            }
-          }
-
-          const titleWithSuffix =
-            title + (suffixNumber ? ` ${suffixNumber}` : '');
-
-          return {
-            ...s,
-            pages: [
-              ...s.pages,
-              { title: titleWithSuffix, content: `# ${titleWithSuffix}\n\n` },
-            ],
-          };
-        }),
-      };
-    });
-
-    setNotebooks(newNotebooks);
+      const titleWithSuffix = title + (suffixNumber ? ` ${suffixNumber}` : '');
+      dispatch(
+        addPage({
+          path,
+          title: titleWithSuffix,
+          content: `# ${titleWithSuffix}`,
+        })
+      );
+    }
   };
 
   let pageContent;
   if (path.pageTitle) {
     const pathComponents = findPage(path, notebooks);
-
     if (pathComponents) {
-      const { notebook, section, page } = pathComponents;
+      const { page } = pathComponents;
 
       const handleContentChange = (newContent: string) => {
-        const newNotebooks = notebooks.map(n => {
-          if (n !== notebook) {
-            return n;
-          }
-
-          return {
-            ...n,
-            sections: n.sections.map(s => {
-              if (s !== section) {
-                return s;
-              }
-
-              return {
-                ...s,
-                pages: s.pages.map(p => {
-                  if (p !== page) {
-                    return p;
-                  }
-
-                  return { ...p, content: newContent };
-                }),
-              };
-            }),
-          };
-        });
-
-        setNotebooks(newNotebooks);
+        dispatch(changePageContent({ path, content: newContent }));
       };
 
       pageContent = (
@@ -162,7 +121,7 @@ function App() {
       <NavigationContainer
         notebooks={notebooks}
         path={path}
-        onPathChange={path => setPath(path)}
+        onPathChange={path => dispatch(changeCurrentPath(path))}
         onNewPage={handleNewPage}
       />
       {pageContent}

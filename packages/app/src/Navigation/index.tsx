@@ -7,9 +7,8 @@ import {
   faSearch,
   faTimes,
 } from '@fortawesome/free-solid-svg-icons';
-
-import Path, { SectionPath } from '../models/path';
-import Notebook from '../models/notebook';
+import Path, { SectionPath } from 'features/path/model';
+import Notebook from 'features/notebooks/model';
 import Column from './Column';
 import Element from './Element';
 
