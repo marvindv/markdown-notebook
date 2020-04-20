@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect, useRef, KeyboardEvent } from 'react';
 import styled, { css } from 'styled-components';
 import { transparentize } from 'polished';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
@@ -17,6 +17,7 @@ const StyledDropdown = styled(Dropdown)`
 const ElementContainer = styled.li<{
   indexTabColor: RgbColor | undefined;
   showDropdown: boolean;
+  editMode: boolean;
 }>`
   ${props =>
     props.indexTabColor &&
@@ -40,7 +41,7 @@ const ElementContainer = styled.li<{
   }
 
   ${props =>
-    props.showDropdown &&
+    (props.showDropdown || props.editMode) &&
     css`
       background-color: ${props =>
         transparentize(0.25, props.theme.borders.color)} !important;
@@ -95,6 +96,15 @@ const ElementButton = styled.button`
   padding: 1rem;
 `;
 
+const ElementInputContainer = styled.div`
+  padding: 1rem;
+`;
+
+const ElementInput = styled.input`
+  width: 100%;
+  border: 0;
+`;
+
 /**
  * An element in a column, either notebook, section or page.
  *
@@ -103,27 +113,65 @@ const ElementButton = styled.button`
 export default function Element(props: {
   onClick?: () => void;
   onDeleteClick?: () => void;
+  onTitleChange?: (newTitle: string) => void;
   className: string;
-  children: any;
+  label: string;
   indexTabColor?: RgbColor;
 }) {
   const [showDropdown, setShowDropdown] = useState(false);
+  const [isEditing, setEditing] = useState(false);
+  const [editValue, setEditValue] = useState(props.label);
+  const inputRef = useRef<HTMLInputElement>(null);
+
+  // Focus the input if isEditing changed to true.
+  useEffect(() => {
+    if (isEditing && inputRef.current) {
+      inputRef.current.focus();
+    }
+  }, [isEditing]);
+
+  const handleNameEditClick = () => {
+    setShowDropdown(false);
+    setEditing(!isEditing);
+  };
+
+  const handleInputKeyDown = (ev: KeyboardEvent) => {
+    if (ev.key === 'Enter') {
+      setEditing(false);
+      props.onTitleChange?.(editValue);
+    }
+  };
 
   return (
     <ElementContainer
       className={props.className}
       indexTabColor={props.indexTabColor}
       showDropdown={showDropdown}
+      editMode={isEditing}
     >
-      <ElementButton type='button' onClick={props.onClick}>
-        {props.children}
-      </ElementButton>
+      {!isEditing && (
+        <ElementButton type='button' onClick={props.onClick}>
+          {props.label}
+        </ElementButton>
+      )}
+
+      {isEditing && (
+        <ElementInputContainer>
+          <ElementInput
+            ref={inputRef}
+            type='text'
+            value={editValue}
+            onChange={e => setEditValue(e.target.value)}
+            onKeyDown={handleInputKeyDown}
+          />
+        </ElementInputContainer>
+      )}
 
       <StyledDropdown
         show={showDropdown}
         toggleLabel={<FontAwesomeIcon icon={faEllipsisV} />}
         items={[
-          { label: 'Name ändern' },
+          { label: 'Name ändern', onClick: handleNameEditClick },
           { label: 'Löschen', onClick: props.onDeleteClick },
         ]}
         onToggleClick={() => setShowDropdown(!showDropdown)}

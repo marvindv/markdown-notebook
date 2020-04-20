@@ -74,6 +74,7 @@ export interface NavigationProps {
   onPathChange?: (newPath: Path) => void;
   onNewPage: (path: SectionPath, pageTitle: string) => void;
   onDeletePage: (path: PagePath) => void;
+  onChangePageName: (path: PagePath, newTitle: string) => void;
 }
 
 /**
@@ -104,11 +105,10 @@ export default function Navigation(props: NavigationProps) {
         <Element
           key={n.title}
           className={n.title === path?.notebookTitle ? 'active' : ''}
+          label={n.title}
           indexTabColor={n.color}
           onClick={() => handleNotebookClick(n.title)}
-        >
-          {n.title}
-        </Element>
+        />
       ))}
     </Column>
   );
@@ -132,11 +132,10 @@ export default function Navigation(props: NavigationProps) {
           <Element
             key={section.title}
             className={section.title === path?.sectionTitle ? 'active' : ''}
+            label={section.title}
             indexTabColor={section.color}
             onClick={() => handleClick(section.title)}
-          >
-            {section.title}
-          </Element>
+          />
         ))}
       </Column>
     );
@@ -167,13 +166,18 @@ export default function Navigation(props: NavigationProps) {
           <Element
             key={page.title}
             className={page.title === path?.pageTitle ? 'active' : ''}
+            label={page.title}
             onClick={() => handleClick(page.title)}
             onDeleteClick={() =>
               props.onDeletePage({ ...path, pageTitle: page.title })
             }
-          >
-            {page.title}
-          </Element>
+            onTitleChange={newTitle =>
+              props.onChangePageName(
+                { ...path, pageTitle: page.title },
+                newTitle
+              )
+            }
+          />
         ))}
       </Column>
     );

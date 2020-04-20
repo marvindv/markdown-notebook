@@ -5,6 +5,7 @@ import {
   addPage,
   changePageContent,
   deletePage,
+  changePageTitle,
 } from 'features/notebooks/notebooksSlice';
 import { changeCurrentPath } from 'features/path/currentPathSlice';
 import { SectionPath } from 'features/path/model';
@@ -128,6 +129,9 @@ function App() {
         onPathChange={path => dispatch(changeCurrentPath(path))}
         onNewPage={handleNewPage}
         onDeletePage={path => dispatch(deletePage(path))}
+        onChangePageName={(path, newTitle) =>
+          dispatch(changePageTitle({ path, newTitle }))
+        }
       />
       {pageContent}
     </ContentWrapper>

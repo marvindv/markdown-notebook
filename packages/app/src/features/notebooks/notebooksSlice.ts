@@ -87,6 +87,23 @@ const notebooksSlice = createSlice({
         section?.pages.splice(pageIndex, 1);
       }
     },
+
+    changePageTitle(
+      state,
+      action: PayloadAction<{ path: PagePath; newTitle: string }>
+    ) {
+      const { path, newTitle } = action.payload;
+      const notebook = state.find(n => n.title === path.notebookTitle);
+      const section = notebook?.sections.find(
+        s => s.title === path.sectionTitle
+      );
+      const page = section?.pages.find(p => p.title === path.pageTitle);
+
+      if (page) {
+        // TODO: Handle collision with existing pages?
+        page.title = newTitle;
+      }
+    },
   },
 });
 
@@ -96,6 +113,7 @@ export const {
   addPage,
   changePageContent,
   deletePage,
+  changePageTitle,
 } = notebooksSlice.actions;
 
 export default notebooksSlice.reducer;
