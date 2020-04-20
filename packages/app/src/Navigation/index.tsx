@@ -7,7 +7,7 @@ import {
   faSearch,
   faTimes,
 } from '@fortawesome/free-solid-svg-icons';
-import Path, { SectionPath } from 'features/path/model';
+import Path, { SectionPath, PagePath } from 'features/path/model';
 import Notebook from 'features/notebooks/model';
 import Column from './Column';
 import Element from './Element';
@@ -73,6 +73,7 @@ export interface NavigationProps {
   notebooks: Notebook[];
   onPathChange?: (newPath: Path) => void;
   onNewPage: (path: SectionPath, pageTitle: string) => void;
+  onDeletePage: (path: PagePath) => void;
 }
 
 /**
@@ -167,6 +168,9 @@ export default function Navigation(props: NavigationProps) {
             key={page.title}
             className={page.title === path?.pageTitle ? 'active' : ''}
             onClick={() => handleClick(page.title)}
+            onDeleteClick={() =>
+              props.onDeletePage({ ...path, pageTitle: page.title })
+            }
           >
             {page.title}
           </Element>

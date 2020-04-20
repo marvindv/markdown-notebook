@@ -72,6 +72,21 @@ const notebooksSlice = createSlice({
         page.content = content;
       }
     },
+
+    deletePage(state, action: PayloadAction<PagePath>) {
+      const path = action.payload;
+      const notebook = state.find(n => n.title === path.notebookTitle);
+      const section = notebook?.sections.find(
+        s => s.title === path.sectionTitle
+      );
+      const pageIndex = section?.pages.findIndex(
+        p => p.title === path.pageTitle
+      );
+
+      if (pageIndex !== undefined) {
+        section?.pages.splice(pageIndex, 1);
+      }
+    },
   },
 });
 
@@ -80,6 +95,7 @@ export const {
   addSection,
   addPage,
   changePageContent,
+  deletePage,
 } = notebooksSlice.actions;
 
 export default notebooksSlice.reducer;

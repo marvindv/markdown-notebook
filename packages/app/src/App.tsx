@@ -1,7 +1,11 @@
 import React from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import styled from 'styled-components';
-import { addPage, changePageContent } from 'features/notebooks/notebooksSlice';
+import {
+  addPage,
+  changePageContent,
+  deletePage,
+} from 'features/notebooks/notebooksSlice';
 import { changeCurrentPath } from 'features/path/currentPathSlice';
 import { SectionPath } from 'features/path/model';
 import Breadcrumbs from './Breadcrumbs';
@@ -123,6 +127,7 @@ function App() {
         path={path}
         onPathChange={path => dispatch(changeCurrentPath(path))}
         onNewPage={handleNewPage}
+        onDeletePage={path => dispatch(deletePage(path))}
       />
       {pageContent}
     </ContentWrapper>

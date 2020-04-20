@@ -1,13 +1,27 @@
-import React from 'react';
+import React, { useState } from 'react';
 import styled, { css } from 'styled-components';
 import { transparentize } from 'polished';
-import { RgbColor } from 'features/notebooks/model';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { faEllipsisV } from '@fortawesome/free-solid-svg-icons';
 
-const ElementContainer = styled.li<{ indexTabColor: RgbColor | undefined }>`
+import { RgbColor } from 'features/notebooks/model';
+import Dropdown, { DropdownToggle } from 'features/dropdowns/Dropdown';
+
+const StyledDropdown = styled(Dropdown)`
+  position: absolute;
+  right: 0;
+  top: 0;
+  bottom: 0;
+`;
+
+const ElementContainer = styled.li<{
+  indexTabColor: RgbColor | undefined;
+  showDropdown: boolean;
+}>`
   ${props =>
     props.indexTabColor &&
     css`
-      border-left: 6px solid
+      border-left: 0.5rem solid
         rgb(
           ${props.indexTabColor[0]},
           ${props.indexTabColor[1]},
@@ -24,6 +38,50 @@ const ElementContainer = styled.li<{ indexTabColor: RgbColor | undefined }>`
     background-color: ${props =>
       transparentize(0.25, props.theme.borders.color)};
   }
+
+  ${props =>
+    props.showDropdown &&
+    css`
+      background-color: ${props =>
+        transparentize(0.25, props.theme.borders.color)} !important;
+    `}
+
+  ${props =>
+    !props.showDropdown &&
+    css`
+      &:not(:hover) ${StyledDropdown} {
+        display: none;
+      }
+    `}
+
+  ${DropdownToggle} {
+    height: 100%;
+    background: linear-gradient(
+      to right,
+      ${props => transparentize(1, props.theme.borders.color)},
+      ${props => transparentize(0.25, props.theme.borders.color)} 20%,
+      ${props => transparentize(0, props.theme.borders.color)}
+    );
+
+    &:hover,
+    &:active,
+    &:focus {
+      background: linear-gradient(
+        to right,
+        ${props => transparentize(1, props.theme.borders.color)},
+        ${props => transparentize(0.25, props.theme.borders.color)} 20%,
+        ${props => props.theme.buttons.secondaryBackground}
+      );
+    }
+
+    &:focus {
+      outline-color: ${props => props.theme.buttons.secondaryBackground};
+    }
+  }
+
+  display: flex;
+  align-items: center;
+  position: relative;
 `;
 
 const ElementButton = styled.button`
@@ -44,18 +102,32 @@ const ElementButton = styled.button`
  */
 export default function Element(props: {
   onClick?: () => void;
+  onDeleteClick?: () => void;
   className: string;
   children: any;
   indexTabColor?: RgbColor;
 }) {
+  const [showDropdown, setShowDropdown] = useState(false);
+
   return (
     <ElementContainer
       className={props.className}
       indexTabColor={props.indexTabColor}
+      showDropdown={showDropdown}
     >
       <ElementButton type='button' onClick={props.onClick}>
         {props.children}
       </ElementButton>
+
+      <StyledDropdown
+        show={showDropdown}
+        toggleLabel={<FontAwesomeIcon icon={faEllipsisV} />}
+        items={[
+          { label: 'Name ändern' },
+          { label: 'Löschen', onClick: props.onDeleteClick },
+        ]}
+        onToggleClick={() => setShowDropdown(!showDropdown)}
+      />
     </ElementContainer>
   );
 }
