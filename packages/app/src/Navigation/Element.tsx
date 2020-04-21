@@ -158,7 +158,12 @@ export default function Element(props: {
     }
 
     setShowDropdown(false);
-    setEditing(!isEditing);
+    const willBeEditing = !isEditing;
+    if (willBeEditing) {
+      setEditValue(props.label);
+    }
+
+    setEditing(willBeEditing);
   };
 
   const handleInputKeyDown = (ev: KeyboardEvent) => {
@@ -166,6 +171,9 @@ export default function Element(props: {
       setEditing(false);
       setInnerWidthBeforeEdit(null);
       props.onTitleChange?.(editValue);
+    } else if (ev.key === 'Escape') {
+      setEditing(false);
+      setInnerWidthBeforeEdit(null);
     }
   };
 
