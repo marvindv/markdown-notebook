@@ -103,6 +103,7 @@ const ElementInputContainer = styled.div`
 const ElementInput = styled.input`
   width: 100%;
   border: 0;
+  padding: 0;
 `;
 
 /**
@@ -199,7 +200,7 @@ export default function Element(props: {
             type='text'
             value={editValue}
             style={{
-              width: innerWidthBeforeEdit
+              minWidth: innerWidthBeforeEdit
                 ? innerWidthBeforeEdit + 'px'
                 : undefined,
             }}
