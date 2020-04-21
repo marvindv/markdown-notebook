@@ -108,6 +108,8 @@ const ElementInput = styled.input`
 /**
  * Gets the width of an element without the padding.
  *
+ * From https://stackoverflow.com/a/29881817
+ *
  * @param {HTMLElement} element
  * @returns {number}
  */
