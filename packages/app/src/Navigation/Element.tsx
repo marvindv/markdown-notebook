@@ -106,6 +106,21 @@ const ElementInput = styled.input`
 `;
 
 /**
+ * Gets the width of an element without the padding.
+ *
+ * @param {HTMLElement} element
+ * @returns {number}
+ */
+function getElementInnerWidth(element: HTMLElement): number {
+  const computedStyle = getComputedStyle(element);
+  let elementWidth = element.clientWidth;
+  elementWidth -=
+    parseFloat(computedStyle.paddingLeft) +
+    parseFloat(computedStyle.paddingRight);
+  return elementWidth;
+}
+
+/**
  * An element in a column, either notebook, section or page.
  *
  * @param props
@@ -121,7 +136,11 @@ export default function Element(props: {
   const [showDropdown, setShowDropdown] = useState(false);
   const [isEditing, setEditing] = useState(false);
   const [editValue, setEditValue] = useState(props.label);
+  const [innerWidthBeforeEdit, setInnerWidthBeforeEdit] = useState<
+    number | null
+  >(null);
   const inputRef = useRef<HTMLInputElement>(null);
+  const buttonRef = useRef<HTMLButtonElement>(null);
 
   // Focus the input if isEditing changed to true.
   useEffect(() => {
@@ -131,6 +150,13 @@ export default function Element(props: {
   }, [isEditing]);
 
   const handleNameEditClick = () => {
+    if (buttonRef.current) {
+      const innerWidth = getElementInnerWidth(buttonRef.current);
+      setInnerWidthBeforeEdit(innerWidth);
+    } else {
+      setInnerWidthBeforeEdit(null);
+    }
+
     setShowDropdown(false);
     setEditing(!isEditing);
   };
@@ -138,6 +164,7 @@ export default function Element(props: {
   const handleInputKeyDown = (ev: KeyboardEvent) => {
     if (ev.key === 'Enter') {
       setEditing(false);
+      setInnerWidthBeforeEdit(null);
       props.onTitleChange?.(editValue);
     }
   };
@@ -150,7 +177,7 @@ export default function Element(props: {
       editMode={isEditing}
     >
       {!isEditing && (
-        <ElementButton type='button' onClick={props.onClick}>
+        <ElementButton type='button' onClick={props.onClick} ref={buttonRef}>
           {props.label}
         </ElementButton>
       )}
@@ -161,6 +188,11 @@ export default function Element(props: {
             ref={inputRef}
             type='text'
             value={editValue}
+            style={{
+              width: innerWidthBeforeEdit
+                ? innerWidthBeforeEdit + 'px'
+                : undefined,
+            }}
             onChange={e => setEditValue(e.target.value)}
             onKeyDown={handleInputKeyDown}
           />
