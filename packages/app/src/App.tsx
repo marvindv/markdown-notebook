@@ -1,9 +1,12 @@
 import {
+  addNotebook,
   addPage,
   addSection,
+  changeNotebookTitle,
   changePageContent,
   changePageTitle,
   changeSectionTitle,
+  deleteNotebook,
   deletePage,
   deleteSection,
 } from 'features/notebooks/notebooksSlice';
@@ -107,6 +110,14 @@ function App() {
     }
   };
 
+  const handleNewNotebook = (newTitle: string) => {
+    const collisionFreeTitle = getCollisionFreeTitle(
+      newTitle,
+      notebooks.map(n => n.title)
+    );
+    dispatch(addNotebook({ title: collisionFreeTitle, color: [0, 0, 0] }));
+  };
+
   let pageContent;
   if (path.pageTitle) {
     const pathComponents = findPage(path, notebooks);
@@ -160,6 +171,11 @@ function App() {
         onDeleteSection={path => dispatch(deleteSection(path))}
         onChangeSectionTitle={(path, newTitle) =>
           dispatch(changeSectionTitle({ path, newTitle }))
+        }
+        onNewNotebook={handleNewNotebook}
+        onDeleteNotebook={path => dispatch(deleteNotebook(path))}
+        onChangeNotebookTitle={(path, newTitle) =>
+          dispatch(changeNotebookTitle({ path, newTitle }))
         }
       />
       {pageContent}

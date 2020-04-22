@@ -124,3 +124,24 @@ export function findNotebook(
 ): Notebook | undefined {
   return notebooks.find(n => n.title === path.notebookTitle);
 }
+
+/**
+ * Finds the notebook index described by the given path from a list of
+ * notebooks. Returns `undefined` if no notebook matches the path.
+ *
+ * @export
+ * @param {(NotebookPath | SectionPath | PagePath)} path
+ * @param {Notebook[]} notebooks
+ * @returns {(number | undefined)}
+ */
+export function findNotebookIndex(
+  path: NotebookPath | SectionPath | PagePath,
+  notebooks: Notebook[]
+): number | undefined {
+  const index = notebooks.findIndex(n => n.title === path.notebookTitle);
+  if (index === -1) {
+    return undefined;
+  }
+
+  return index;
+}

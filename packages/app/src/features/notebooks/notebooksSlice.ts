@@ -1,14 +1,14 @@
 import { createSlice, PayloadAction } from '@reduxjs/toolkit';
-
-import Notebook, { RgbColor } from './model';
-import { NotebookPath, SectionPath, PagePath } from 'features/path/model';
+import { NotebookPath, PagePath, SectionPath } from 'features/path/model';
 import { DUMMY_NOTEBOOKS } from './dummy-data';
+import Notebook, { RgbColor } from './model';
 import {
-  findSection,
-  findSectionIndex,
+  findNotebook,
+  findNotebookIndex,
   findPage,
   findPageIndex,
-  findNotebook,
+  findSection,
+  findSectionIndex,
 } from './selection';
 
 const notebooksSlice = createSlice({
@@ -22,6 +22,25 @@ const notebooksSlice = createSlice({
       const { title, color } = action.payload;
       // TODO: Avoid duplicates?
       state.push({ title, color, sections: [] });
+    },
+
+    changeNotebookTitle(
+      state,
+      action: PayloadAction<{ path: NotebookPath; newTitle: string }>
+    ) {
+      const { path, newTitle } = action.payload;
+      const notebook = findNotebook(path, state);
+      if (notebook) {
+        notebook.title = newTitle;
+      }
+    },
+
+    deleteNotebook(state, action: PayloadAction<NotebookPath>) {
+      const path = action.payload;
+      const notebookIndex = findNotebookIndex(path, state);
+      if (notebookIndex !== undefined) {
+        state.splice(notebookIndex, 1);
+      }
     },
 
     addSection(
@@ -112,6 +131,8 @@ const notebooksSlice = createSlice({
 
 export const {
   addNotebook,
+  changeNotebookTitle,
+  deleteNotebook,
   addSection,
   changeSectionTitle,
   deleteSection,
