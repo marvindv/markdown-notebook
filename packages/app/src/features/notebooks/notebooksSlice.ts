@@ -3,6 +3,13 @@ import { createSlice, PayloadAction } from '@reduxjs/toolkit';
 import Notebook, { RgbColor } from './model';
 import { NotebookPath, SectionPath, PagePath } from 'features/path/model';
 import { DUMMY_NOTEBOOKS } from './dummy-data';
+import {
+  findSection,
+  findSectionIndex,
+  findPage,
+  findPageIndex,
+  findNotebook,
+} from './selection';
 
 const notebooksSlice = createSlice({
   name: 'notebooks',
@@ -27,9 +34,7 @@ const notebooksSlice = createSlice({
     ) {
       const { path, title, color } = action.payload;
       // TODO: Handle invalid path?
-      const notebook = state.find(
-        notebook => notebook.title === path.notebookTitle
-      );
+      const notebook = findNotebook(path, state);
       if (notebook) {
         // TODO: Handle duplication?
         notebook.sections.push({ title, color, pages: [] });
@@ -46,45 +51,10 @@ const notebooksSlice = createSlice({
     ) {
       const { path, title, content } = action.payload;
       // TODO: Handle invalid path?
-      const notebook = state.find(n => n.title === path.notebookTitle);
-      const section = notebook?.sections.find(
-        s => s.title === path.sectionTitle
-      );
-
+      const { section } = findSection(path, state) || {};
       if (section) {
         // TODO: Handle duplication?
         section.pages.push({ title, content });
-      }
-    },
-
-    changePageContent(
-      state,
-      action: PayloadAction<{ path: PagePath; content: string }>
-    ) {
-      const { path, content } = action.payload;
-      const notebook = state.find(n => n.title === path.notebookTitle);
-      const section = notebook?.sections.find(
-        s => s.title === path.sectionTitle
-      );
-      const page = section?.pages.find(p => p.title === path.pageTitle);
-
-      if (page) {
-        page.content = content;
-      }
-    },
-
-    deletePage(state, action: PayloadAction<PagePath>) {
-      const path = action.payload;
-      const notebook = state.find(n => n.title === path.notebookTitle);
-      const section = notebook?.sections.find(
-        s => s.title === path.sectionTitle
-      );
-      const pageIndex = section?.pages.findIndex(
-        p => p.title === path.pageTitle
-      );
-
-      if (pageIndex !== undefined) {
-        section?.pages.splice(pageIndex, 1);
       }
     },
 
@@ -93,15 +63,29 @@ const notebooksSlice = createSlice({
       action: PayloadAction<{ path: PagePath; newTitle: string }>
     ) {
       const { path, newTitle } = action.payload;
-      const notebook = state.find(n => n.title === path.notebookTitle);
-      const section = notebook?.sections.find(
-        s => s.title === path.sectionTitle
-      );
-      const page = section?.pages.find(p => p.title === path.pageTitle);
-
+      const { page } = findPage(path, state) || {};
       if (page) {
         // TODO: Handle collision with existing pages?
         page.title = newTitle;
+      }
+    },
+
+    changePageContent(
+      state,
+      action: PayloadAction<{ path: PagePath; content: string }>
+    ) {
+      const { path, content } = action.payload;
+      const { page } = findPage(path, state) || {};
+      if (page) {
+        page.content = content;
+      }
+    },
+
+    deletePage(state, action: PayloadAction<PagePath>) {
+      const path = action.payload;
+      const { section, pageIndex } = findPageIndex(path, state) || {};
+      if (pageIndex !== undefined) {
+        section?.pages.splice(pageIndex, 1);
       }
     },
   },
@@ -111,9 +95,9 @@ export const {
   addNotebook,
   addSection,
   addPage,
+  changePageTitle,
   changePageContent,
   deletePage,
-  changePageTitle,
 } = notebooksSlice.actions;
 
 export default notebooksSlice.reducer;

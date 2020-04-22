@@ -1,4 +1,4 @@
-import { PagePath } from 'features/path/model';
+import { PagePath, SectionPath, NotebookPath } from 'features/path/model';
 import Notebook, { Page, Section } from './model';
 
 /**
@@ -15,23 +15,112 @@ export function findPage(
   notebooks: Notebook[]
 ): { notebook: Notebook; section: Section; page: Page } | undefined {
   const notebook = notebooks.find(n => n.title === path.notebookTitle);
-  if (!notebook) {
-    return undefined;
+  const section = notebook?.sections.find(s => s.title === path.sectionTitle);
+  const page = section?.pages.find(p => p.title === path.pageTitle);
+  if (notebook && section && page) {
+    return {
+      notebook,
+      section,
+      page,
+    };
   }
 
-  const section = notebook.sections.find(s => s.title === path.sectionTitle);
-  if (!section) {
-    return undefined;
+  return undefined;
+}
+
+/**
+ * Find the page index and the enclosing section and notebook described by the
+ * given path from a list of notebooks.
+ *
+ * @export
+ * @param {PagePath} path
+ * @param {Notebook[]} notebooks
+ * @returns {({
+ *       notebook: Notebook;
+ *       section: Section;
+ *       pageIndex: number;
+ *     }
+ *   | undefined)}
+ */
+export function findPageIndex(
+  path: PagePath,
+  notebooks: Notebook[]
+):
+  | {
+      notebook: Notebook;
+      section: Section;
+      pageIndex: number;
+    }
+  | undefined {
+  const notebook = notebooks.find(n => n.title === path.notebookTitle);
+  const section = notebook?.sections.find(s => s.title === path.sectionTitle);
+  const pageIndex = section?.pages.findIndex(p => p.title === path.pageTitle);
+  if (notebook && section && pageIndex !== -1 && pageIndex !== undefined) {
+    return { notebook, section, pageIndex };
   }
 
-  const page = section.pages.find(p => p.title === path.pageTitle);
-  if (!page) {
-    return undefined;
+  return undefined;
+}
+
+/**
+ * Finds the section and the enclosing notebooks described by the given path
+ * from a list of notebooks.
+ *
+ * @export
+ * @param {(PagePath | SectionPath)} path
+ * @param {Notebook[]} notebooks
+ * @returns {({ notebook: Notebook; section: Section } | undefined)}
+ */
+export function findSection(
+  path: PagePath | SectionPath,
+  notebooks: Notebook[]
+): { notebook: Notebook; section: Section } | undefined {
+  const notebook = notebooks.find(n => n.title === path.notebookTitle);
+  const section = notebook?.sections.find(s => s.title === path.sectionTitle);
+  // The notebook check is actually not necessary but otherwise typescript
+  // complains.
+  if (notebook && section) {
+    return { notebook, section };
   }
 
-  return {
-    notebook,
-    section,
-    page,
-  };
+  return undefined;
+}
+
+/**
+ * Finds the section index and the enclosing notebook described by the given
+ * path from a list of notebooks.
+ *
+ * @export
+ * @param {(PagePath | SectionPath)} path
+ * @param {Notebook[]} notebooks
+ * @returns {({ notebook: Notebook; sectionIndex: number } | undefined)}
+ */
+export function findSectionIndex(
+  path: PagePath | SectionPath,
+  notebooks: Notebook[]
+): { notebook: Notebook; sectionIndex: number } | undefined {
+  const notebook = notebooks.find(n => n.title === path.notebookTitle);
+  const sectionIndex = notebook?.sections.findIndex(
+    s => s.title === path.sectionTitle
+  );
+  if (notebook && sectionIndex !== -1 && sectionIndex !== undefined) {
+    return { notebook, sectionIndex };
+  }
+
+  return undefined;
+}
+
+/**
+ * Finds the notebook described by the given path from a list of notebooks.
+ *
+ * @export
+ * @param {(NotebookPath | SectionPath | PagePath)} path
+ * @param {Notebook[]} notebooks
+ * @returns {(Notebook | undefined)}
+ */
+export function findNotebook(
+  path: NotebookPath | SectionPath | PagePath,
+  notebooks: Notebook[]
+): Notebook | undefined {
+  return notebooks.find(n => n.title === path.notebookTitle);
 }
