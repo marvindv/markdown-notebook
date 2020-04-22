@@ -12,6 +12,8 @@ export interface Props {
   onNewSection: (path: NotebookPath, newTitle: string) => void;
   onDeleteSection: (path: SectionPath) => void;
   onChangeSectionTitle: (path: SectionPath, newTitle: string) => void;
+  titleEditingSections: { [sectionTitle: string]: true } | undefined;
+  onChangeSectionTitleEditing: (path: SectionPath, isEditing: boolean) => void;
 }
 
 export default function SectionsColumn(props: Props) {
@@ -22,6 +24,8 @@ export default function SectionsColumn(props: Props) {
     onNewSection,
     onDeleteSection,
     onChangeSectionTitle,
+    titleEditingSections,
+    onChangeSectionTitleEditing,
   } = props;
   const notebook = findNotebook(path, notebooks);
 
@@ -44,6 +48,13 @@ export default function SectionsColumn(props: Props) {
             onChangeSectionTitle(
               { ...path, sectionTitle: section.title },
               newTitle
+            )
+          }
+          isEditing={!!titleEditingSections?.[section.title]}
+          onEditingChange={isEditing =>
+            onChangeSectionTitleEditing(
+              { ...path, sectionTitle: section.title },
+              isEditing
             )
           }
         />

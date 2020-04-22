@@ -6,6 +6,10 @@ import {
 } from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import Notebook, { Page, Section } from 'features/notebooks/model';
+import {
+  EditingPages,
+  EditingSections,
+} from 'features/notebooks/titleEditingSlice';
 import Path, { NotebookPath, PagePath, SectionPath } from 'features/path/model';
 import React, { useState } from 'react';
 import styled from 'styled-components';
@@ -82,6 +86,15 @@ export interface NavigationProps {
   onNewNotebook: (notebookTitle: string) => void;
   onDeleteNotebook: (path: NotebookPath) => void;
   onChangeNotebookTitle: (path: NotebookPath, newTitle: string) => void;
+  titleEditingNotebooks: { [notebookTitle: string]: true };
+  onChangeNotebookTitleEditing: (
+    path: NotebookPath,
+    isEditing: boolean
+  ) => void;
+  titleEditingSections: EditingSections;
+  onChangeSectionTitleEditing: (path: SectionPath, isEditing: boolean) => void;
+  titleEditingPages: EditingPages;
+  onChangePageTitleEditing: (path: PagePath, isEditing: boolean) => void;
 }
 
 /**
@@ -126,6 +139,7 @@ export default function Navigation(props: NavigationProps) {
       <SectionsColumn
         {...{ ...props, path: path as NotebookPath }}
         onSectionClick={handleSectionClick}
+        titleEditingSections={props.titleEditingSections[path.notebookTitle]}
       />
     );
   }
@@ -148,6 +162,9 @@ export default function Navigation(props: NavigationProps) {
           path: path as SectionPath,
         }}
         onPageClick={handlePageClick}
+        titleEditingPages={
+          props.titleEditingPages[path.notebookTitle]?.[path.sectionTitle]
+        }
       />
     );
   }

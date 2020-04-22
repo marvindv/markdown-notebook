@@ -10,6 +10,11 @@ import {
   deletePage,
   deleteSection,
 } from 'features/notebooks/notebooksSlice';
+import {
+  setNotebookEditing,
+  setPageEditing,
+  setSectionEditing,
+} from 'features/notebooks/titleEditingSlice';
 import { changeCurrentPath } from 'features/path/currentPathSlice';
 import { NotebookPath, SectionPath } from 'features/path/model';
 import React from 'react';
@@ -78,6 +83,7 @@ function getCollisionFreeTitle(title: string, existing: string[]): string {
 function App() {
   const notebooks = useSelector((state: RootState) => state.notebooks);
   const path = useSelector((state: RootState) => state.currentPath);
+  const titleEditing = useSelector((state: RootState) => state.titleEditing);
   const dispatch = useDispatch();
 
   const handleNewPage = (path: SectionPath, title: string) => {
@@ -176,6 +182,18 @@ function App() {
         onDeleteNotebook={path => dispatch(deleteNotebook(path))}
         onChangeNotebookTitle={(path, newTitle) =>
           dispatch(changeNotebookTitle({ path, newTitle }))
+        }
+        titleEditingNotebooks={titleEditing.notebooks}
+        onChangeNotebookTitleEditing={(path, isEditing) =>
+          dispatch(setNotebookEditing({ path, isEditing }))
+        }
+        titleEditingSections={titleEditing.sections}
+        onChangeSectionTitleEditing={(path, isEditing) =>
+          dispatch(setSectionEditing({ path, isEditing }))
+        }
+        titleEditingPages={titleEditing.pages}
+        onChangePageTitleEditing={(path, isEditing) =>
+          dispatch(setPageEditing({ path, isEditing }))
         }
       />
       {pageContent}

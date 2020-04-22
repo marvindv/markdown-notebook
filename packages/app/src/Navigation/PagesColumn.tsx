@@ -12,6 +12,8 @@ export interface Props {
   onNewPage: (path: SectionPath, newTitle: string) => void;
   onDeletePage: (path: PagePath) => void;
   onChangePageTitle: (path: PagePath, newTitle: string) => void;
+  titleEditingPages: { [pageTitle: string]: true } | undefined;
+  onChangePageTitleEditing: (path: PagePath, isEditing: boolean) => void;
 }
 
 export default function PageColumn(props: Props) {
@@ -22,6 +24,8 @@ export default function PageColumn(props: Props) {
     onNewPage,
     onDeletePage,
     onChangePageTitle,
+    titleEditingPages,
+    onChangePageTitleEditing,
   } = props;
   const { section } = findSection(path, notebooks) || {};
 
@@ -41,6 +45,13 @@ export default function PageColumn(props: Props) {
           onDeleteClick={() => onDeletePage({ ...path, pageTitle: page.title })}
           onTitleChange={newTitle =>
             onChangePageTitle({ ...path, pageTitle: page.title }, newTitle)
+          }
+          isEditing={!!titleEditingPages?.[page.title]}
+          onEditingChange={isEditing =>
+            onChangePageTitleEditing(
+              { ...path, pageTitle: page.title },
+              isEditing
+            )
           }
         />
       ))}

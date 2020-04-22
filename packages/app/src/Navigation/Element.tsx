@@ -134,9 +134,11 @@ export default function Element(props: {
   className: string;
   label: string;
   indexTabColor?: RgbColor;
+  isEditing: boolean;
+  onEditingChange: (isEditing: boolean) => void;
 }) {
+  const { isEditing } = props;
   const [showDropdown, setShowDropdown] = useState(false);
-  const [isEditing, setEditing] = useState(false);
   const [editValue, setEditValue] = useState(props.label);
   const [innerWidthBeforeEdit, setInnerWidthBeforeEdit] = useState<
     number | null
@@ -165,16 +167,16 @@ export default function Element(props: {
       setEditValue(props.label);
     }
 
-    setEditing(willBeEditing);
+    props.onEditingChange(willBeEditing);
   };
 
   const handleInputKeyDown = (ev: KeyboardEvent) => {
     if (ev.key === 'Enter') {
-      setEditing(false);
+      props.onEditingChange(false);
       setInnerWidthBeforeEdit(null);
       props.onTitleChange?.(editValue);
     } else if (ev.key === 'Escape') {
-      setEditing(false);
+      props.onEditingChange(false);
       setInnerWidthBeforeEdit(null);
     }
   };

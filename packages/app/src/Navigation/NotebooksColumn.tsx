@@ -11,6 +11,11 @@ export interface Props {
   onNewNotebook: (notebookTitle: string) => void;
   onDeleteNotebook: (path: NotebookPath) => void;
   onChangeNotebookTitle: (path: NotebookPath, newTitle: string) => void;
+  titleEditingNotebooks: { [notebookTitle: string]: true } | undefined;
+  onChangeNotebookTitleEditing: (
+    path: NotebookPath,
+    isEditing: boolean
+  ) => void;
 }
 
 export default function NotebooksColumn(props: Props) {
@@ -21,6 +26,8 @@ export default function NotebooksColumn(props: Props) {
     onNewNotebook,
     onDeleteNotebook,
     onChangeNotebookTitle,
+    titleEditingNotebooks,
+    onChangeNotebookTitleEditing,
   } = props;
 
   return (
@@ -38,6 +45,10 @@ export default function NotebooksColumn(props: Props) {
           onDeleteClick={() => onDeleteNotebook({ notebookTitle: n.title })}
           onTitleChange={newTitle =>
             onChangeNotebookTitle({ notebookTitle: n.title }, newTitle)
+          }
+          isEditing={!!titleEditingNotebooks?.[n.title]}
+          onEditingChange={isEditing =>
+            onChangeNotebookTitleEditing(path as NotebookPath, isEditing)
           }
         />
       ))}
