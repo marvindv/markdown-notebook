@@ -149,7 +149,9 @@ export default function Element(props: {
   // Focus the input if isEditing changed to true.
   useEffect(() => {
     if (isEditing && inputRef.current) {
-      inputRef.current.focus();
+      const input = inputRef.current;
+      input.focus();
+      input.setSelectionRange(0, input.value.length);
     }
   }, [isEditing]);
 
