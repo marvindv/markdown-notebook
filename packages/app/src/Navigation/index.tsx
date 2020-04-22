@@ -76,6 +76,9 @@ export interface NavigationProps {
   onNewPage: (path: SectionPath, pageTitle: string) => void;
   onDeletePage: (path: PagePath) => void;
   onChangePageTitle: (path: PagePath, newTitle: string) => void;
+  onNewSection: (path: NotebookPath, newTitle: string) => void;
+  onDeleteSection: (path: SectionPath) => void;
+  onChangeSectionTitle: (path: SectionPath, newTitle: string) => void;
 }
 
 /**

@@ -1,16 +1,23 @@
+import {
+  addPage,
+  addSection,
+  changePageContent,
+  changePageTitle,
+  changeSectionTitle,
+  deletePage,
+  deleteSection,
+} from 'features/notebooks/notebooksSlice';
+import { changeCurrentPath } from 'features/path/currentPathSlice';
+import { NotebookPath, SectionPath } from 'features/path/model';
 import React from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import styled from 'styled-components';
-import {
-  addPage,
-  changePageContent,
-  deletePage,
-  changePageTitle,
-} from 'features/notebooks/notebooksSlice';
-import { changeCurrentPath } from 'features/path/currentPathSlice';
-import { SectionPath } from 'features/path/model';
 import Breadcrumbs from './Breadcrumbs';
-import { findPage } from './features/notebooks/selection';
+import {
+  findNotebook,
+  findPage,
+  findSection,
+} from './features/notebooks/selection';
 import Navigation from './Navigation';
 import PageView from './PageView';
 import { RootState } from './reducers';
@@ -48,37 +55,54 @@ const NoPageNotice = styled.div`
   color: ${props => props.theme.typo.mutedColor};
 `;
 
+function getCollisionFreeTitle(title: string, existing: string[]): string {
+  let suffixNumber: number | null = null;
+  const titleWithSuffix = () =>
+    title + (suffixNumber ? ' ' + suffixNumber : '');
+  let collision = true;
+  while (collision) {
+    const currentTitle = titleWithSuffix();
+    if (existing.find(s => s === currentTitle)) {
+      suffixNumber = suffixNumber ? suffixNumber + 1 : 2;
+    } else {
+      collision = false;
+    }
+  }
+
+  return titleWithSuffix();
+}
+
 function App() {
   const notebooks = useSelector((state: RootState) => state.notebooks);
   const path = useSelector((state: RootState) => state.currentPath);
   const dispatch = useDispatch();
 
   const handleNewPage = (path: SectionPath, title: string) => {
-    const notebook = notebooks.find(n => n.title === path.notebookTitle);
-    const section = notebook?.sections.find(s => s.title === path.sectionTitle);
+    const { section } = findSection(path, notebooks) || {};
     if (section) {
-      // Find out if the new page title collides with an existing page.
-      let suffixNumber: number | null = null;
-      let colission = true;
-      while (colission) {
-        if (
-          section.pages.find(
-            p => p.title === title + (suffixNumber ? ` ${suffixNumber}` : '')
-          )
-        ) {
-          suffixNumber = suffixNumber ? suffixNumber + 1 : 2;
-        } else {
-          colission = false;
-        }
-      }
-
-      const titleWithSuffix = title + (suffixNumber ? ` ${suffixNumber}` : '');
+      const collisionFreeTitle = getCollisionFreeTitle(
+        title,
+        section.pages.map(p => p.title)
+      );
       dispatch(
         addPage({
           path,
-          title: titleWithSuffix,
-          content: `# ${titleWithSuffix}`,
+          title: collisionFreeTitle,
+          content: `# ${collisionFreeTitle}`,
         })
+      );
+    }
+  };
+
+  const handleNewSection = (path: NotebookPath, newTitle: string) => {
+    const notebook = findNotebook(path, notebooks);
+    if (notebook) {
+      const collisionFreeTitle = getCollisionFreeTitle(
+        newTitle,
+        notebook.sections.map(n => n.title)
+      );
+      dispatch(
+        addSection({ path, title: collisionFreeTitle, color: [0, 0, 0] })
       );
     }
   };
@@ -131,6 +155,11 @@ function App() {
         onDeletePage={path => dispatch(deletePage(path))}
         onChangePageTitle={(path, newTitle) =>
           dispatch(changePageTitle({ path, newTitle }))
+        }
+        onNewSection={handleNewSection}
+        onDeleteSection={path => dispatch(deleteSection(path))}
+        onChangeSectionTitle={(path, newTitle) =>
+          dispatch(changeSectionTitle({ path, newTitle }))
         }
       />
       {pageContent}

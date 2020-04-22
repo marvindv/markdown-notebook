@@ -41,6 +41,25 @@ const notebooksSlice = createSlice({
       }
     },
 
+    changeSectionTitle(
+      state,
+      action: PayloadAction<{ path: SectionPath; newTitle: string }>
+    ) {
+      const { path, newTitle } = action.payload;
+      const { section } = findSection(path, state) || {};
+      if (section) {
+        section.title = newTitle;
+      }
+    },
+
+    deleteSection(state, action: PayloadAction<SectionPath>) {
+      const path = action.payload;
+      const { notebook, sectionIndex } = findSectionIndex(path, state) || {};
+      if (notebook && sectionIndex !== undefined) {
+        notebook.sections.splice(sectionIndex, 1);
+      }
+    },
+
     addPage(
       state,
       action: PayloadAction<{
@@ -94,6 +113,8 @@ const notebooksSlice = createSlice({
 export const {
   addNotebook,
   addSection,
+  changeSectionTitle,
+  deleteSection,
   addPage,
   changePageTitle,
   changePageContent,
