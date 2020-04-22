@@ -100,6 +100,12 @@ function App() {
           content: `# ${collisionFreeTitle}`,
         })
       );
+      dispatch(
+        setPageEditing({
+          path: { ...path, pageTitle: collisionFreeTitle },
+          isEditing: true,
+        })
+      );
     }
   };
 
@@ -113,6 +119,12 @@ function App() {
       dispatch(
         addSection({ path, title: collisionFreeTitle, color: [0, 0, 0] })
       );
+      dispatch(
+        setSectionEditing({
+          path: { ...path, sectionTitle: collisionFreeTitle },
+          isEditing: true,
+        })
+      );
     }
   };
 
@@ -122,6 +134,12 @@ function App() {
       notebooks.map(n => n.title)
     );
     dispatch(addNotebook({ title: collisionFreeTitle, color: [0, 0, 0] }));
+    dispatch(
+      setNotebookEditing({
+        path: { notebookTitle: collisionFreeTitle },
+        isEditing: true,
+      })
+    );
   };
 
   let pageContent;
