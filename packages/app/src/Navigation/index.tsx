@@ -1,16 +1,17 @@
-import React, { useState } from 'react';
-import styled from 'styled-components';
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import {
   faBars,
   faCog,
   faSearch,
   faTimes,
 } from '@fortawesome/free-solid-svg-icons';
-import Path, { SectionPath, PagePath } from 'features/path/model';
-import Notebook from 'features/notebooks/model';
-import Column from './Column';
-import Element from './Element';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import Notebook, { Page, Section } from 'features/notebooks/model';
+import Path, { NotebookPath, PagePath, SectionPath } from 'features/path/model';
+import React, { useState } from 'react';
+import styled from 'styled-components';
+import NotebooksColumn from './NotebooksColumn';
+import PagesColumn from './PagesColumn';
+import SectionsColumn from './SectionsColumn';
 
 const Header = styled.div`
   display: flex;
@@ -74,7 +75,7 @@ export interface NavigationProps {
   onPathChange?: (newPath: Path) => void;
   onNewPage: (path: SectionPath, pageTitle: string) => void;
   onDeletePage: (path: PagePath) => void;
-  onChangePageName: (path: PagePath, newTitle: string) => void;
+  onChangePageTitle: (path: PagePath, newTitle: string) => void;
 }
 
 /**
@@ -90,96 +91,58 @@ export default function Navigation(props: NavigationProps) {
 
   const path = props.path;
 
-  const handleNotebookClick = (title: string) => {
+  const handleNotebookClick = (notebook: Notebook) => {
     // Only emit if actually another notebook selected.
-    if (path.notebookTitle !== title) {
+    if (path.notebookTitle !== notebook.title) {
       props.onPathChange?.({
-        notebookTitle: title,
+        notebookTitle: notebook.title,
       });
       setShowHiddenColumns(false);
     }
   };
   const notebooksColumn = (
-    <Column addButtonText='+ Notizbuch' onClick={() => {}}>
-      {props.notebooks.map(n => (
-        <Element
-          key={n.title}
-          className={n.title === path?.notebookTitle ? 'active' : ''}
-          label={n.title}
-          indexTabColor={n.color}
-          onClick={() => handleNotebookClick(n.title)}
-        />
-      ))}
-    </Column>
+    <NotebooksColumn {...props} onNotebookClick={handleNotebookClick} />
   );
 
   let sectionsColumn;
   if (path.notebookTitle) {
-    const notebook = props.notebooks.find(n => n.title === path.notebookTitle);
-    const handleClick = (title: string) => {
+    const handleSectionClick = (section: Section) => {
       // Only emit if actually another section selected.
-      if (path.sectionTitle !== title) {
+      if (path.sectionTitle !== section.title) {
         props.onPathChange?.({
-          notebookTitle: notebook!.title,
-          sectionTitle: title,
+          notebookTitle: path.notebookTitle,
+          sectionTitle: section.title,
         });
       }
     };
 
     sectionsColumn = (
-      <Column addButtonText='+ Abschnitt' onClick={() => {}}>
-        {notebook?.sections.map(section => (
-          <Element
-            key={section.title}
-            className={section.title === path?.sectionTitle ? 'active' : ''}
-            label={section.title}
-            indexTabColor={section.color}
-            onClick={() => handleClick(section.title)}
-          />
-        ))}
-      </Column>
+      <SectionsColumn
+        {...{ ...props, path: path as NotebookPath }}
+        onSectionClick={handleSectionClick}
+      />
     );
   }
 
   let pagesColumn;
   if (path.sectionTitle) {
-    const notebook = props.notebooks.find(n => n.title === path.notebookTitle);
-    const section = notebook?.sections.find(s => s.title === path.sectionTitle);
-    const handleClick = (title: string) => {
+    const handlePageClick = (page: Page) => {
       // Only emit if actually another page selected.
-      if (path.pageTitle !== title) {
+      if (path.pageTitle !== page.title) {
         props.onPathChange?.({
           ...path,
-          pageTitle: title,
+          pageTitle: page.title,
         });
       }
     };
-
     pagesColumn = (
-      <Column
-        addButtonText='+ Seite'
-        onClick={() =>
-          props.onNewPage({ ...path, pageTitle: undefined }, 'Neue Seite')
-        }
-      >
-        {section?.pages.map(page => (
-          <Element
-            key={page.title}
-            className={page.title === path?.pageTitle ? 'active' : ''}
-            label={page.title}
-            onClick={() => handleClick(page.title)}
-            onDeleteClick={() =>
-              props.onDeletePage({ ...path, pageTitle: page.title })
-            }
-            onTitleChange={newTitle =>
-              props.onChangePageName(
-                { ...path, pageTitle: page.title },
-                newTitle
-              )
-            }
-          />
-        ))}
-      </Column>
+      <PagesColumn
+        {...{
+          ...props,
+          path: path as SectionPath,
+        }}
+        onPageClick={handlePageClick}
+      />
     );
   }
 

@@ -129,7 +129,7 @@ function App() {
         onPathChange={path => dispatch(changeCurrentPath(path))}
         onNewPage={handleNewPage}
         onDeletePage={path => dispatch(deletePage(path))}
-        onChangePageName={(path, newTitle) =>
+        onChangePageTitle={(path, newTitle) =>
           dispatch(changePageTitle({ path, newTitle }))
         }
       />

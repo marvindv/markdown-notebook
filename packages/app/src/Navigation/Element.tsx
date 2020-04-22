@@ -1,11 +1,10 @@
-import React, { useState, useEffect, useRef, KeyboardEvent } from 'react';
-import styled, { css } from 'styled-components';
-import { transparentize } from 'polished';
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faEllipsisV } from '@fortawesome/free-solid-svg-icons';
-
-import { RgbColor } from 'features/notebooks/model';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import Dropdown, { DropdownToggle } from 'features/dropdowns/Dropdown';
+import { RgbColor } from 'features/notebooks/model';
+import { transparentize } from 'polished';
+import React, { KeyboardEvent, useEffect, useRef, useState } from 'react';
+import styled, { css } from 'styled-components';
 
 const StyledDropdown = styled(Dropdown)`
   position: absolute;

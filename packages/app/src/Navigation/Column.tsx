@@ -38,14 +38,14 @@ const ColumnContainer = styled.div`
 
 export default function Column(props: {
   addButtonText: string;
-  onClick: () => void;
+  onAddClick: () => void;
   children: any;
 }) {
   return (
     <ColumnContainer>
       <ul>{props.children}</ul>
 
-      <button type='button' className='add-element' onClick={props.onClick}>
+      <button type='button' className='add-element' onClick={props.onAddClick}>
         {props.addButtonText}
       </button>
     </ColumnContainer>
