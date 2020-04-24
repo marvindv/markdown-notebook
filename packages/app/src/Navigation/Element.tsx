@@ -2,6 +2,7 @@ import { faEllipsisV } from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import Dropdown, { DropdownToggle } from 'features/dropdowns/Dropdown';
 import { RgbColor } from 'features/notebooks/model';
+import useOutsideClick from 'hooks/useOutsideClick';
 import { transparentize } from 'polished';
 import React, { KeyboardEvent, useEffect, useRef, useState } from 'react';
 import styled, { css } from 'styled-components';
@@ -137,7 +138,7 @@ export default function Element(props: {
   isEditing: boolean;
   onEditingChange: (isEditing: boolean) => void;
 }) {
-  const { isEditing } = props;
+  const { isEditing, onEditingChange } = props;
   const [showDropdown, setShowDropdown] = useState(false);
   const [editValue, setEditValue] = useState(props.label);
   const [innerWidthBeforeEdit, setInnerWidthBeforeEdit] = useState<
@@ -145,6 +146,7 @@ export default function Element(props: {
   >(null);
   const inputRef = useRef<HTMLInputElement>(null);
   const buttonRef = useRef<HTMLButtonElement>(null);
+  const ref = useRef<HTMLLIElement>(null);
 
   // Focus the input if isEditing changed to true.
   useEffect(() => {
@@ -154,6 +156,10 @@ export default function Element(props: {
       input.setSelectionRange(0, input.value.length);
     }
   }, [isEditing]);
+
+  useOutsideClick(ref, isEditing, () => {
+    onEditingChange(false);
+  });
 
   const handleNameEditClick = () => {
     if (buttonRef.current) {
@@ -185,6 +191,7 @@ export default function Element(props: {
 
   return (
     <ElementContainer
+      ref={ref}
       className={props.className}
       indexTabColor={props.indexTabColor}
       showDropdown={showDropdown}
