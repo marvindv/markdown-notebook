@@ -1,4 +1,5 @@
-import React, { useRef, useEffect } from 'react';
+import useOutsideClick from 'hooks/useOutsideClick';
+import React, { useRef } from 'react';
 import styled from 'styled-components';
 
 const Container = styled.div`
@@ -78,26 +79,11 @@ export interface Props {
  * @returns
  */
 export default function Dropdown(props: Props) {
-  const ref = useRef(null);
+  const ref = useRef<HTMLDivElement>(null);
 
-  // If the user clicks outside of this element emit onToggleClick.
-  // Based on https://stackoverflow.com/a/42234988
-  useEffect(() => {
-    function handleClickOutside(event: MouseEvent) {
-      if (
-        props.show &&
-        ref.current &&
-        !(ref.current as any).contains(event.target)
-      ) {
-        props.onToggleClick?.();
-      }
-    }
-
-    document.addEventListener('mousedown', handleClickOutside);
-    return () => {
-      document.removeEventListener('mousedown', handleClickOutside);
-    };
-  }, [ref, props.show, props.onToggleClick]);
+  useOutsideClick(ref, props.show, () => {
+    props.onToggleClick?.();
+  });
 
   return (
     <Container className={props.className} ref={ref}>
