@@ -1,8 +1,8 @@
 import { faEllipsisV } from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import Dropdown, { DropdownToggle } from 'features/dropdowns/Dropdown';
-import { RgbColor } from 'features/notebooks/model';
 import useOutsideClick from 'hooks/useOutsideClick';
+import { RgbColor } from 'models/notebook';
 import { transparentize } from 'polished';
 import React, { KeyboardEvent, useEffect, useRef, useState } from 'react';
 import styled, { css } from 'styled-components';

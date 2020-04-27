@@ -44,14 +44,6 @@ export interface Section {
   title: string;
 
   /**
-   * The color associated to this section.
-   *
-   * @type {RgbColor}
-   * @memberof Section
-   */
-  color: RgbColor;
-
-  /**
    * The pages in this section.
    *
    * @type {Page[]}
@@ -68,14 +60,6 @@ export default interface Notebook {
    * @memberof Notebook
    */
   title: string;
-
-  /**
-   * The color associated to this notebook.
-   *
-   * @type {RgbColor}
-   * @memberof Notebook
-   */
-  color: RgbColor;
 
   /**
    * The sections this notebook contains.

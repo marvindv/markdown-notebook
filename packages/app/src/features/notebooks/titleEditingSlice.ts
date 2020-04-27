@@ -1,5 +1,5 @@
 import { createSlice, PayloadAction } from '@reduxjs/toolkit';
-import { NotebookPath, PagePath, SectionPath } from 'features/path/model';
+import { NotebookPath, PagePath, SectionPath } from 'models/path';
 
 /**
  * An object mapping a notebook title to a set of section titles that are

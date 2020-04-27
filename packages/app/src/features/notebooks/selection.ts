@@ -1,5 +1,5 @@
-import { PagePath, SectionPath, NotebookPath } from 'features/path/model';
-import Notebook, { Page, Section } from './model';
+import { PagePath, SectionPath, NotebookPath } from 'models/path';
+import Notebook, { Page, Section } from 'models/notebook';
 
 /**
  * Find the page and the enclosing section and notebook described by the given

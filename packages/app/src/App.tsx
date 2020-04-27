@@ -1,14 +1,11 @@
+import React from 'react';
+import { useDispatch, useSelector } from 'react-redux';
+import styled from 'styled-components';
 import {
-  addNotebook,
-  addPage,
-  addSection,
-  changeNotebookTitle,
+  addEntity,
+  changeEntityTitle,
   changePageContent,
-  changePageTitle,
-  changeSectionTitle,
-  deleteNotebook,
-  deletePage,
-  deleteSection,
+  deleteEntity,
 } from 'features/notebooks/notebooksSlice';
 import {
   setNotebookEditing,
@@ -16,10 +13,7 @@ import {
   setSectionEditing,
 } from 'features/notebooks/titleEditingSlice';
 import { changeCurrentPath } from 'features/path/currentPathSlice';
-import { NotebookPath, SectionPath } from 'features/path/model';
-import React from 'react';
-import { useDispatch, useSelector } from 'react-redux';
-import styled from 'styled-components';
+import { NotebookPath, SectionPath } from 'models/path';
 import Breadcrumbs from './Breadcrumbs';
 import {
   findNotebook,
@@ -81,7 +75,9 @@ function getCollisionFreeTitle(title: string, existing: string[]): string {
 }
 
 function App() {
-  const notebooks = useSelector((state: RootState) => state.notebooks);
+  const notebooks = useSelector(
+    (state: RootState) => state.notebooks.notebooks
+  );
   const path = useSelector((state: RootState) => state.currentPath);
   const titleEditing = useSelector((state: RootState) => state.titleEditing);
   const dispatch = useDispatch();
@@ -93,13 +89,7 @@ function App() {
         title,
         section.pages.map(p => p.title)
       );
-      dispatch(
-        addPage({
-          path,
-          title: collisionFreeTitle,
-          content: `# ${collisionFreeTitle}`,
-        })
-      );
+      dispatch(addEntity({ path: { ...path, pageTitle: collisionFreeTitle } }));
       dispatch(
         setPageEditing({
           path: { ...path, pageTitle: collisionFreeTitle },
@@ -110,6 +100,7 @@ function App() {
   };
 
   const handleNewSection = (path: NotebookPath, newTitle: string) => {
+    console.warn(path);
     const notebook = findNotebook(path, notebooks);
     if (notebook) {
       const collisionFreeTitle = getCollisionFreeTitle(
@@ -117,7 +108,7 @@ function App() {
         notebook.sections.map(n => n.title)
       );
       dispatch(
-        addSection({ path, title: collisionFreeTitle, color: [0, 0, 0] })
+        addEntity({ path: { ...path, sectionTitle: collisionFreeTitle } })
       );
       dispatch(
         setSectionEditing({
@@ -133,7 +124,7 @@ function App() {
       newTitle,
       notebooks.map(n => n.title)
     );
-    dispatch(addNotebook({ title: collisionFreeTitle, color: [0, 0, 0] }));
+    dispatch(addEntity({ path: { notebookTitle: collisionFreeTitle } }));
     dispatch(
       setNotebookEditing({
         path: { notebookTitle: collisionFreeTitle },
@@ -187,19 +178,19 @@ function App() {
         path={path}
         onPathChange={path => dispatch(changeCurrentPath(path))}
         onNewPage={handleNewPage}
-        onDeletePage={path => dispatch(deletePage(path))}
+        onDeletePage={path => dispatch(deleteEntity(path))}
         onChangePageTitle={(path, newTitle) =>
-          dispatch(changePageTitle({ path, newTitle }))
+          dispatch(changeEntityTitle({ path, newTitle }))
         }
         onNewSection={handleNewSection}
-        onDeleteSection={path => dispatch(deleteSection(path))}
+        onDeleteSection={path => dispatch(deleteEntity(path))}
         onChangeSectionTitle={(path, newTitle) =>
-          dispatch(changeSectionTitle({ path, newTitle }))
+          dispatch(changeEntityTitle({ path, newTitle }))
         }
         onNewNotebook={handleNewNotebook}
-        onDeleteNotebook={path => dispatch(deleteNotebook(path))}
+        onDeleteNotebook={path => dispatch(deleteEntity(path))}
         onChangeNotebookTitle={(path, newTitle) =>
-          dispatch(changeNotebookTitle({ path, newTitle }))
+          dispatch(changeEntityTitle({ path, newTitle }))
         }
         titleEditingNotebooks={titleEditing.notebooks}
         onChangeNotebookTitleEditing={(path, isEditing) =>

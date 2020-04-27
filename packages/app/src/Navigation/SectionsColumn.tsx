@@ -1,12 +1,12 @@
-import Notebook, { Section } from 'features/notebooks/model';
 import { findNotebook } from 'features/notebooks/selection';
-import { NotebookPath, SectionPath } from 'features/path/model';
+import Notebook, { Section } from 'models/notebook';
+import { NotebookPath, SectionPath } from 'models/path';
 import React from 'react';
 import Column from './Column';
 import Element from './Element';
 
 export interface Props {
-  path: NotebookPath;
+  path: NotebookPath | SectionPath;
   notebooks: Notebook[];
   onSectionClick: (section: Section) => void;
   onNewSection: (path: NotebookPath, newTitle: string) => void;
@@ -32,14 +32,16 @@ export default function SectionsColumn(props: Props) {
   return (
     <Column
       addButtonText='+ Abschnitt'
-      onAddClick={() => onNewSection(path, 'Neuer Abschnitt')}
+      onAddClick={() => {
+        console.warn(path);
+        onNewSection({ notebookTitle: path.notebookTitle }, 'Neuer Abschnitt');
+      }}
     >
       {notebook?.sections.map(section => (
         <Element
           key={section.title}
           className={section.title === path?.sectionTitle ? 'active' : ''}
           label={section.title}
-          indexTabColor={section.color}
           onClick={() => onSectionClick(section)}
           onDeleteClick={() =>
             onDeleteSection({ ...path, sectionTitle: section.title })

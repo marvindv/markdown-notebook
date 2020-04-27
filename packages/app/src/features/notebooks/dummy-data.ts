@@ -1,13 +1,11 @@
-import Notebook from './model';
+import Notebook from 'models/notebook';
 
 export const DUMMY_NOTEBOOKS: Notebook[] = [
   {
     title: 'Allgemein',
-    color: [255, 0, 0],
     sections: [
       {
         title: 'Ein Abschnitt',
-        color: [10, 10, 10],
         pages: [
           {
             title: 'Übersicht',
@@ -25,7 +23,6 @@ export const DUMMY_NOTEBOOKS: Notebook[] = [
       },
       {
         title: 'Ein anderer Abschnitt',
-        color: [100, 100, 100],
         pages: [
           {
             title: 'Hallo',
@@ -41,11 +38,9 @@ export const DUMMY_NOTEBOOKS: Notebook[] = [
   },
   {
     title: 'Tinkering',
-    color: [0, 255, 0],
     sections: [
       {
         title: 'Erster Abschnitt',
-        color: [115, 0, 230],
         pages: [
           {
             title: 'Erste Seite',
@@ -59,7 +54,6 @@ export const DUMMY_NOTEBOOKS: Notebook[] = [
       },
       {
         title: 'Zweiter Abschnitt',
-        color: [255, 51, 51],
         pages: [
           {
             title: 'Erste Seite',
@@ -73,7 +67,6 @@ export const DUMMY_NOTEBOOKS: Notebook[] = [
       },
       {
         title: 'Markdown Notebook',
-        color: [204, 204, 0],
         pages: [
           {
             title: 'Markdown Formatierung',

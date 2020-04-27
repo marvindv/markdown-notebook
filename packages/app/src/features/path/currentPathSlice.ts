@@ -1,6 +1,6 @@
 import { createSlice, PayloadAction } from '@reduxjs/toolkit';
+import Path from 'models/path';
 import { DUMMY_PATH } from './dummy-data';
-import Path from './model';
 
 const currentPathSlice = createSlice({
   name: 'currentPath',

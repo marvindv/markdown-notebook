@@ -5,12 +5,12 @@ import {
   faTimes,
 } from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import Notebook, { Page, Section } from 'features/notebooks/model';
 import {
   EditingPages,
   EditingSections,
 } from 'features/notebooks/titleEditingSlice';
-import Path, { NotebookPath, PagePath, SectionPath } from 'features/path/model';
+import Notebook, { Page, Section } from 'models/notebook';
+import Path, { NotebookPath, PagePath, SectionPath } from 'models/path';
 import React, { useState } from 'react';
 import styled from 'styled-components';
 import NotebooksColumn from './NotebooksColumn';
@@ -137,7 +137,11 @@ export default function Navigation(props: NavigationProps) {
 
     sectionsColumn = (
       <SectionsColumn
-        {...{ ...props, path: path as NotebookPath }}
+        {...props}
+        path={{
+          notebookTitle: path.notebookTitle,
+          sectionTitle: path.sectionTitle,
+        }}
         onSectionClick={handleSectionClick}
         titleEditingSections={props.titleEditingSections[path.notebookTitle]}
       />
@@ -145,7 +149,7 @@ export default function Navigation(props: NavigationProps) {
   }
 
   let pagesColumn;
-  if (path.sectionTitle) {
+  if (path.notebookTitle && path.sectionTitle) {
     const handlePageClick = (page: Page) => {
       // Only emit if actually another page selected.
       if (path.pageTitle !== page.title) {
@@ -157,10 +161,8 @@ export default function Navigation(props: NavigationProps) {
     };
     pagesColumn = (
       <PagesColumn
-        {...{
-          ...props,
-          path: path as SectionPath,
-        }}
+        {...props}
+        path={{ ...path }}
         onPageClick={handlePageClick}
         titleEditingPages={
           props.titleEditingPages[path.notebookTitle]?.[path.sectionTitle]

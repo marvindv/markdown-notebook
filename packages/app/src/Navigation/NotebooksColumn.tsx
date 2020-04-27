@@ -1,5 +1,5 @@
-import Notebook from 'features/notebooks/model';
-import Path, { NotebookPath } from 'features/path/model';
+import Notebook from 'models/notebook';
+import Path, { NotebookPath } from 'models/path';
 import React from 'react';
 import Column from './Column';
 import Element from './Element';
@@ -40,7 +40,6 @@ export default function NotebooksColumn(props: Props) {
           key={n.title}
           className={n.title === path.notebookTitle ? 'active' : ''}
           label={n.title}
-          indexTabColor={n.color}
           onClick={() => onNotebookClick(n)}
           onDeleteClick={() => onDeleteNotebook({ notebookTitle: n.title })}
           onTitleChange={newTitle =>
