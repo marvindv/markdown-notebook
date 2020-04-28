@@ -11,7 +11,7 @@ import {
 } from 'features/notebooks/titleEditingSlice';
 import Notebook, { Page, Section } from 'models/notebook';
 import Path, { NotebookPath, PagePath, SectionPath } from 'models/path';
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import styled from 'styled-components';
 import NotebooksColumn from './NotebooksColumn';
 import PagesColumn from './PagesColumn';
@@ -110,6 +110,13 @@ export default function Navigation(props: NavigationProps) {
 
   const path = props.path;
 
+  // Make sure the notebook column is visible if the path is empty.
+  useEffect(() => {
+    if (!path.notebookTitle) {
+      setShowHiddenColumns(true);
+    }
+  }, [path]);
+
   const handleNotebookClick = (notebook: Notebook) => {
     // Only emit if actually another notebook selected.
     if (path.notebookTitle !== notebook.title) {
@@ -178,12 +185,17 @@ export default function Navigation(props: NavigationProps) {
     >
       <CollapsedSelectorPane>
         <Header>
-          <button
-            type='button'
-            onClick={() => setShowHiddenColumns(!showHiddenColumns)}
-          >
-            <FontAwesomeIcon fixedWidth={true} icon={faTimes} />
-          </button>
+          {path.notebookTitle ? (
+            <button
+              type='button'
+              onClick={() => setShowHiddenColumns(!showHiddenColumns)}
+            >
+              <FontAwesomeIcon fixedWidth={true} icon={faTimes} />
+            </button>
+          ) : (
+            <div></div>
+          )}
+
           <span>Notizbücher</span>
           <button type='button'>
             <FontAwesomeIcon fixedWidth={true} icon={faCog} />
