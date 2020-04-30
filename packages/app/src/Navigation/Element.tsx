@@ -6,6 +6,7 @@ import { RgbColor } from 'models/notebook';
 import { transparentize } from 'polished';
 import React, { KeyboardEvent, useEffect, useRef, useState } from 'react';
 import styled, { css } from 'styled-components';
+import UnsavedChangesIndicator from './UnsavedChangesIndicator';
 
 const StyledDropdown = styled(Dropdown)`
   position: absolute;
@@ -85,15 +86,25 @@ const ElementContainer = styled.li<{
   position: relative;
 `;
 
-const ElementButton = styled.button`
-  width: 100%;
-  text-align: left;
+const ElementButtonLabel = styled.div`
   text-overflow: ellipsis;
   white-space: nowrap;
   overflow: hidden;
+`;
+
+const ElementUnsavedChangesIndicator = styled(UnsavedChangesIndicator)``;
+
+const ElementButton = styled.button`
+  display: flex;
+  width: 100%;
+  text-align: left;
   background: none;
   border: 0;
   padding: 1rem;
+
+  ${ElementUnsavedChangesIndicator} {
+    margin-right: 0.25rem;
+  }
 `;
 
 const ElementInputContainer = styled.div`
@@ -123,22 +134,28 @@ function getElementInnerWidth(element: HTMLElement): number {
   return elementWidth;
 }
 
+export interface Props {
+  onClick?: () => void;
+  onDeleteClick?: () => void;
+  onTitleChange?: (newTitle: string) => void;
+  className: string;
+  showUnsavedChangesIndicator: boolean;
+  label: string;
+  indexTabColor?: RgbColor;
+  unsavedChangesIndicatorTooltip: string;
+  isEditing: boolean;
+  onEditingChange: (isEditing: boolean) => void;
+  saveButtonDisabled?: boolean;
+  onSaveClick?: () => void;
+}
+
 /**
  * An element in a column, either notebook, section or page.
  *
  * @param props
  */
-export default function Element(props: {
-  onClick?: () => void;
-  onDeleteClick?: () => void;
-  onTitleChange?: (newTitle: string) => void;
-  className: string;
-  label: string;
-  indexTabColor?: RgbColor;
-  isEditing: boolean;
-  onEditingChange: (isEditing: boolean) => void;
-}) {
-  const { isEditing, onEditingChange } = props;
+export default function Element(props: Props) {
+  const { showUnsavedChangesIndicator, isEditing, onEditingChange } = props;
   const [showDropdown, setShowDropdown] = useState(false);
   const [editValue, setEditValue] = useState(props.label);
   const [innerWidthBeforeEdit, setInnerWidthBeforeEdit] = useState<
@@ -199,7 +216,12 @@ export default function Element(props: {
     >
       {!isEditing && (
         <ElementButton type='button' onClick={props.onClick} ref={buttonRef}>
-          {props.label}
+          {showUnsavedChangesIndicator && (
+            <ElementUnsavedChangesIndicator
+              title={props.unsavedChangesIndicatorTooltip}
+            />
+          )}
+          <ElementButtonLabel>{props.label}</ElementButtonLabel>
         </ElementButton>
       )}
 
@@ -224,6 +246,11 @@ export default function Element(props: {
         show={showDropdown}
         toggleLabel={<FontAwesomeIcon icon={faEllipsisV} />}
         items={[
+          {
+            label: 'Speichern',
+            disabled: props.saveButtonDisabled,
+            onClick: props.onSaveClick,
+          },
           { label: 'Name ändern', onClick: handleNameEditClick },
           { label: 'Löschen', onClick: props.onDeleteClick },
         ]}

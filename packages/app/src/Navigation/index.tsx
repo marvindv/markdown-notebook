@@ -1,18 +1,25 @@
 import {
   faBars,
   faCog,
+  faSave,
   faSearch,
   faTimes,
 } from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import React, { useEffect, useState } from 'react';
+import styled from 'styled-components';
+import { PagesWithUnsavedChangesTree } from 'features/notebooks/notebooksSlice';
 import {
   EditingPages,
   EditingSections,
 } from 'features/notebooks/titleEditingSlice';
 import Notebook, { Page, Section } from 'models/notebook';
-import Path, { NotebookPath, PagePath, SectionPath } from 'models/path';
-import React, { useState, useEffect } from 'react';
-import styled from 'styled-components';
+import Path, {
+  EmptyPath,
+  NotebookPath,
+  PagePath,
+  SectionPath,
+} from 'models/path';
 import NotebooksColumn from './NotebooksColumn';
 import PagesColumn from './PagesColumn';
 import SectionsColumn from './SectionsColumn';
@@ -76,6 +83,7 @@ export interface NavigationProps {
   className?: string;
   path: Path;
   notebooks: Notebook[];
+  unsavedPages: PagesWithUnsavedChangesTree;
   onPathChange?: (newPath: Path) => void;
   onNewPage: (path: SectionPath, pageTitle: string) => void;
   onDeletePage: (path: PagePath) => void;
@@ -95,6 +103,9 @@ export interface NavigationProps {
   onChangeSectionTitleEditing: (path: SectionPath, isEditing: boolean) => void;
   titleEditingPages: EditingPages;
   onChangePageTitleEditing: (path: PagePath, isEditing: boolean) => void;
+  onSaveClick: (
+    path: PagePath | SectionPath | NotebookPath | EmptyPath
+  ) => void;
 }
 
 /**
@@ -116,6 +127,10 @@ export default function Navigation(props: NavigationProps) {
       setShowHiddenColumns(true);
     }
   }, [path]);
+
+  const handleSaveAllClick = () => {
+    props.onSaveClick({});
+  };
 
   const handleNotebookClick = (notebook: Notebook) => {
     // Only emit if actually another notebook selected.
@@ -170,10 +185,10 @@ export default function Navigation(props: NavigationProps) {
       <PagesColumn
         {...props}
         path={{ ...path }}
-        onPageClick={handlePageClick}
         titleEditingPages={
           props.titleEditingPages[path.notebookTitle]?.[path.sectionTitle]
         }
+        onPageClick={handlePageClick}
       />
     );
   }
@@ -207,16 +222,42 @@ export default function Navigation(props: NavigationProps) {
 
       <PermanentSelectorPane>
         <Header>
-          <button
-            type='button'
-            onClick={() => setShowHiddenColumns(!showHiddenColumns)}
-          >
-            <FontAwesomeIcon fixedWidth={true} icon={faBars} />
-          </button>
+          <div>
+            <button
+              type='button'
+              onClick={() => setShowHiddenColumns(!showHiddenColumns)}
+            >
+              <FontAwesomeIcon fixedWidth={true} icon={faBars} />
+            </button>
+
+            {/*
+              Invisible button so the div to the left and the div to the right
+              of the notebook title are equal width all the time to make the
+              notebook title centered.
+            */}
+            {Object.keys(props.unsavedPages).length > 0 && (
+              <button type='button' style={{ visibility: 'hidden' }}>
+                <FontAwesomeIcon fixedWidth={true} icon={faSave} />
+              </button>
+            )}
+          </div>
+
           <span className='notebook-title'>{path.notebookTitle}</span>
-          <button type='button'>
-            <FontAwesomeIcon fixedWidth={true} icon={faSearch} />
-          </button>
+
+          <div>
+            {Object.keys(props.unsavedPages).length > 0 && (
+              <button
+                type='button'
+                title='Alle speichern'
+                onClick={handleSaveAllClick}
+              >
+                <FontAwesomeIcon fixedWidth={true} icon={faSave} />
+              </button>
+            )}
+            <button type='button'>
+              <FontAwesomeIcon fixedWidth={true} icon={faSearch} />
+            </button>
+          </div>
         </Header>
 
         <Columns>

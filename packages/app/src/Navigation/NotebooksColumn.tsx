@@ -1,12 +1,14 @@
+import React from 'react';
+import { PagesWithUnsavedChangesTree } from 'features/notebooks/notebooksSlice';
 import Notebook from 'models/notebook';
 import Path, { NotebookPath } from 'models/path';
-import React from 'react';
 import Column from './Column';
 import Element from './Element';
 
 export interface Props {
   notebooks: Notebook[];
   path: Path;
+  unsavedPages: PagesWithUnsavedChangesTree;
   onNotebookClick: (notebook: Notebook) => void;
   onNewNotebook: (notebookTitle: string) => void;
   onDeleteNotebook: (path: NotebookPath) => void;
@@ -22,6 +24,7 @@ export default function NotebooksColumn(props: Props) {
   const {
     notebooks,
     path,
+    unsavedPages,
     onNotebookClick,
     onNewNotebook,
     onDeleteNotebook,
@@ -40,6 +43,8 @@ export default function NotebooksColumn(props: Props) {
           key={n.title}
           className={n.title === path.notebookTitle ? 'active' : ''}
           label={n.title}
+          showUnsavedChangesIndicator={!!unsavedPages[n.title]}
+          unsavedChangesIndicatorTooltip='In diesem Notizbuch befinden sich ungespeicherte Änderungen.'
           onClick={() => onNotebookClick(n)}
           onDeleteClick={() => onDeleteNotebook({ notebookTitle: n.title })}
           onTitleChange={newTitle =>

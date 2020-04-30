@@ -1,10 +1,12 @@
 import React from 'react';
 import styled from 'styled-components';
 import Path from 'models/path';
+import UnsavedChangesIndicator from 'Navigation/UnsavedChangesIndicator';
 
 export interface Props {
   path: Path;
   className?: string;
+  unsavedChangesIndicator: boolean;
 }
 
 const Container = styled.ol`
@@ -23,7 +25,13 @@ const Element = styled.li`
   }
 `;
 
-export default function Breadcrumbs({ path, className }: Props) {
+const BreadcrumbsUnsavedChangesIndicator = styled(UnsavedChangesIndicator)`
+  margin-left: 0.25rem;
+  margin-right: 0.25rem;
+`;
+
+export default function Breadcrumbs(props: Props) {
+  const { path, className, unsavedChangesIndicator } = props;
   const elements = [];
   if (path.notebookTitle) {
     elements.push(path.notebookTitle);
@@ -42,6 +50,9 @@ export default function Breadcrumbs({ path, className }: Props) {
       {elements.map((el, i) => (
         <Element key={i}>{el}</Element>
       ))}
+      {unsavedChangesIndicator && (
+        <BreadcrumbsUnsavedChangesIndicator title='Diese Seite enthält ungespeicherte Änderungen' />
+      )}
     </Container>
   );
 }

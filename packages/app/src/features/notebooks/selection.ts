@@ -1,5 +1,6 @@
-import { PagePath, SectionPath, NotebookPath } from 'models/path';
 import Notebook, { Page, Section } from 'models/notebook';
+import { NotebookPath, PagePath, SectionPath } from 'models/path';
+import { PagesWithUnsavedChangesTree } from './notebooksSlice';
 
 /**
  * Find the page and the enclosing section and notebook described by the given
@@ -144,4 +145,81 @@ export function findNotebookIndex(
   }
 
   return index;
+}
+
+/**
+ * Extracts the paths of all unsaved pages of the specified section from the
+ * object containing all unsaved pages in a notebook-section-page tree.
+ *
+ * @export
+ * @param {PagesWithUnsavedChangesTree} unsavedPagesTree
+ * @param {SectionPath} path
+ * @returns {PagePath[]}
+ */
+export function findUnsavedPagesOfSection(
+  unsavedPagesTree: PagesWithUnsavedChangesTree,
+  path: SectionPath
+): PagePath[] {
+  const unsavedPagesInSection =
+    unsavedPagesTree[path.notebookTitle]?.[path.sectionTitle];
+
+  if (!unsavedPagesInSection) {
+    // TODO: What to do?
+    return [];
+  }
+
+  const pageTitles = Object.keys(unsavedPagesInSection);
+  return pageTitles.map(pageTitle => ({ ...path, pageTitle }));
+}
+
+/**
+ * Extracts the paths of all unsaved pages of the specified notebook from the
+ * object containing all unsaved pages in a notebook-section-page tree.
+ *
+ * @export
+ * @param {PagesWithUnsavedChangesTree} unsavedPagesTree
+ * @param {NotebookPath} path
+ * @returns {PagePath[]}
+ */
+export function findUnsavedPagesOfNotebook(
+  unsavedPagesTree: PagesWithUnsavedChangesTree,
+  path: NotebookPath
+): PagePath[] {
+  const unsavedSections = unsavedPagesTree[path.notebookTitle];
+  if (!unsavedSections) {
+    return [];
+  }
+
+  const sectionTitles = Object.keys(unsavedSections);
+  const result: PagePath[] = [];
+  for (const sectionTitle of sectionTitles) {
+    result.push(
+      ...findUnsavedPagesOfSection(unsavedPagesTree, { ...path, sectionTitle })
+    );
+  }
+
+  return result;
+}
+
+/**
+ * Extracts the paths of all unsaved pages from the object containing all
+ * unsaved pages in a notebook-section-page tree.
+ *
+ * @export
+ * @param {PagesWithUnsavedChangesTree} unsavedPagesTree
+ * @returns {PagePath[]}
+ */
+export function findAllUnsavedPages(
+  unsavedPagesTree: PagesWithUnsavedChangesTree
+): PagePath[] {
+  const notebookTitles = Object.keys(unsavedPagesTree);
+
+  const result: PagePath[] = [];
+  for (const notebookTitle of notebookTitles) {
+    result.push(
+      ...findUnsavedPagesOfNotebook(unsavedPagesTree, { notebookTitle })
+    );
+  }
+
+  return result;
 }
