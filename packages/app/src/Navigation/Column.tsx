@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { PropsWithChildren } from 'react';
 import styled from 'styled-components';
 
 const ColumnContainer = styled.div`
@@ -36,11 +36,12 @@ const ColumnContainer = styled.div`
   }
 `;
 
-export default function Column(props: {
-  addButtonText: string;
-  onAddClick: () => void;
-  children: any;
-}) {
+export default function Column(
+  props: PropsWithChildren<{
+    addButtonText: string;
+    onAddClick: () => void;
+  }>
+) {
   return (
     <ColumnContainer>
       <ul>{props.children}</ul>
