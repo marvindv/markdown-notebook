@@ -50,7 +50,11 @@ const Item = styled.button`
   text-align: left;
   white-space: nowrap;
 
-  &:hover {
+  &[disabled] {
+    cursor: default;
+  }
+
+  &:not([disabled]):hover {
     background-color: ${props => props.theme.buttons.secondaryBackground};
     color: ${props => props.theme.buttons.secondaryForeground};
   }
@@ -58,6 +62,7 @@ const Item = styled.button`
 
 export interface DropdownItem {
   label: string;
+  disabled?: boolean;
   onClick?: () => void;
 }
 
@@ -93,7 +98,7 @@ export default function Dropdown(props: Props) {
       {props.show && (
         <Menu>
           {props.items.map((item, i) => (
-            <Item key={i} onClick={item.onClick}>
+            <Item key={i} onClick={item.onClick} disabled={item.disabled}>
               {item.label}
             </Item>
           ))}
