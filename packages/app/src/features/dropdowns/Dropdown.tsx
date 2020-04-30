@@ -90,6 +90,11 @@ export default function Dropdown(props: Props) {
     props.onToggleClick?.();
   });
 
+  const handleClick = (callback: (() => void) | undefined) => {
+    props.onToggleClick?.();
+    callback?.();
+  };
+
   return (
     <Container className={props.className} ref={ref}>
       <DropdownToggle type='button' onClick={() => props.onToggleClick?.()}>
@@ -98,7 +103,11 @@ export default function Dropdown(props: Props) {
       {props.show && (
         <Menu>
           {props.items.map((item, i) => (
-            <Item key={i} onClick={item.onClick} disabled={item.disabled}>
+            <Item
+              key={i}
+              onClick={() => handleClick(item.onClick)}
+              disabled={item.disabled}
+            >
               {item.label}
             </Item>
           ))}
