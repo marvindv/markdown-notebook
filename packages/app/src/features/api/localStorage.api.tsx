@@ -1,3 +1,5 @@
+import React from 'react';
+import Button from 'components/Button';
 import {
   findNotebook,
   findNotebookIndex,
@@ -8,7 +10,7 @@ import {
 } from 'features/notebooks/selection';
 import Notebook from 'models/notebook';
 import Path, { PagePath } from 'models/path';
-import Api from './api';
+import Api, { DuplicateError, InvalidPathError, NotFoundError } from './api';
 
 enum LocalStorageVersion {
   v1 = '1',
@@ -19,14 +21,6 @@ interface LocalStorage {
   notebooks: Notebook[];
 }
 
-export class ApiError extends Error {}
-
-export class DuplicateError extends ApiError {}
-
-export class InvalidPathError extends ApiError {}
-
-export class NotFoundError extends ApiError {}
-
 /**
  * Api to store notebooks in the browsers localStorage.
  *
@@ -36,6 +30,57 @@ export class NotFoundError extends ApiError {}
  */
 export default class LocalStorageApi extends Api {
   private readonly key = '_markdown_notebook_storage';
+
+  getLoginButtonText() {
+    return (
+      <div>
+        <div>In diesem Browser</div>
+        <small>ohne Synchronisation</small>
+      </div>
+    );
+  }
+
+  getLoginUi() {
+    return (props: { onDone: () => void }) => {
+      return (
+        <div>
+          <div>
+            <strong>Achtung!</strong> Sobald Cookies und Browserdaten gelöscht
+            werden, gehen auch alle gespeicherten Notizen verloren.
+          </div>
+
+          <Button
+            themeColor='primary'
+            type='button'
+            onClick={props.onDone}
+            style={{ marginTop: '1rem' }}
+          >
+            Verstanden
+          </Button>
+        </div>
+      );
+    };
+  }
+
+  /**
+   * @inheritdoc
+   *
+   * @returns {boolean}
+   * @memberof LocalStorageApi
+   */
+  isValid(): boolean {
+    return true;
+  }
+
+  /**
+   * @inheritdoc
+   * @memberof LocalStorageApi
+   */
+  logout() {
+    // TODO: Add a logout UI to let the user choose to whether or not to remove
+    // all data.
+    //localStorage.removeItem(this.key);
+  }
 
   /**
    * @inheritdoc

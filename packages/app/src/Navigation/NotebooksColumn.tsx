@@ -52,7 +52,7 @@ export default function NotebooksColumn(props: Props) {
           }
           isEditing={!!titleEditingNotebooks?.[n.title]}
           onEditingChange={isEditing =>
-            onChangeNotebookTitleEditing(path as NotebookPath, isEditing)
+            onChangeNotebookTitleEditing({ notebookTitle: n.title }, isEditing)
           }
         />
       ))}

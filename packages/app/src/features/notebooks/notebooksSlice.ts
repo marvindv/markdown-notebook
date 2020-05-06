@@ -1,5 +1,6 @@
 import { createAsyncThunk, createSlice, PayloadAction } from '@reduxjs/toolkit';
-import getApi from 'api';
+import { toast } from 'react-toastify';
+import { getApi } from 'features/api';
 import Notebook from 'models/notebook';
 import Path, {
   EmptyPath,
@@ -43,7 +44,12 @@ export type PagesWithUnsavedChangesTree = {
 };
 
 export const fetchNotebooks = createAsyncThunk('notebooks/fetch', async () => {
-  const result = await getApi().fetchNotebooks();
+  const api = getApi();
+  if (!api) {
+    throw new Error('No api installed.');
+  }
+
+  const result = await api.fetchNotebooks();
   return result;
 });
 
@@ -57,7 +63,12 @@ export const fetchNotebooks = createAsyncThunk('notebooks/fetch', async () => {
 export const addEntity = createAsyncThunk(
   'notebooks/addEntity',
   async (payload: { path: Path }, thunkApi) => {
-    const result = await getApi().addEntity(payload.path);
+    const api = getApi();
+    if (!api) {
+      throw new Error('No api installed.');
+    }
+
+    const result = await api.addEntity(payload.path);
     return result;
   }
 );
@@ -69,8 +80,13 @@ export const addEntity = createAsyncThunk(
 export const changeEntityTitle = createAsyncThunk(
   'notebooks/changeEntityTitle',
   async (payload: { path: Path; newTitle: string }, thunkApi) => {
+    const api = getApi();
+    if (!api) {
+      throw new Error('No api installed.');
+    }
+
     const { path, newTitle } = payload;
-    const result = await getApi().changeEntityTitle(path, newTitle);
+    const result = await api.changeEntityTitle(path, newTitle);
     return result;
   }
 );
@@ -81,7 +97,12 @@ export const changeEntityTitle = createAsyncThunk(
 export const deleteEntity = createAsyncThunk(
   'notebooks/deleteEntity',
   async (payload: Path, thunkApi) => {
-    const result = await getApi().deleteEntity(payload);
+    const api = getApi();
+    if (!api) {
+      throw new Error('No api installed.');
+    }
+
+    const result = await api.deleteEntity(payload);
     return result;
   }
 );
@@ -93,6 +114,11 @@ export const deleteEntity = createAsyncThunk(
 export const savePageContent = createAsyncThunk(
   'notebooks/savePageContent',
   async (payload: { path: PagePath }, thunkApi) => {
+    const api = getApi();
+    if (!api) {
+      throw new Error('No api installed.');
+    }
+
     const { path } = payload;
     const { notebooks } = (thunkApi.getState() as {
       notebooks: State;
@@ -101,7 +127,7 @@ export const savePageContent = createAsyncThunk(
     const { page } = findPage(path, notebooks) || {};
     if (page) {
       const content = page.content;
-      await getApi().setPageContent(path, content);
+      await api.setPageContent(path, content);
     } else {
       throw new Error('Page not found.');
     }
@@ -135,11 +161,12 @@ export const saveManyPostsContent = createAsyncThunk(
       pagePaths.push(...findAllUnsavedPages(unsavedPages));
     }
 
-    const result = await Promise.allSettled(
+    // TODO: Reject or resolve when any promise was rejected?
+    // No need to show errors toasts here since savePageContent.rejected does
+    // that.
+    await Promise.allSettled(
       pagePaths.map(path => thunkApi.dispatch(savePageContent({ path })))
     );
-
-    // TODO: Reject or resolve when any promise was rejected?
   }
 );
 
@@ -177,14 +204,19 @@ const notebooksSlice = createSlice({
       state.isFetching = true;
     });
 
-    builder.addCase(fetchNotebooks.rejected, state => {
+    builder.addCase(fetchNotebooks.rejected, (state, { error }) => {
       state.isFetching = false;
+      toast.error(`Failed to load notebooks: ${error.name} ${error.message}`);
     });
 
     builder.addCase(fetchNotebooks.fulfilled, (state, { payload }) => {
       const notebooks = payload;
       state.isFetching = false;
       state.notebooks = notebooks;
+    });
+
+    builder.addCase(addEntity.rejected, (state, { error }) => {
+      toast.error(`Failed to add entity: ${error.name} ${error.message}`);
     });
 
     builder.addCase(addEntity.fulfilled, (state, { payload }) => {
@@ -207,6 +239,13 @@ const notebooksSlice = createSlice({
       } else if (path.notebookTitle) {
         notebooks.push({ title: path.notebookTitle, sections: [] });
       }
+    });
+
+    builder.addCase(changeEntityTitle.rejected, (state, { error }) => {
+      console.warn(error);
+      toast.error(
+        `Failed to change entity name: ${error.name} ${error.message}`
+      );
     });
 
     builder.addCase(changeEntityTitle.fulfilled, (state, { payload }) => {
@@ -266,6 +305,10 @@ const notebooksSlice = createSlice({
       }
     });
 
+    builder.addCase(deleteEntity.rejected, (state, { error }) => {
+      toast.error(`Failed to delete entity: ${error.name} ${error.message}`);
+    });
+
     builder.addCase(deleteEntity.fulfilled, (state, { payload }) => {
       // Remove the entity after it was removed from the backend.
       const { notebooks } = state;
@@ -319,6 +362,15 @@ const notebooksSlice = createSlice({
       // Since the saving failed, we have to ensure unsavedPages contains this
       // page.
       setUnsavedChangesForPage(path, state.unsavedPages);
+
+      const breadcrumbs = [
+        path.notebookTitle,
+        path.pageTitle,
+        path.sectionTitle,
+      ].join(' > ');
+      toast.error(
+        `Failed to save content of page ${breadcrumbs}: ${action.error.name} ${action.error.message}`
+      );
     });
 
     builder.addCase(savePageContent.fulfilled, state => {

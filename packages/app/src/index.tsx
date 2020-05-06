@@ -2,6 +2,9 @@ import React from 'react';
 import ReactDOM from 'react-dom';
 import { ThemeProvider } from 'styled-components';
 import { Provider } from 'react-redux';
+import { BrowserRouter as Router } from 'react-router-dom';
+import { ToastContainer } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.min.css';
 
 import 'core-js/modules/es.promise.all-settled';
 
@@ -17,7 +20,22 @@ ReactDOM.render(
     <Provider store={store}>
       <ThemeProvider theme={THEME}>
         <GlobalStyle theme={THEME} />
-        <App />
+
+        <ToastContainer
+          position='top-right'
+          autoClose={10000}
+          hideProgressBar={false}
+          newestOnTop={false}
+          closeOnClick
+          rtl={false}
+          pauseOnFocusLoss
+          draggable
+          pauseOnHover
+        />
+
+        <Router>
+          <App />
+        </Router>
       </ThemeProvider>
     </Provider>
   </React.StrictMode>,

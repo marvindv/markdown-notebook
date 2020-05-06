@@ -35,7 +35,7 @@ const Header = styled.div`
   button {
     border: 0;
     background: transparent;
-    color: ${props => props.theme.buttons.secondaryBackground};
+    color: ${props => props.theme.buttons.themes.secondary.background};
   }
 `;
 

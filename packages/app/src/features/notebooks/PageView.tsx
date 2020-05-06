@@ -2,7 +2,7 @@ import React from 'react';
 import MonacoEditor, { EditorConstructionOptions } from 'react-monaco-editor';
 import styled from 'styled-components';
 import Path from 'models/path';
-import Breadcrumbs from './Breadcrumbs';
+import Breadcrumbs from '../../Breadcrumbs';
 
 export interface Props {
   className?: string;

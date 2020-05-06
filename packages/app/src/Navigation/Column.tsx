@@ -24,14 +24,15 @@ const ColumnContainer = styled.div`
 
   button.add-element {
     width: 100%;
-    background-color: ${props => props.theme.buttons.secondaryBackground};
-    color: ${props => props.theme.buttons.secondaryForeground};
+    background-color: ${props =>
+      props.theme.buttons.themes.secondary.background};
+    color: ${props => props.theme.buttons.themes.secondary.foreground};
     border: 0;
     border-top: ${props => props.theme.buttons.borderWidth} solid
-      ${props => props.theme.buttons.secondaryBorder};
+      ${props => props.theme.buttons.themes.secondary.border};
 
     &:hover {
-      background-color: ${props => props.theme.buttons.secondaryHover};
+      background-color: ${props => props.theme.buttons.themes.secondary.hover};
     }
   }
 `;

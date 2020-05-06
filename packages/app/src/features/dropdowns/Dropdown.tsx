@@ -55,8 +55,9 @@ const Item = styled.button`
   }
 
   &:not([disabled]):hover {
-    background-color: ${props => props.theme.buttons.secondaryBackground};
-    color: ${props => props.theme.buttons.secondaryForeground};
+    background-color: ${props =>
+      props.theme.buttons.themes.secondary.background};
+    color: ${props => props.theme.buttons.themes.secondary.foreground};
   }
 `;
 

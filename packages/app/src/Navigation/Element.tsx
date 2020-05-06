@@ -72,12 +72,13 @@ const ElementContainer = styled.li<{
         to right,
         ${props => transparentize(1, props.theme.borders.color)},
         ${props => transparentize(0.25, props.theme.borders.color)} 20%,
-        ${props => props.theme.buttons.secondaryBackground}
+        ${props => props.theme.buttons.themes.secondary.background}
       );
     }
 
     &:focus {
-      outline-color: ${props => props.theme.buttons.secondaryBackground};
+      outline-color: ${props =>
+        props.theme.buttons.themes.secondary.background};
     }
   }
 
