@@ -7,19 +7,19 @@ import {
 } from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import React, { useEffect, useState } from 'react';
-import styled from 'styled-components';
-import { PagesWithUnsavedChangesTree } from 'features/notebooks/notebooksSlice';
+import { PagesWithUnsavedChangesTree } from 'src/features/notebooks/notebooksSlice';
 import {
   EditingPages,
   EditingSections,
-} from 'features/notebooks/titleEditingSlice';
-import Notebook, { Page, Section } from 'models/notebook';
+} from 'src/features/notebooks/titleEditingSlice';
+import Notebook, { Page, Section } from 'src/models/notebook';
 import Path, {
   EmptyPath,
   NotebookPath,
   PagePath,
   SectionPath,
-} from 'models/path';
+} from 'src/models/path';
+import styled from 'styled-components';
 import NotebooksColumn from './NotebooksColumn';
 import PagesColumn from './PagesColumn';
 import SectionsColumn from './SectionsColumn';
@@ -79,7 +79,7 @@ const Container = styled.div<{ showHiddenColumns: boolean }>`
   }
 `;
 
-export interface NavigationProps {
+export interface Props {
   className?: string;
   path: Path;
   notebooks: Notebook[];
@@ -113,10 +113,10 @@ export interface NavigationProps {
  * structure.
  *
  * @export
- * @param {NavigationProps} props
+ * @param {Props} props
  * @returns
  */
-export default function Navigation(props: NavigationProps) {
+export default function Navigation(props: Props) {
   const [showHiddenColumns, setShowHiddenColumns] = useState(false);
 
   const path = props.path;

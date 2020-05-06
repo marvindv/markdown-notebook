@@ -1,9 +1,9 @@
 import React from 'react';
-import { Switch, Route, Redirect } from 'react-router-dom';
-import NotebooksPage from 'features/notebooks/NotebooksPage';
 import { useSelector } from 'react-redux';
-import { RootState } from 'reducers';
-import LoginPage from 'features/api/LoginPage';
+import { Redirect, Route, Switch } from 'react-router-dom';
+import LoginPage from 'src/features/api/LoginPage';
+import NotebooksPage from 'src/features/notebooks/NotebooksPage';
+import { RootState } from 'src/reducers';
 
 export default function App() {
   const currentApi = useSelector((state: RootState) => state.api.current);

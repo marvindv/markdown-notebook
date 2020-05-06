@@ -1,12 +1,12 @@
 import { faEllipsisV } from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import Dropdown, { DropdownToggle } from 'features/dropdowns/Dropdown';
-import useOutsideClick from 'hooks/useOutsideClick';
-import { RgbColor } from 'models/notebook';
 import { transparentize } from 'polished';
 import React, { KeyboardEvent, useEffect, useRef, useState } from 'react';
+import UnsavedChangesIndicator from 'src/components/UnsavedChangesIndicator';
+import Dropdown, { DropdownToggle } from 'src/features/dropdowns/Dropdown';
+import useOutsideClick from 'src/hooks/useOutsideClick';
+import { RgbColor } from 'src/models/notebook';
 import styled, { css } from 'styled-components';
-import UnsavedChangesIndicator from './UnsavedChangesIndicator';
 
 const StyledDropdown = styled(Dropdown)`
   position: absolute;

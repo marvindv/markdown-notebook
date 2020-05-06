@@ -1,19 +1,17 @@
+import 'core-js/modules/es.promise.all-settled';
 import React from 'react';
 import ReactDOM from 'react-dom';
-import { ThemeProvider } from 'styled-components';
 import { Provider } from 'react-redux';
 import { BrowserRouter as Router } from 'react-router-dom';
 import { ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.min.css';
-
-import 'core-js/modules/es.promise.all-settled';
-
-import './index.scss';
+import { ThemeProvider } from 'styled-components';
 import App from './App';
+import './index.scss';
 import * as serviceWorker from './serviceWorker';
-import THEME from './theme';
+import store from './store';
 import GlobalStyle from './style';
-import store from 'store';
+import THEME from './theme';
 
 ReactDOM.render(
   <React.StrictMode>

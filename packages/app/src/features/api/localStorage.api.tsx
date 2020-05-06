@@ -1,5 +1,5 @@
 import React from 'react';
-import Button from 'components/Button';
+import Button from 'src/components/Button';
 import {
   findNotebook,
   findNotebookIndex,
@@ -7,9 +7,9 @@ import {
   findPageIndex,
   findSection,
   findSectionIndex,
-} from 'features/notebooks/selection';
-import Notebook from 'models/notebook';
-import Path, { PagePath } from 'models/path';
+} from 'src/features/notebooks/selection';
+import Notebook from 'src/models/notebook';
+import Path, { PagePath } from 'src/models/path';
 import Api, { DuplicateError, InvalidPathError, NotFoundError } from './api';
 
 enum LocalStorageVersion {

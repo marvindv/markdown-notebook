@@ -1,8 +1,8 @@
 import React from 'react';
-import { PagesWithUnsavedChangesTree } from 'features/notebooks/notebooksSlice';
-import { findSection } from 'features/notebooks/selection';
-import Notebook, { Page } from 'models/notebook';
-import { PagePath, SectionPath } from 'models/path';
+import { PagesWithUnsavedChangesTree } from 'src/features/notebooks/notebooksSlice';
+import { findSection } from 'src/features/notebooks/selection';
+import Notebook, { Page } from 'src/models/notebook';
+import { PagePath, SectionPath } from 'src/models/path';
 import Column from './Column';
 import Element from './Element';
 

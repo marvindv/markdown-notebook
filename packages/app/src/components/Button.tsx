@@ -1,5 +1,5 @@
+import { ThemeColors } from 'src/theme';
 import styled, { css } from 'styled-components';
-import { ThemeColors } from 'theme';
 
 export interface Props {
   themeColor?: ThemeColors;

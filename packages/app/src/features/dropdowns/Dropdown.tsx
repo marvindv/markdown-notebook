@@ -1,5 +1,5 @@
-import useOutsideClick from 'hooks/useOutsideClick';
 import React, { useRef } from 'react';
+import useOutsideClick from 'src/hooks/useOutsideClick';
 import styled from 'styled-components';
 
 const Container = styled.div`

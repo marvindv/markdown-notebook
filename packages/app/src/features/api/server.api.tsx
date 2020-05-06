@@ -1,20 +1,20 @@
-import React, { SyntheticEvent, useState, useEffect, useRef } from 'react';
-import styled from 'styled-components';
 import fetch from 'cross-fetch';
 import { decode } from 'jsonwebtoken';
-import Button from 'components/Button';
-import Input from 'components/Input';
-import Notebook from 'models/notebook';
-import Path, { PagePath } from 'models/path';
+import React, { SyntheticEvent, useEffect, useRef, useState } from 'react';
+import Button from 'src/components/Button';
+import Input from 'src/components/Input';
+import LoadingIndicatorButton from 'src/components/LoadingIndicatorButton';
+import Notebook from 'src/models/notebook';
+import Path, { PagePath } from 'src/models/path';
+import styled from 'styled-components';
 import Api, {
-  InvalidPathError,
-  InvalidCredentialsError,
-  ConnectionError,
-  NotFoundError,
-  DuplicateError,
   ApiError,
+  ConnectionError,
+  DuplicateError,
+  InvalidCredentialsError,
+  InvalidPathError,
+  NotFoundError,
 } from './api';
-import LoadingIndicatorButton from 'components/LoadingIndicatorButton';
 
 const Wrapper = styled.div`
   text-align: left;

@@ -1,9 +1,9 @@
 import React, { useState } from 'react';
 import { useDispatch } from 'react-redux';
 import { useHistory } from 'react-router-dom';
+import Button from 'src/components/Button';
 import styled from 'styled-components';
-import { apis, ApiId, changeCurrentApi } from './apiSlice';
-import Button from 'components/Button';
+import { ApiId, apis, changeCurrentApi } from './apiSlice';
 
 const Container = styled.div`
   max-width: 400px;

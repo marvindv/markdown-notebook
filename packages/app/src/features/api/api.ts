@@ -1,6 +1,6 @@
-import Notebook from 'models/notebook';
-import Path, { PagePath } from 'models/path';
 import React from 'react';
+import Notebook from 'src/models/notebook';
+import Path, { PagePath } from 'src/models/path';
 
 /**
  * The interface each api must implement.

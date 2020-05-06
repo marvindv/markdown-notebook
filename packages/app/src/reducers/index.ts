@@ -1,8 +1,8 @@
 import { combineReducers } from '@reduxjs/toolkit';
-import apiReducer from 'features/api/apiSlice';
-import notebooksReducer from 'features/notebooks/notebooksSlice';
-import titleEditingReducer from 'features/notebooks/titleEditingSlice';
-import currentPathReducer from 'features/notebooks/currentPathSlice';
+import apiReducer from 'src/features/api/apiSlice';
+import currentPathReducer from 'src/features/notebooks/currentPathSlice';
+import notebooksReducer from 'src/features/notebooks/notebooksSlice';
+import titleEditingReducer from 'src/features/notebooks/titleEditingSlice';
 
 const rootReducer = combineReducers({
   api: apiReducer,

@@ -1,7 +1,7 @@
 import React from 'react';
-import { PagesWithUnsavedChangesTree } from 'features/notebooks/notebooksSlice';
-import Notebook from 'models/notebook';
-import Path, { NotebookPath } from 'models/path';
+import { PagesWithUnsavedChangesTree } from 'src/features/notebooks/notebooksSlice';
+import Notebook from 'src/models/notebook';
+import Path, { NotebookPath } from 'src/models/path';
 import Column from './Column';
 import Element from './Element';
 

@@ -1,13 +1,13 @@
 import { createAsyncThunk, createSlice, PayloadAction } from '@reduxjs/toolkit';
 import { toast } from 'react-toastify';
-import { getApi } from 'features/api';
-import Notebook from 'models/notebook';
+import { getApi } from 'src/features/api';
+import Notebook from 'src/models/notebook';
 import Path, {
   EmptyPath,
   NotebookPath,
   PagePath,
   SectionPath,
-} from 'models/path';
+} from 'src/models/path';
 import {
   findAllUnsavedPages,
   findNotebook,

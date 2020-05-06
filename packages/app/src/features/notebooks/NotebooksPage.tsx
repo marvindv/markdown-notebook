@@ -1,7 +1,7 @@
 import { unwrapResult } from '@reduxjs/toolkit';
 import React, { useEffect } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
-import styled from 'styled-components';
+import { changeCurrentPath } from 'src/features/notebooks/currentPathSlice';
 import {
   addEntity,
   changeEntityTitle,
@@ -10,23 +10,28 @@ import {
   fetchNotebooks,
   saveManyPostsContent,
   savePageContent,
-} from 'features/notebooks/notebooksSlice';
-import {
-  setNotebookEditing,
-  setPageEditing,
-  setSectionEditing,
-} from 'features/notebooks/titleEditingSlice';
-import { changeCurrentPath } from 'features/notebooks/currentPathSlice';
-import { EmptyPath, NotebookPath, PagePath, SectionPath } from 'models/path';
+} from 'src/features/notebooks/notebooksSlice';
+import PageView from 'src/features/notebooks/PageView';
 import {
   findNotebook,
   findPage,
   findSection,
-} from 'features/notebooks/selection';
-import Navigation from 'Navigation';
-import PageView from 'features/notebooks/PageView';
-import { RootState } from 'reducers';
-import { AppDispatch } from 'store';
+} from 'src/features/notebooks/selection';
+import {
+  setNotebookEditing,
+  setPageEditing,
+  setSectionEditing,
+} from 'src/features/notebooks/titleEditingSlice';
+import {
+  EmptyPath,
+  NotebookPath,
+  PagePath,
+  SectionPath,
+} from 'src/models/path';
+import Navigation from 'src/Navigation';
+import { RootState } from 'src/reducers';
+import { AppDispatch } from 'src/store';
+import styled from 'styled-components';
 
 const NavigationContainer = styled(Navigation)``;
 

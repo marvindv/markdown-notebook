@@ -1,13 +1,7 @@
 import React from 'react';
+import UnsavedChangesIndicator from 'src/components/UnsavedChangesIndicator';
+import Path from 'src/models/path';
 import styled from 'styled-components';
-import Path from 'models/path';
-import UnsavedChangesIndicator from 'Navigation/UnsavedChangesIndicator';
-
-export interface Props {
-  path: Path;
-  className?: string;
-  unsavedChangesIndicator: boolean;
-}
 
 const Container = styled.ol`
   list-style: none;
@@ -29,6 +23,12 @@ const BreadcrumbsUnsavedChangesIndicator = styled(UnsavedChangesIndicator)`
   margin-left: 0.25rem;
   margin-right: 0.25rem;
 `;
+
+export interface Props {
+  path: Path;
+  className?: string;
+  unsavedChangesIndicator: boolean;
+}
 
 export default function Breadcrumbs(props: Props) {
   const { path, className, unsavedChangesIndicator } = props;

@@ -1,5 +1,5 @@
-import Notebook, { Page, Section } from 'models/notebook';
-import { NotebookPath, PagePath, SectionPath } from 'models/path';
+import Notebook, { Page, Section } from 'src/models/notebook';
+import { NotebookPath, PagePath, SectionPath } from 'src/models/path';
 import { PagesWithUnsavedChangesTree } from './notebooksSlice';
 
 /**
