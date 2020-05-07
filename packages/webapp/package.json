@@ -1,7 +1,10 @@
 {
-  "name": "@markdown-notebook/app",
+  "name": "@markdown-notebook/webapp",
   "version": "0.1.0",
   "private": true,
+  "repository": "git@github.com:marvindv/markdown-notebook.git",
+  "author": "Marvin Davieds <marvin.davieds@gmail.com>",
+  "license": "AGPL-3.0",
   "dependencies": {
     "@fortawesome/fontawesome-svg-core": "^1.2.28",
     "@fortawesome/free-solid-svg-icons": "^5.13.0",
@@ -34,7 +37,10 @@
     "react-scripts": "3.4.1",
     "react-toastify": "^5.5.0",
     "styled-components": "^5.1.0",
-    "typescript": "~3.7.2"
+    "typescript": "~3.7.2",
+    "husky": "^4.2.5",
+    "lint-staged": "^10.1.5",
+    "prettier": "^2.0.4"
   },
   "scripts": {
     "start": "react-app-rewired start",
@@ -57,5 +63,15 @@
       "last 1 safari version"
     ]
   },
-  "proxy": "http://localhost:8000"
+  "proxy": "http://localhost:8000",
+  "husky": {
+    "hooks": {
+      "pre-commit": "lint-staged"
+    }
+  },
+  "lint-staged": {
+    "packages/**/*.{js,jsx,ts,tsx,json,css,scss,md}": [
+      "prettier --write"
+    ]
+  }
 }
