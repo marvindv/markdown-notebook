@@ -1,7 +1,10 @@
+use dotenv::dotenv;
 use std::error::Error;
 use std::io::stdin;
 
 fn main() -> Result<(), Box<dyn Error>> {
+    dotenv().ok();
+
     // Read the username.
     println!("Enter the username:");
     let mut username = String::new();

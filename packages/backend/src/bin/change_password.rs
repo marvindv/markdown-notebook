@@ -1,10 +1,13 @@
 use diesel::prelude::*;
+use dotenv::dotenv;
 use std::error::Error;
 use std::io::stdin;
 
 use backend::models::*;
 
 fn main() -> Result<(), Box<dyn Error>> {
+    dotenv().ok();
+
     use backend::models::schema::users::dsl::*;
 
     let database_url = std::env::var("MN_DATABASE_URL")?;
