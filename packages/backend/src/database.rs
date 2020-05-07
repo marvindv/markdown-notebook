@@ -1,6 +1,8 @@
 use crate::BackendResult;
 use diesel::r2d2;
 
+embed_migrations!();
+
 /// This type represents a database provider agnostic connection handle.
 pub type DbConnection = diesel::sqlite::SqliteConnection;
 
@@ -33,4 +35,11 @@ pub fn create_pool(database_url: &str) -> BackendResult<DbConnectionPool> {
         .max_size(1)
         .build(manager)?;
     Ok(pool)
+}
+
+/// Checks whether there are pending migrations for the connected database and
+/// if so executes them.
+pub fn run_migrations(conn: &DbConnection) -> BackendResult<()> {
+    embedded_migrations::run_with_output(&*conn, &mut std::io::stdout())?;
+    Ok(())
 }

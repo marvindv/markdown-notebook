@@ -3,6 +3,7 @@ use dotenv::dotenv;
 use std::error::Error;
 use std::io::stdin;
 
+use backend::database;
 use backend::models::*;
 
 fn main() -> Result<(), Box<dyn Error>> {
@@ -13,6 +14,7 @@ fn main() -> Result<(), Box<dyn Error>> {
     let database_url = std::env::var("MN_DATABASE_URL")?;
     let pool = backend::database::create_pool(&database_url)?;
     let conn = pool.get()?;
+    database::run_migrations(&conn)?;
     let user_list = users.load::<User>(&conn)?;
 
     println!("Displaying {} users", user_list.len());

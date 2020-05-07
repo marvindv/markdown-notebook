@@ -2,6 +2,8 @@ use dotenv::dotenv;
 use std::error::Error;
 use std::io::stdin;
 
+use backend::database;
+
 fn main() -> Result<(), Box<dyn Error>> {
     dotenv().ok();
 
@@ -26,6 +28,7 @@ fn main() -> Result<(), Box<dyn Error>> {
     let database_url = std::env::var("MN_DATABASE_URL")?;
     let pool = backend::database::create_pool(&database_url)?;
     let conn = pool.get()?;
+    database::run_migrations(&conn)?;
     let user = backend::user_management::create(&conn, username, &password)?;
     println!("\nSaved user {} (id: {})", user.username, user.id);
 

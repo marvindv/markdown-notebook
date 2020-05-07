@@ -14,6 +14,7 @@ pub enum BackendError {
     Bcrypt(bcrypt::BcryptError),
     Diesel(diesel::result::Error),
     DieselConnectionError(diesel::ConnectionError),
+    DieselMigration(diesel_migrations::RunMigrationsError),
     R2D2(r2d2::Error),
     /// This encapsulates the actual ::r2d2::Error, which is re-exported by
     /// diesel as diesel::r2d2::PoolError.
@@ -54,6 +55,9 @@ impl fmt::Display for BackendError {
             BackendError::DieselConnectionError(err) => {
                 write!(f, "Diesel connection error: {}", err)
             }
+            BackendError::DieselMigration(err) => {
+                write!(f, "Diesel migration error: {}", err)
+            }
             BackendError::R2D2(err) => write!(f, "r2d2 error: {}", err),
             BackendError::R2D2Pool(err) => {
                 write!(f, "r2d2 pool error: {}", err)
@@ -80,6 +84,7 @@ impl std::error::Error for BackendError {
             BackendError::Bcrypt(err) => err.description(),
             BackendError::Diesel(err) => err.description(),
             BackendError::DieselConnectionError(err) => err.description(),
+            BackendError::DieselMigration(err) => err.description(),
             BackendError::R2D2(err) => err.description(),
             BackendError::R2D2Pool(err) => err.description(),
             BackendError::EnvError(err) => err.description(),
@@ -120,6 +125,10 @@ macro_rules! impl_from_error {
 
 impl_from_error!(bcrypt::BcryptError, BackendError::Bcrypt);
 impl_from_error!(diesel::ConnectionError, BackendError::DieselConnectionError);
+impl_from_error!(
+    diesel_migrations::RunMigrationsError,
+    BackendError::DieselMigration
+);
 impl_from_error!(std::env::VarError, BackendError::EnvError);
 impl_from_error!(jsonwebtoken::errors::Error, BackendError::JwtError);
 impl_from_error!(r2d2::Error, BackendError::R2D2);

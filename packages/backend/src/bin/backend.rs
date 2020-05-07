@@ -49,6 +49,13 @@ fn main() -> Result<(), Box<dyn Error>> {
             .expect("MN_DATABASE_URL env variable missing"),
     )?;
 
+    // Run migrations in a block so the connection is dropped immediately after
+    // so we don't leak the connection.
+    {
+        let conn = db_connection_pool.get()?;
+        database::run_migrations(&conn)?;
+    }
+
     rocket::custom(config)
         .manage(jwt::Config {
             secret: env::var("MN_JWT_SECRET")
