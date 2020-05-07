@@ -22,6 +22,11 @@ import {
 
 export interface State {
   isFetching: boolean;
+  /**
+   * `null` if no fetch error occurred. Otherwise contains the string
+   * representation of the error.
+   */
+  fetchError: null | string;
   savePending: boolean;
   unsavedPages: PagesWithUnsavedChangesTree;
   notebooks: Notebook[];
@@ -195,6 +200,7 @@ const notebooksSlice = createSlice({
   name: 'notebooks',
   initialState: {
     isFetching: false,
+    fetchError: null,
     savePending: false,
     unsavedPages: {},
     notebooks: [],
@@ -202,10 +208,12 @@ const notebooksSlice = createSlice({
   extraReducers: builder => {
     builder.addCase(fetchNotebooks.pending, state => {
       state.isFetching = true;
+      state.fetchError = null;
     });
 
     builder.addCase(fetchNotebooks.rejected, (state, { error }) => {
       state.isFetching = false;
+      state.fetchError = `${error.name} ${error.message}`;
       toast.error(`Failed to load notebooks: ${error.name} ${error.message}`);
     });
 

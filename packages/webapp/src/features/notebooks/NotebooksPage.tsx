@@ -1,3 +1,8 @@
+import {
+  faCircleNotch,
+  faExclamationTriangle,
+} from '@fortawesome/free-solid-svg-icons';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { unwrapResult } from '@reduxjs/toolkit';
 import React, { useEffect } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
@@ -22,7 +27,7 @@ import {
   setPageEditing,
   setSectionEditing,
 } from 'src/features/notebooks/titleEditingSlice';
-import {
+import Path, {
   EmptyPath,
   NotebookPath,
   PagePath,
@@ -87,11 +92,103 @@ export default function NotebooksPage() {
   const unsavedPages = useSelector(
     (state: RootState) => state.notebooks.unsavedPages
   );
+  const isFetching = useSelector(
+    (state: RootState) => state.notebooks.isFetching
+  );
+  const fetchError = useSelector(
+    (state: RootState) => state.notebooks.fetchError
+  );
   const dispatch: AppDispatch = useDispatch();
 
   useEffect(() => {
     dispatch(fetchNotebooks());
   }, [dispatch]);
+
+  // If we are currently fetching or fetching failed with an error, show the
+  // corresponding hints, since there are no notebooks to render.
+  if (isFetching) {
+    return (
+      <ContentWrapper>
+        <PageContainer>
+          <NoPageNotice>
+            <div>Notizbücher werden geladen &hellip;</div>
+            <div style={{ textAlign: 'center', marginTop: '1rem' }}>
+              <FontAwesomeIcon icon={faCircleNotch} size='2x' spin />
+            </div>
+          </NoPageNotice>
+        </PageContainer>
+      </ContentWrapper>
+    );
+  } else if (fetchError) {
+    return (
+      <ContentWrapper>
+        <PageContainer>
+          <NoPageNotice>
+            <div style={{ textAlign: 'center', marginBottom: '1rem' }}>
+              <FontAwesomeIcon icon={faExclamationTriangle} size='2x' />
+            </div>
+            <div>Notizbücher konnten nicht geladen werden</div>
+            <small
+              style={{
+                textAlign: 'center',
+                display: 'block',
+                marginTop: '0.25rem',
+              }}
+            >
+              {fetchError}
+            </small>
+          </NoPageNotice>
+        </PageContainer>
+      </ContentWrapper>
+    );
+  }
+
+  let pageContent;
+  if (path.pageTitle) {
+    const pathComponents = findPage(path, notebooks);
+    if (pathComponents) {
+      const { page } = pathComponents;
+
+      const handleContentChange = (newContent: string) => {
+        dispatch(changePageContent({ path, content: newContent }));
+      };
+
+      const hasUnsavedChanges = !!unsavedPages[path.notebookTitle]?.[
+        path.sectionTitle
+      ]?.[path.pageTitle];
+
+      pageContent = (
+        <PageContainer>
+          <PageView
+            path={path}
+            hasUnsavedChanges={hasUnsavedChanges}
+            content={page.content}
+            onChange={handleContentChange}
+          />
+        </PageContainer>
+      );
+    }
+  }
+
+  // If we have no path or the path does not match any page, display a
+  // placeholder instead. If we are still fetching the notebooks, show a loading
+  // indicator.
+  if (!pageContent) {
+    let text;
+    if (!path.notebookTitle) {
+      text = 'Wähle ein Notizbuch aus.';
+    } else if (!path.sectionTitle) {
+      text = 'Wähle einen Abschnitt aus.';
+    } else {
+      text = 'Wähle eine Seite aus.';
+    }
+
+    pageContent = (
+      <PageContainer>
+        <NoPageNotice>{text}</NoPageNotice>
+      </PageContainer>
+    );
+  }
 
   const handleNewPage = async (path: SectionPath, title: string) => {
     const { section } = findSection(path, notebooks) || {};
@@ -191,51 +288,11 @@ export default function NotebooksPage() {
     }
   };
 
-  let pageContent;
-  if (path.pageTitle) {
-    const pathComponents = findPage(path, notebooks);
-    if (pathComponents) {
-      const { page } = pathComponents;
+  const handleChangeTitle = (path: Path, newTitle: string) => {
+    dispatch(changeEntityTitle({ path, newTitle }));
+  };
 
-      const handleContentChange = (newContent: string) => {
-        dispatch(changePageContent({ path, content: newContent }));
-      };
-
-      const hasUnsavedChanges = !!unsavedPages[path.notebookTitle]?.[
-        path.sectionTitle
-      ]?.[path.pageTitle];
-
-      pageContent = (
-        <PageContainer>
-          <PageView
-            path={path}
-            hasUnsavedChanges={hasUnsavedChanges}
-            content={page.content}
-            onChange={handleContentChange}
-          />
-        </PageContainer>
-      );
-    }
-  }
-
-  // If we have no path or the path does not match any page, display a
-  // placeholder instead.
-  if (!pageContent) {
-    let text;
-    if (!path.notebookTitle) {
-      text = 'Wähle ein Notizbuch aus.';
-    } else if (!path.sectionTitle) {
-      text = 'Wähle einen Abschnitt aus.';
-    } else {
-      text = 'Wähle eine Seite aus.';
-    }
-
-    pageContent = (
-      <PageContainer>
-        <NoPageNotice>{text}</NoPageNotice>
-      </PageContainer>
-    );
-  }
+  const handleDelete = (path: Path) => dispatch(deleteEntity(path));
 
   return (
     <ContentWrapper>
@@ -245,20 +302,14 @@ export default function NotebooksPage() {
         unsavedPages={unsavedPages}
         onPathChange={path => dispatch(changeCurrentPath(path))}
         onNewPage={handleNewPage}
-        onDeletePage={path => dispatch(deleteEntity(path))}
-        onChangePageTitle={(path, newTitle) =>
-          dispatch(changeEntityTitle({ path, newTitle }))
-        }
+        onDeletePage={handleDelete}
+        onChangePageTitle={handleChangeTitle}
         onNewSection={handleNewSection}
-        onDeleteSection={path => dispatch(deleteEntity(path))}
-        onChangeSectionTitle={(path, newTitle) =>
-          dispatch(changeEntityTitle({ path, newTitle }))
-        }
+        onDeleteSection={handleDelete}
+        onChangeSectionTitle={handleChangeTitle}
         onNewNotebook={handleNewNotebook}
-        onDeleteNotebook={path => dispatch(deleteEntity(path))}
-        onChangeNotebookTitle={(path, newTitle) =>
-          dispatch(changeEntityTitle({ path, newTitle }))
-        }
+        onDeleteNotebook={handleDelete}
+        onChangeNotebookTitle={handleChangeTitle}
         titleEditingNotebooks={titleEditing.notebooks}
         onChangeNotebookTitleEditing={(path, isEditing) =>
           dispatch(setNotebookEditing({ path, isEditing }))
