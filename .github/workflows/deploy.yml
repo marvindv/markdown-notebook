@@ -16,7 +16,8 @@ jobs:
           docker -v
           docker-compose -v
 
+      # https://github.com/actions/virtual-environments/issues/765
       - name: Run docker-compose
         run: |
-          docker-compose build
-          docker-compose up -d
+          JWT_SECRET=${{ secrets.DEPLOY_JWT_SECRET }} PORT=${{ secrets.DEPLOY_PORT }} DATABASE_STORAGE_DIR=${{ secrets.DEPLOY_DATABASE_STORAGE_DIR }} docker-compose build
+          JWT_SECRET=${{ secrets.DEPLOY_JWT_SECRET }} PORT=${{ secrets.DEPLOY_PORT }} DATABASE_STORAGE_DIR=${{ secrets.DEPLOY_DATABASE_STORAGE_DIR }} docker-compose up -d
