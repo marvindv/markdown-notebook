@@ -1,0 +1,8 @@
+target
+.env
+.gitignore
+*.sqlite
+README.md
+rustfmt.toml
+.dockerignore
+Dockerfile

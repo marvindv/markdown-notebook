@@ -44,3 +44,14 @@ You don’t have to ever use `eject`. The curated feature set is suitable for sm
 You can learn more in the [Create React App documentation](https://facebook.github.io/create-react-app/docs/getting-started).
 
 To learn React, check out the [React documentation](https://reactjs.org/).
+
+## Docker deployment
+
+```bash
+# Create an image for the webapp with an nginx sidecar.
+$ docker build -t markdown-notebook/webapp .
+# Run the image interactive.
+$ docker run -it --rm -p 8080:80 markdown-notebook/webapp
+# Run the image as a daemon.
+$ docker run -d -p 8080:80 markdown-notebook/webapp
+```

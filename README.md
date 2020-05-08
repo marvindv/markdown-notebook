@@ -1,5 +1,54 @@
 # Markdown Notebook
 
+## Docker deployment
+
+Make sure you have Docker and `docker-compose` installed.
+
+Create a `.env` file derived from `.env.template` and fill in a random jwt
+secret and the path to the directory where the database file should be stored on
+the host. It should look like this:
+
+```dotenv
+JWT_SECRET=<some random secret>
+PORT=8430
+DATABASE_STORAGE_DIR=/var/lib/markdown-notebook
+```
+
+Then the project can be run using `docker-compose`. All commands are executed
+in the directory that contains a valid `.env` and the `docker-compose.yml` file:
+
+```bash
+# Start webapp, backend and load balancer and show the aggregated output of all
+# services.
+$ docker-compose up
+
+# Start webapp, backend and load balancer in the background.
+$ docker-compose up -d
+
+# Rebuild the images after changes to the source of one or more services.
+$ docker-compose build
+
+# Stop all services.
+$ docker-compose stop
+
+# Stop and remove services.
+$ docker-compose down
+```
+
+Creating and deleting a user as well as changing the password is possible using
+the binaries bundled with the backend service.
+
+```bash
+# Create a user:
+$ docker-compose run backend create_user
+
+# Change the password of a user:
+$ docker-compose run backend change_password
+
+# Delete a user:
+$ docker-compose run backend delete_user
+```
+
 ## Install build tools and dependencies
 
 ### Frontend
