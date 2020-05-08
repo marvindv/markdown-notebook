@@ -278,7 +278,7 @@ export default class ServerApi extends Api {
         sectionTitle: string;
         notebookId: number;
       }) => ({ notebookTitle, sectionTitle: json.sectionTitle });
-    } else if (path.pageTitle) {
+    } else if (path.notebookTitle) {
       let { notebookTitle } = path;
 
       url += `/notebook`;
@@ -445,6 +445,7 @@ export default class ServerApi extends Api {
 
     const { token } = (await res.json()) as { token: string };
     localStorage.setItem(this.tokenKey, token);
+    this.token = token;
   }
 
   private responseToError(res: Response): Error {
