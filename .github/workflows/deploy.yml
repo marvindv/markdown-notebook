@@ -15,6 +15,7 @@ jobs:
         run: |
           docker -v
           docker-compose -v
+          who
 
       # https://github.com/actions/virtual-environments/issues/765
       - name: Run docker-compose
