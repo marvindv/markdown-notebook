@@ -21,6 +21,5 @@ jobs:
         run: |
           echo "JWT_SECRET=${{ secrets.DEPLOY_JWT_SECRET }}" >> .env
           echo "PORT=${{ secrets.DEPLOY_PORT }}" >> .env
-          echo "DATABASE_STORAGE_DIR=${{ secrets.DEPLOY_DATABASE_STORAGE_DIR }}" >> .env
           docker-compose build
           docker-compose up -d
