@@ -16,12 +16,7 @@ jobs:
           docker -v
           docker-compose -v
 
-      # Set env variables with export to avoid
-      # https://github.com/actions/virtual-environments/issues/765
       - name: Run docker-compose
         run: |
-          export JWT_SECRET=${{ secrets.DEPLOY_JWT_SECRET }}
-          export PORT=${{ secrets.DEPLOY_PORT }}
-          export DATABASE_STORAGE_DIR=${{ secrets.DEPLOY_DATABASE_STORAGE_DIR }}
           docker-compose build
           docker-compose up -d
