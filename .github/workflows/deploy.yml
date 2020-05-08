@@ -20,5 +20,6 @@ jobs:
       - name: Run docker-compose
         run: |
           echo "JWT_SECRET=${{ secrets.DEPLOY_JWT_SECRET }}" >> .env
+          echo "DATABASE_STORAGE_DIR=${{ secrets.DEPLOY_DATABASE_STORAGE_DIR }}" >> .env
           docker-compose build
           docker-compose up -d
