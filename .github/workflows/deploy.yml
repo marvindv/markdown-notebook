@@ -11,11 +11,16 @@ jobs:
     steps:
       - uses: actions/checkout@v2
 
+      - name: Print docker version
+        run: |
+          docker -v
+          docker-compose -v
+
       - name: Run docker-compose
         env:
-          JWT_SECRET: ${{ secrets.DEPLOY_JWT_SECRET }}
-          PORT: ${{ secrets.DEPLOY_PORT }}
-          DATABASE_STORAGE_DIR: ${{ secrets.DEPLOY_DATABASE_STORAGE_DIR }}
+          JWT_SECRET: "${{ secrets.DEPLOY_JWT_SECRET }}"
+          PORT: "${{ secrets.DEPLOY_PORT }}"
+          DATABASE_STORAGE_DIR: "${{ secrets.DEPLOY_DATABASE_STORAGE_DIR }}"
         run: |
           docker-compose build
           docker-compose up -d
