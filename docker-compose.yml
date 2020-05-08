@@ -23,5 +23,5 @@ services:
       - webapp
       - backend
     ports:
-      - "${PORT}:80"
+      - "8430:80"
     restart: unless-stopped
