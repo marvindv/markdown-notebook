@@ -7,18 +7,19 @@ use backend::database;
 fn main() -> Result<(), Box<dyn Error>> {
     dotenv().ok();
 
+    println!("Creating a new user.");
     // Read the username.
-    println!("Enter the username:");
+    println!("Username:");
     let mut username = String::new();
     stdin().read_line(&mut username).unwrap();
     // Drop the newline character and remove whitespaces.
     let username = &username[..(username.len() - 1)].trim();
     if username.len() == 0 {
-        panic!("Please enter a username")
+        panic!("Enter a username")
     }
 
     // Read the password without printing it using rpassword.
-    println!("\nEnter the password for this user:");
+    println!("Password:");
     let password = rpassword::read_password().unwrap();
     if password.len() == 0 {
         panic!("Please enter a password")
@@ -30,7 +31,7 @@ fn main() -> Result<(), Box<dyn Error>> {
     let conn = pool.get()?;
     database::run_migrations(&conn)?;
     let user = backend::user_management::create(&conn, username, &password)?;
-    println!("\nSaved user {} (id: {})", user.username, user.id);
+    println!("Saved user {} (id: {}).", user.username, user.id);
 
     Ok(())
 }

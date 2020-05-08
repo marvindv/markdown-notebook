@@ -16,12 +16,13 @@ fn main() -> Result<(), Box<dyn Error>> {
     database::run_migrations(&conn)?;
     let user_list = users.load::<User>(&conn)?;
 
+    println!("Delete a user.");
     println!("Displaying {} users", user_list.len());
     for user in &user_list {
         println!("[{}] {}", user.id, user.username);
     }
 
-    println!("\nEnter the id of the user you want to delete:");
+    println!("ID of the user you want to delete:");
     let mut user_id = String::new();
     stdin().read_line(&mut user_id)?;
     // Remove newline at the end of the input and parse as integer.
@@ -31,7 +32,7 @@ fn main() -> Result<(), Box<dyn Error>> {
         .expect("The id is invalid");
 
     println!(
-        "\nDo you really want to delete user '{}'? (y|N)",
+        "Do you really want to delete user '{}'? (y|N)",
         user_list
             .iter()
             .find(|&user| user.id == *user_id)
@@ -44,9 +45,9 @@ fn main() -> Result<(), Box<dyn Error>> {
     let choice = choice.trim();
     if choice == "y" {
         backend::user_management::delete(&conn, *user_id)?;
-        println!("Done!");
+        println!("User deleted.");
     } else {
-        println!("Aborted!");
+        println!("Aborted.");
     }
 
     Ok(())
