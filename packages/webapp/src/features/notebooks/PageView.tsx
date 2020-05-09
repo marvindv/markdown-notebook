@@ -1,4 +1,4 @@
-import { IDisposable, KeyCode } from 'monaco-editor';
+import { IDisposable, KeyCode, Position } from 'monaco-editor';
 import React, { useEffect, useRef } from 'react';
 import MonacoEditor, { EditorConstructionOptions } from 'react-monaco-editor';
 import { PagePath } from 'src/models/path';
@@ -32,6 +32,8 @@ export default function PageView(props: Props) {
   const { className, content, path, onChange, onSaveClick } = props;
   const editorRef = useRef<MonacoEditor | null>(null);
   const handler = useRef<IDisposable | null>(null);
+
+  // Emit onSaveClick on CTRL+S keypress.
   useEffect(() => {
     if (editorRef) {
       const editor = editorRef.current?.editor;
@@ -49,6 +51,18 @@ export default function PageView(props: Props) {
 
     return () => handler.current?.dispose();
   }, [onSaveClick, path]);
+
+  // Whenever another page is selected, set the focus to the editor and set the
+  // cursor position to the end of the text.
+  useEffect(() => {
+    const editor = editorRef.current?.editor;
+    if (!editor) {
+      return;
+    }
+
+    editor.focus();
+    editor.setPosition(new Position(Number.MAX_VALUE, Number.MAX_VALUE));
+  }, [path]);
 
   return (
     <Container className={className}>
