@@ -5,7 +5,7 @@ import {
 } from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { unwrapResult } from '@reduxjs/toolkit';
-import React, { useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { Prompt } from 'react-router-dom';
 import Button from 'src/components/Button';
@@ -176,6 +176,22 @@ export default function NotebooksPage() {
   const dispatch: AppDispatch = useDispatch();
   const [focusPageContainer, setFocusPageContainer] = useState(false);
 
+  // Memoize this event handler, since its passed to PageView were it is used in
+  // an effect.
+  const handleSaveClick = useCallback(
+    async (path: PagePath | SectionPath | NotebookPath | EmptyPath) => {
+      const resultAction =
+        path.pageTitle === undefined
+          ? await dispatch(saveManyPostsContent({ path }))
+          : await dispatch(savePageContent({ path }));
+      if (savePageContent.rejected.match(resultAction)) {
+        // An error toast will be triggered by the reducer for
+        // savePageContent.rejected so nothing todo here for now.
+      }
+    },
+    [dispatch]
+  );
+
   useEffect(() => {
     dispatch(fetchNotebooks());
   }, [dispatch]);
@@ -262,7 +278,12 @@ export default function NotebooksPage() {
               unsavedChangesIndicator={hasUnsavedChanges}
             />
           </PageHeader>
-          <PageView content={page.content} onChange={handleContentChange} />
+          <PageView
+            path={path}
+            content={page.content}
+            onChange={handleContentChange}
+            onSaveClick={handleSaveClick}
+          />
         </PageContainer>
       );
     }
@@ -370,19 +391,6 @@ export default function NotebooksPage() {
     } else {
       // An error toast will be triggered by the reducer for
       // addEntity.rejected so nothing todo here for now.
-    }
-  };
-
-  const handleSaveClick = async (
-    path: PagePath | SectionPath | NotebookPath | EmptyPath
-  ) => {
-    const resultAction =
-      path.pageTitle === undefined
-        ? await dispatch(saveManyPostsContent({ path }))
-        : await dispatch(savePageContent({ path }));
-    if (savePageContent.rejected.match(resultAction)) {
-      // An error toast will be triggered by the reducer for
-      // savePageContent.rejected so nothing todo here for now.
     }
   };
 
