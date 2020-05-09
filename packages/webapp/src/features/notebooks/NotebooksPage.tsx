@@ -41,8 +41,11 @@ import { RootState } from 'src/reducers';
 import { AppDispatch } from 'src/store';
 import styled, { css } from 'styled-components';
 
+// The screens max width to which the mobile view of the NotebooksPage should
+// be used.
 const MOBILE_VIEW_MAX_WIDTH_PX = 768;
-const fontAwesomeFixedWidth = '1.25rem';
+// The width of a Font Awesome icon with `fixedWidth={true}`.
+const FONT_AWESOME_FIXED_WIDTH = '1.25rem';
 
 const BackButton = styled(Button)`
   padding-left: 0;
@@ -66,7 +69,7 @@ const PageHeader = styled(Header)`
     // Breadcrumbs should take the full container width minus the BackButton
     // width.
     max-width: calc(
-      100% - ${fontAwesomeFixedWidth} -
+      100% - ${FONT_AWESOME_FIXED_WIDTH} -
         (2 * ${props => props.theme.buttons.borderWidth})
     );
     flex: 1;
