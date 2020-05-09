@@ -85,7 +85,7 @@ const PageHeader = styled(Header)`
     font-size: 100%;
   }
 
-  margin-bottom: 0.5rem;
+  border-color: transparent;
   padding-left: ${props => props.theme.buttons.paddingX};
   padding-right: ${props => props.theme.buttons.paddingX};
 `;
