@@ -1,8 +1,8 @@
 import React from 'react';
 import MonacoEditor, { EditorConstructionOptions } from 'react-monaco-editor';
+import Breadcrumbs from 'src/features/navigation/Breadcrumbs';
 import Path from 'src/models/path';
 import styled from 'styled-components';
-import Breadcrumbs from './Breadcrumbs';
 
 const Container = styled.div`
   display: flex;

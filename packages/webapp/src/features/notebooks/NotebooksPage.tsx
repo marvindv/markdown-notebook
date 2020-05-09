@@ -6,7 +6,9 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { unwrapResult } from '@reduxjs/toolkit';
 import React, { useEffect } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
-import { changeCurrentPath } from 'src/features/notebooks/currentPathSlice';
+import Button from 'src/components/Button';
+import Navigation from 'src/features/navigation';
+import { changeCurrentPath } from 'src/features/navigation/currentPathSlice';
 import {
   addEntity,
   changeEntityTitle,
@@ -33,7 +35,6 @@ import Path, {
   PagePath,
   SectionPath,
 } from 'src/models/path';
-import Navigation from 'src/Navigation';
 import { RootState } from 'src/reducers';
 import { AppDispatch } from 'src/store';
 import styled from 'styled-components';

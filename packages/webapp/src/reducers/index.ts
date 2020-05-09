@@ -1,6 +1,6 @@
 import { combineReducers } from '@reduxjs/toolkit';
 import apiReducer from 'src/features/api/apiSlice';
-import currentPathReducer from 'src/features/notebooks/currentPathSlice';
+import currentPathReducer from 'src/features/navigation/currentPathSlice';
 import notebooksReducer from 'src/features/notebooks/notebooksSlice';
 import titleEditingReducer from 'src/features/notebooks/titleEditingSlice';
 
