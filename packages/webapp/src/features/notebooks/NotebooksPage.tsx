@@ -7,6 +7,7 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { unwrapResult } from '@reduxjs/toolkit';
 import React, { useEffect, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
+import { Prompt } from 'react-router-dom';
 import Button from 'src/components/Button';
 import Navigation, { Header } from 'src/features/navigation';
 import Breadcrumbs, { Breadcrumb } from 'src/features/navigation/Breadcrumbs';
@@ -31,6 +32,7 @@ import {
   setPageEditing,
   setSectionEditing,
 } from 'src/features/notebooks/titleEditingSlice';
+import useEventListener from 'src/hooks/useEventListener';
 import Path, {
   EmptyPath,
   NotebookPath,
@@ -160,6 +162,11 @@ export default function NotebooksPage() {
   const unsavedPages = useSelector(
     (state: RootState) => state.notebooks.unsavedPages
   );
+  const hasUnsavedPages = useSelector(
+    (state: RootState) =>
+      state.notebooks.unsavedPages &&
+      Object.keys(state.notebooks.unsavedPages).length > 0
+  );
   const isFetching = useSelector(
     (state: RootState) => state.notebooks.isFetching
   );
@@ -172,6 +179,19 @@ export default function NotebooksPage() {
   useEffect(() => {
     dispatch(fetchNotebooks());
   }, [dispatch]);
+
+  // Prevent reload and navigation as long as there are unsaved changes.
+  useEventListener(window, 'beforeunload', ev => {
+    if (!hasUnsavedPages) {
+      return;
+    }
+
+    // No browser supports custom confirm messages anymore like in
+    // https://stackoverflow.com/questions/7317273/warn-user-before-leaving-web-page-with-unsaved-changes/7317311#7317311
+    // described, so no need to bother.
+    ev.returnValue = false;
+    return false;
+  });
 
   // If we are currently fetching or fetching failed with an error, show the
   // corresponding hints, since there are no notebooks to render.
@@ -373,37 +393,43 @@ export default function NotebooksPage() {
   const handleDelete = (path: Path) => dispatch(deleteEntity(path));
 
   return (
-    <ContentWrapper focusPageContainer={focusPageContainer}>
-      <NavigationContainer
-        notebooks={notebooks}
-        path={path}
-        unsavedPages={unsavedPages}
-        onPathChange={path => dispatch(changeCurrentPath(path))}
-        onPageClick={() => setFocusPageContainer(true)}
-        onNewPage={handleNewPage}
-        onDeletePage={handleDelete}
-        onChangePageTitle={handleChangeTitle}
-        onNewSection={handleNewSection}
-        onDeleteSection={handleDelete}
-        onChangeSectionTitle={handleChangeTitle}
-        onNewNotebook={handleNewNotebook}
-        onDeleteNotebook={handleDelete}
-        onChangeNotebookTitle={handleChangeTitle}
-        titleEditingNotebooks={titleEditing.notebooks}
-        onChangeNotebookTitleEditing={(path, isEditing) =>
-          dispatch(setNotebookEditing({ path, isEditing }))
-        }
-        titleEditingSections={titleEditing.sections}
-        onChangeSectionTitleEditing={(path, isEditing) =>
-          dispatch(setSectionEditing({ path, isEditing }))
-        }
-        titleEditingPages={titleEditing.pages}
-        onChangePageTitleEditing={(path, isEditing) =>
-          dispatch(setPageEditing({ path, isEditing }))
-        }
-        onSaveClick={handleSaveClick}
+    <>
+      <Prompt
+        when={hasUnsavedPages}
+        message='Du hast ungespeicherte Änderungen. Diese gehen verloren, wenn du diese Seite verlässt.'
       />
-      {pageContent}
-    </ContentWrapper>
+      <ContentWrapper focusPageContainer={focusPageContainer}>
+        <NavigationContainer
+          notebooks={notebooks}
+          path={path}
+          unsavedPages={unsavedPages}
+          onPathChange={path => dispatch(changeCurrentPath(path))}
+          onPageClick={() => setFocusPageContainer(true)}
+          onNewPage={handleNewPage}
+          onDeletePage={handleDelete}
+          onChangePageTitle={handleChangeTitle}
+          onNewSection={handleNewSection}
+          onDeleteSection={handleDelete}
+          onChangeSectionTitle={handleChangeTitle}
+          onNewNotebook={handleNewNotebook}
+          onDeleteNotebook={handleDelete}
+          onChangeNotebookTitle={handleChangeTitle}
+          titleEditingNotebooks={titleEditing.notebooks}
+          onChangeNotebookTitleEditing={(path, isEditing) =>
+            dispatch(setNotebookEditing({ path, isEditing }))
+          }
+          titleEditingSections={titleEditing.sections}
+          onChangeSectionTitleEditing={(path, isEditing) =>
+            dispatch(setSectionEditing({ path, isEditing }))
+          }
+          titleEditingPages={titleEditing.pages}
+          onChangePageTitleEditing={(path, isEditing) =>
+            dispatch(setPageEditing({ path, isEditing }))
+          }
+          onSaveClick={handleSaveClick}
+        />
+        {pageContent}
+      </ContentWrapper>
+    </>
   );
 }
