@@ -144,8 +144,9 @@ export default function Navigation(props: Props) {
       props.onPathChange?.({
         notebookTitle: notebook.title,
       });
-      setShowHiddenColumns(false);
     }
+
+    setShowHiddenColumns(false);
   };
   const notebooksColumn = (
     <NotebooksColumn {...props} onNotebookClick={handleNotebookClick} />
