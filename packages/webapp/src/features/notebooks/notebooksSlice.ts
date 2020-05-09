@@ -384,6 +384,7 @@ const notebooksSlice = createSlice({
     });
 
     builder.addCase(savePageContent.fulfilled, state => {
+      state.savePending = false;
       // Nothing to do. The page is already removed from unsavedPages in
       // savePageContent.pending case.
     });
