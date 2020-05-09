@@ -319,7 +319,8 @@ export default function NotebooksPage() {
         title,
         section.pages.map(p => p.title)
       );
-      // Add the page and go right into editing mode after its added.
+      // Add the page, set it as current and go right into editing mode after
+      // its added.
       const resultAction = await dispatch(
         addEntity({ path: { ...path, pageTitle: collisionFreeTitle } })
       );
@@ -327,6 +328,7 @@ export default function NotebooksPage() {
         // Use the path as returned from the backend in case the page title
         // was altered by the backend.
         const { actualPath } = unwrapResult(resultAction);
+        dispatch(changeCurrentPath(actualPath));
         dispatch(
           setPageEditing({
             path: actualPath as PagePath,
@@ -348,8 +350,8 @@ export default function NotebooksPage() {
         notebook.sections.map(n => n.title)
       );
 
-      // Add the entity and after that has been done, set the editing mode for
-      // that section.
+      // Add the entity and after that has been done, set the section as the
+      // current section and set the editing mode for that section.
       const resultAction = await dispatch(
         addEntity({
           path: { ...path, sectionTitle: collisionFreeTitle },
@@ -359,6 +361,7 @@ export default function NotebooksPage() {
         // Use the path as returned from the backend in case the section title
         // was altered by the backend.
         const { actualPath } = unwrapResult(resultAction);
+        dispatch(changeCurrentPath(actualPath));
         dispatch(
           setSectionEditing({
             path: actualPath as SectionPath,
@@ -377,7 +380,8 @@ export default function NotebooksPage() {
       newTitle,
       notebooks.map(n => n.title)
     );
-    // Add the notebook and go right into editing mode after its added.
+    // Add the notebook, set it as current and go right into editing mode after
+    // its added.
     const resultAction = await dispatch(
       addEntity({ path: { notebookTitle: collisionFreeTitle } })
     );
@@ -385,6 +389,7 @@ export default function NotebooksPage() {
       // Use the path as returned from the backend in case the notebook title
       // was altered by the backend.
       const { actualPath } = unwrapResult(resultAction);
+      dispatch(changeCurrentPath(actualPath));
       dispatch(
         setNotebookEditing({
           path: actualPath as NotebookPath,
