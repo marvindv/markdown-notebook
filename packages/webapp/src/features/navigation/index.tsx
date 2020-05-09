@@ -7,6 +7,7 @@ import {
 } from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import React, { useEffect, useState } from 'react';
+import { useHistory } from 'react-router-dom';
 import Button from 'src/components/Button';
 import { PagesWithUnsavedChangesTree } from 'src/features/notebooks/notebooksSlice';
 import {
@@ -120,6 +121,7 @@ export interface Props {
  * @returns
  */
 export default function Navigation(props: Props) {
+  const history = useHistory();
   const [showHiddenColumns, setShowHiddenColumns] = useState(false);
 
   const path = props.path;
@@ -218,7 +220,11 @@ export default function Navigation(props: Props) {
 
           <span>Notizbücher</span>
 
-          <Button themeColor='secondary' clear={true}>
+          <Button
+            themeColor='secondary'
+            clear={true}
+            onClick={() => history.push('/login')}
+          >
             <FontAwesomeIcon fixedWidth={true} icon={faCog} />
           </Button>
         </Header>
