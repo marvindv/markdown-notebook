@@ -221,6 +221,8 @@ const notebooksSlice = createSlice({
       const notebooks = payload;
       state.isFetching = false;
       state.notebooks = notebooks;
+      // Reset unsavedPages since unchanged data is now overwritten.
+      state.unsavedPages = {};
     });
 
     builder.addCase(addEntity.rejected, (state, { error }) => {
