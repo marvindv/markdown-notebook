@@ -167,6 +167,9 @@ export default function NotebooksPage() {
       state.notebooks.unsavedPages &&
       Object.keys(state.notebooks.unsavedPages).length > 0
   );
+  const isSavePending = useSelector(
+    (state: RootState) => state.notebooks.savePending
+  );
   const isFetching = useSelector(
     (state: RootState) => state.notebooks.isFetching
   );
@@ -411,6 +414,7 @@ export default function NotebooksPage() {
           notebooks={notebooks}
           path={path}
           unsavedPages={unsavedPages}
+          savePending={isSavePending}
           onPathChange={path => dispatch(changeCurrentPath(path))}
           onPageClick={() => setFocusPageContainer(true)}
           onNewPage={handleNewPage}

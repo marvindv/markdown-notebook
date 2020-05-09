@@ -80,6 +80,7 @@ export interface Props {
   path: Path;
   notebooks: Notebook[];
   unsavedPages: PagesWithUnsavedChangesTree;
+  savePending: boolean;
   onPathChange?: (newPath: Path) => void;
   /**
    * In contrast to `onPathChange` this fires whenever the user clicks on a page
@@ -248,7 +249,8 @@ export default function Navigation(props: Props) {
               of the notebook title are equal width all the time to make the
               notebook title centered.
             */}
-            {Object.keys(props.unsavedPages).length > 0 && (
+            {(props.savePending ||
+              Object.keys(props.unsavedPages).length > 0) && (
               <Button
                 themeColor='secondary'
                 clear={true}
@@ -262,14 +264,19 @@ export default function Navigation(props: Props) {
           <span className='notebook-title'>{path.notebookTitle}</span>
 
           <div>
-            {Object.keys(props.unsavedPages).length > 0 && (
+            {(props.savePending ||
+              Object.keys(props.unsavedPages).length > 0) && (
               <Button
                 themeColor='secondary'
                 clear={true}
                 title='Alle speichern'
                 onClick={handleSaveAllClick}
               >
-                <FontAwesomeIcon fixedWidth={true} icon={faSave} />
+                <FontAwesomeIcon
+                  fixedWidth={true}
+                  icon={faSave}
+                  spin={props.savePending}
+                />
               </Button>
             )}
             <Button themeColor='secondary' clear={true}>
