@@ -3,6 +3,7 @@ import styled, { css } from 'styled-components';
 
 export interface Props {
   themeColor?: ThemeColors;
+  clear?: boolean;
 }
 
 const Button = styled.button<Props>`
@@ -12,6 +13,10 @@ const Button = styled.button<Props>`
   border-radius: ${props => props.theme.base.borderRadius};
   padding: ${props => props.theme.buttons.paddingY}
     ${props => props.theme.buttons.paddingX};
+
+  &[disabled] {
+    cursor: default;
+  }
 
   ${props =>
     props.themeColor &&
@@ -30,9 +35,20 @@ const Button = styled.button<Props>`
         background-color: ${props.theme.buttons.themes[props.themeColor]
           .active};
       }
+    `}
 
-      &[disabled] {
-        cursor: default;
+  ${props =>
+    props.clear &&
+    props.themeColor &&
+    css`
+      border-color: transparent;
+      background: transparent;
+      color: ${props.theme.buttons.themes[props.themeColor].background};
+
+      &:not([disabled]):hover,
+      &:not([disabled]).active:hover {
+        border-color: ${props.theme.buttons.themes[props.themeColor].border};
+        background: transparent;
       }
     `}
 `;

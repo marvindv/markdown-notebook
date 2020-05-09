@@ -1,13 +1,15 @@
 import {
+  faChevronLeft,
   faCircleNotch,
   faExclamationTriangle,
 } from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { unwrapResult } from '@reduxjs/toolkit';
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import Button from 'src/components/Button';
-import Navigation from 'src/features/navigation';
+import Navigation, { Header } from 'src/features/navigation';
+import Breadcrumbs, { Breadcrumb } from 'src/features/navigation/Breadcrumbs';
 import { changeCurrentPath } from 'src/features/navigation/currentPathSlice';
 import {
   addEntity,
@@ -37,11 +39,69 @@ import Path, {
 } from 'src/models/path';
 import { RootState } from 'src/reducers';
 import { AppDispatch } from 'src/store';
-import styled from 'styled-components';
+import styled, { css } from 'styled-components';
+
+const MOBILE_VIEW_MAX_WIDTH_PX = 768;
+const fontAwesomeFixedWidth = '1.25rem';
+
+const BackButton = styled(Button)`
+  padding-left: 0;
+  padding-right: 0;
+`;
+
+const PageBreadcrumbs = styled(Breadcrumbs)`
+  ${Breadcrumb}:last-of-type {
+    overflow: visible;
+  }
+`;
+
+const PageHeader = styled(Header)`
+  @media (min-width: ${MOBILE_VIEW_MAX_WIDTH_PX + 1}px) {
+    ${BackButton} {
+      display: none;
+    }
+  }
+
+  ${PageBreadcrumbs} {
+    // Breadcrumbs should take the full container width minus the BackButton
+    // width.
+    max-width: calc(
+      100% - ${fontAwesomeFixedWidth} -
+        (2 * ${props => props.theme.buttons.borderWidth})
+    );
+    flex: 1;
+
+    // Ensure the PageBreadcrumbs have the same dimensions as the BackButton
+    // so the header has the same height regardless of whether BackButton is
+    // displayed or not.
+    padding: ${props => props.theme.buttons.paddingY} 0;
+    border: ${props => props.theme.buttons.borderWidth} solid transparent;
+  }
+
+  ${BackButton}, ${PageBreadcrumbs} {
+    font-size: 100%;
+  }
+
+  margin-bottom: 0.5rem;
+  padding-left: ${props => props.theme.buttons.paddingX};
+  padding-right: ${props => props.theme.buttons.paddingX};
+`;
 
 const NavigationContainer = styled(Navigation)``;
 
-const ContentWrapper = styled.div`
+const PageContainer = styled.div`
+  flex: 2;
+  display: flex;
+  flex-direction: column;
+  max-width: 100%;
+
+  // Slightly adjusted material depth 3 shadow.
+  // From https://codepen.io/sdthornton/pen/wBZdXq
+  box-shadow: 0 0px 20px rgba(0, 0, 0, 0.19), 0 0px 6px rgba(0, 0, 0, 0.23);
+  z-index: 1;
+`;
+
+const ContentWrapper = styled.div<{ focusPageContainer?: boolean }>`
   display: flex;
   height: 100vh;
   overflow: hidden;
@@ -49,17 +109,21 @@ const ContentWrapper = styled.div`
   ${NavigationContainer} {
     flex: 1;
   }
-`;
 
-const PageContainer = styled.div`
-  flex: 2;
-  display: flex;
-  flex-direction: column;
-
-  // Slightly adjusted material depth 3 shadow.
-  // From https://codepen.io/sdthornton/pen/wBZdXq
-  box-shadow: 0 0px 20px rgba(0, 0, 0, 0.19), 0 0px 6px rgba(0, 0, 0, 0.23);
-  z-index: 1;
+  @media (max-width: ${MOBILE_VIEW_MAX_WIDTH_PX}px) {
+    ${props =>
+      props.focusPageContainer
+        ? css`
+            ${NavigationContainer} {
+              display: none;
+            }
+          `
+        : css`
+            ${PageContainer} {
+              display: none;
+            }
+          `}
+  }
 `;
 
 const NoPageNotice = styled.div`
@@ -100,6 +164,7 @@ export default function NotebooksPage() {
     (state: RootState) => state.notebooks.fetchError
   );
   const dispatch: AppDispatch = useDispatch();
+  const [focusPageContainer, setFocusPageContainer] = useState(false);
 
   useEffect(() => {
     dispatch(fetchNotebooks());
@@ -160,12 +225,21 @@ export default function NotebooksPage() {
 
       pageContent = (
         <PageContainer>
-          <PageView
-            path={path}
-            hasUnsavedChanges={hasUnsavedChanges}
-            content={page.content}
-            onChange={handleContentChange}
-          />
+          <PageHeader>
+            <BackButton
+              themeColor='secondary'
+              clear={true}
+              onClick={() => setFocusPageContainer(false)}
+            >
+              <FontAwesomeIcon fixedWidth={true} icon={faChevronLeft} />
+            </BackButton>
+
+            <PageBreadcrumbs
+              path={path}
+              unsavedChangesIndicator={hasUnsavedChanges}
+            />
+          </PageHeader>
+          <PageView content={page.content} onChange={handleContentChange} />
         </PageContainer>
       );
     }
@@ -296,12 +370,13 @@ export default function NotebooksPage() {
   const handleDelete = (path: Path) => dispatch(deleteEntity(path));
 
   return (
-    <ContentWrapper>
+    <ContentWrapper focusPageContainer={focusPageContainer}>
       <NavigationContainer
         notebooks={notebooks}
         path={path}
         unsavedPages={unsavedPages}
         onPathChange={path => dispatch(changeCurrentPath(path))}
+        onPageClick={() => setFocusPageContainer(true)}
         onNewPage={handleNewPage}
         onDeletePage={handleDelete}
         onChangePageTitle={handleChangeTitle}

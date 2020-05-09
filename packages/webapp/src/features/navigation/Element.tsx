@@ -51,19 +51,24 @@ const ElementContainer = styled.li<{
   ${props =>
     !props.showDropdown &&
     css`
-      &:not(:hover) ${StyledDropdown} {
-        display: none;
+      @media (hover: hover) {
+        &:not(:hover) ${StyledDropdown} {
+          display: none;
+        }
       }
     `}
 
   ${DropdownToggle} {
     height: 100%;
-    background: linear-gradient(
-      to right,
-      ${props => transparentize(1, props.theme.borders.color)},
-      ${props => transparentize(0.25, props.theme.borders.color)} 20%,
-      ${props => transparentize(0, props.theme.borders.color)}
-    );
+
+    @media (hover: hover) {
+      background: linear-gradient(
+        to right,
+        ${props => transparentize(1, props.theme.borders.color)},
+        ${props => transparentize(0.25, props.theme.borders.color)} 20%,
+        ${props => transparentize(0, props.theme.borders.color)}
+      );
+    }
 
     &:hover,
     &:active,

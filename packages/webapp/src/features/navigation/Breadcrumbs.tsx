@@ -12,7 +12,10 @@ const Container = styled.ol`
   font-size: ${props => props.theme.typo.fontSizeSm};
 `;
 
-const Element = styled.li`
+export const Breadcrumb = styled.li`
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
   & + &::before {
     content: '>';
     margin: 0 0.5rem;
@@ -48,7 +51,7 @@ export default function Breadcrumbs(props: Props) {
   return (
     <Container className={className}>
       {elements.map((el, i) => (
-        <Element key={i}>{el}</Element>
+        <Breadcrumb key={i}>{el}</Breadcrumb>
       ))}
       {unsavedChangesIndicator && (
         <BreadcrumbsUnsavedChangesIndicator title='Diese Seite enthält ungespeicherte Änderungen' />

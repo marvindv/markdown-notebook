@@ -1,7 +1,5 @@
 import React from 'react';
 import MonacoEditor, { EditorConstructionOptions } from 'react-monaco-editor';
-import Breadcrumbs from 'src/features/navigation/Breadcrumbs';
-import Path from 'src/models/path';
 import styled from 'styled-components';
 
 const Container = styled.div`
@@ -16,8 +14,6 @@ const PageContent = styled.div`
 
 export interface Props {
   className?: string;
-  path: Path;
-  hasUnsavedChanges: boolean;
   content: string;
   onChange: (content: string) => void;
 }
@@ -30,13 +26,6 @@ export default function PageView(props: Props) {
   };
   return (
     <Container className={props.className}>
-      <div>
-        <Breadcrumbs
-          path={props.path}
-          unsavedChangesIndicator={props.hasUnsavedChanges}
-        />
-      </div>
-
       <PageContent className='PageContent'>
         <MonacoEditor
           language='markdown'

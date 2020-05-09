@@ -7,6 +7,7 @@ import {
 } from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import React, { useEffect, useState } from 'react';
+import Button from 'src/components/Button';
 import { PagesWithUnsavedChangesTree } from 'src/features/notebooks/notebooksSlice';
 import {
   EditingPages,
@@ -24,19 +25,13 @@ import NotebooksColumn from './NotebooksColumn';
 import PagesColumn from './PagesColumn';
 import SectionsColumn from './SectionsColumn';
 
-const Header = styled.div`
+export const Header = styled.div`
   display: flex;
   justify-content: space-between;
   align-items: center;
   padding: 0.5rem 0;
   border-bottom: ${props => props.theme.borders.width} solid
     ${props => props.theme.borders.color};
-
-  button {
-    border: 0;
-    background: transparent;
-    color: ${props => props.theme.buttons.themes.secondary.background};
-  }
 `;
 
 const Columns = styled.div`
@@ -85,6 +80,14 @@ export interface Props {
   notebooks: Notebook[];
   unsavedPages: PagesWithUnsavedChangesTree;
   onPathChange?: (newPath: Path) => void;
+  /**
+   * In contrast to `onPathChange` this fires whenever the user clicks on a page
+   * element, even it represents the currently selected page. This is e.g. used
+   * to hide the Navigation on mobile.
+   *
+   * @memberof Props
+   */
+  onPageClick: (path: PagePath) => void;
   onNewPage: (path: SectionPath, pageTitle: string) => void;
   onDeletePage: (path: PagePath) => void;
   onChangePageTitle: (path: PagePath, newTitle: string) => void;
@@ -173,6 +176,7 @@ export default function Navigation(props: Props) {
   let pagesColumn;
   if (path.notebookTitle && path.sectionTitle) {
     const handlePageClick = (page: Page) => {
+      props.onPageClick({ ...path, pageTitle: page.title });
       // Only emit if actually another page selected.
       if (path.pageTitle !== page.title) {
         props.onPathChange?.({
@@ -201,20 +205,22 @@ export default function Navigation(props: Props) {
       <CollapsedSelectorPane>
         <Header>
           {path.notebookTitle ? (
-            <button
-              type='button'
+            <Button
+              themeColor='secondary'
+              clear={true}
               onClick={() => setShowHiddenColumns(!showHiddenColumns)}
             >
               <FontAwesomeIcon fixedWidth={true} icon={faTimes} />
-            </button>
+            </Button>
           ) : (
             <div></div>
           )}
 
           <span>Notizbücher</span>
-          <button type='button'>
+
+          <Button themeColor='secondary' clear={true}>
             <FontAwesomeIcon fixedWidth={true} icon={faCog} />
-          </button>
+          </Button>
         </Header>
 
         <Columns>{notebooksColumn}</Columns>
@@ -223,12 +229,13 @@ export default function Navigation(props: Props) {
       <PermanentSelectorPane>
         <Header>
           <div>
-            <button
-              type='button'
+            <Button
+              themeColor='secondary'
+              clear={true}
               onClick={() => setShowHiddenColumns(!showHiddenColumns)}
             >
               <FontAwesomeIcon fixedWidth={true} icon={faBars} />
-            </button>
+            </Button>
 
             {/*
               Invisible button so the div to the left and the div to the right
@@ -236,9 +243,13 @@ export default function Navigation(props: Props) {
               notebook title centered.
             */}
             {Object.keys(props.unsavedPages).length > 0 && (
-              <button type='button' style={{ visibility: 'hidden' }}>
+              <Button
+                themeColor='secondary'
+                clear={true}
+                style={{ visibility: 'hidden' }}
+              >
                 <FontAwesomeIcon fixedWidth={true} icon={faSave} />
-              </button>
+              </Button>
             )}
           </div>
 
@@ -246,17 +257,18 @@ export default function Navigation(props: Props) {
 
           <div>
             {Object.keys(props.unsavedPages).length > 0 && (
-              <button
-                type='button'
+              <Button
+                themeColor='secondary'
+                clear={true}
                 title='Alle speichern'
                 onClick={handleSaveAllClick}
               >
                 <FontAwesomeIcon fixedWidth={true} icon={faSave} />
-              </button>
+              </Button>
             )}
-            <button type='button'>
+            <Button themeColor='secondary' clear={true}>
               <FontAwesomeIcon fixedWidth={true} icon={faSearch} />
-            </button>
+            </Button>
           </div>
         </Header>
 
