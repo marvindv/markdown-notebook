@@ -106,7 +106,7 @@ const PageContainer = styled.div`
 
 const ContentWrapper = styled.div<{ focusPageContainer?: boolean }>`
   display: flex;
-  height: 100vh;
+  height: 100%;
   overflow: hidden;
 
   ${NavigationContainer} {

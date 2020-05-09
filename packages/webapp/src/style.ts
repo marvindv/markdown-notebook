@@ -5,6 +5,10 @@ export const GlobalStyle = createGlobalStyle`
     box-sizing: border-box;
   }
 
+  html, body, #root {
+    height: 100%;
+  }
+
   button {
     cursor: pointer;
     border: ${props => props.theme.buttons.borderWidth} solid;
