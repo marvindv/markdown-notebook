@@ -252,7 +252,6 @@ const notebooksSlice = createSlice({
     });
 
     builder.addCase(changeEntityTitle.rejected, (state, { error }) => {
-      console.warn(error);
       toast.error(
         `Failed to change entity name: ${error.name} ${error.message}`
       );
