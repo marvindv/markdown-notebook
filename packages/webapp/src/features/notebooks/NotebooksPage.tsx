@@ -50,8 +50,6 @@ import styled, { css } from 'styled-components';
 // The screens max width to which the mobile view of the NotebooksPage should
 // be used.
 const MOBILE_VIEW_MAX_WIDTH_PX = 768;
-// The width of a Font Awesome icon with `fixedWidth={true}`.
-const FONT_AWESOME_FIXED_WIDTH = '1.25rem';
 
 const PageViewModeButtonGroup = styled(ButtonGroup)``;
 
