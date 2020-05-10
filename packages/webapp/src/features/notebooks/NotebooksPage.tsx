@@ -1,7 +1,10 @@
 import {
   faChevronLeft,
   faCircleNotch,
+  faColumns,
+  faEdit,
   faExclamationTriangle,
+  faSearch,
 } from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { unwrapResult } from '@reduxjs/toolkit';
@@ -9,8 +12,9 @@ import React, { useCallback, useEffect, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { Prompt } from 'react-router-dom';
 import Button from 'src/components/Button';
+import ButtonGroup from 'src/components/ButtonGroup';
 import Navigation, { Header } from 'src/features/navigation';
-import Breadcrumbs, { Breadcrumb } from 'src/features/navigation/Breadcrumbs';
+import Breadcrumbs from 'src/features/navigation/Breadcrumbs';
 import { changeCurrentPath } from 'src/features/navigation/currentPathSlice';
 import {
   addEntity,
@@ -21,7 +25,7 @@ import {
   saveManyPostsContent,
   savePageContent,
 } from 'src/features/notebooks/notebooksSlice';
-import PageView from 'src/features/notebooks/PageView';
+import PageView, { ViewMode } from 'src/features/notebooks/PageView';
 import {
   findNotebook,
   findPage,
@@ -49,45 +53,38 @@ const MOBILE_VIEW_MAX_WIDTH_PX = 768;
 // The width of a Font Awesome icon with `fixedWidth={true}`.
 const FONT_AWESOME_FIXED_WIDTH = '1.25rem';
 
+const PageViewModeButtonGroup = styled(ButtonGroup)``;
+
 const BackButton = styled(Button)`
-  padding-left: 0;
-  padding-right: 0;
+  padding-left: 0.5rem;
+  padding-right: 0.5rem;
+  margin-left: calc(-0.5rem - ${props => props.theme.buttons.borderWidth});
 `;
 
-const PageBreadcrumbs = styled(Breadcrumbs)`
-  ${Breadcrumb}:last-of-type {
-    overflow: visible;
-  }
-`;
+const PageBreadcrumbs = styled(Breadcrumbs)``;
 
 const PageHeader = styled(Header)`
+  display: grid;
+  grid-template-columns: fit-content(100%) auto fit-content(100%);
+
+  ${PageBreadcrumbs} {
+    overflow: hidden;
+  }
+
+  ${PageViewModeButtonGroup} {
+    grid-column: 3;
+  }
+
   @media (min-width: ${MOBILE_VIEW_MAX_WIDTH_PX + 1}px) {
     ${BackButton} {
       display: none;
     }
   }
 
-  ${PageBreadcrumbs} {
-    // Breadcrumbs should take the full container width minus the BackButton
-    // width.
-    max-width: calc(
-      100% - ${FONT_AWESOME_FIXED_WIDTH} -
-        (2 * ${props => props.theme.buttons.borderWidth})
-    );
-    flex: 1;
-
-    // Ensure the PageBreadcrumbs have the same dimensions as the BackButton
-    // so the header has the same height regardless of whether BackButton is
-    // displayed or not.
-    padding: ${props => props.theme.buttons.paddingY} 0;
-    border: ${props => props.theme.buttons.borderWidth} solid transparent;
-  }
-
   ${BackButton}, ${PageBreadcrumbs} {
     font-size: 100%;
   }
 
-  border-color: transparent;
   padding-left: ${props => props.theme.buttons.paddingX};
   padding-right: ${props => props.theme.buttons.paddingX};
 `;
@@ -95,7 +92,6 @@ const PageHeader = styled(Header)`
 const NavigationContainer = styled(Navigation)``;
 
 const PageContainer = styled.div`
-  flex: 2;
   display: flex;
   flex-direction: column;
   max-width: 100%;
@@ -111,11 +107,11 @@ const ContentWrapper = styled.div<{ focusPageContainer?: boolean }>`
   height: 100%;
   overflow: hidden;
 
-  ${NavigationContainer} {
-    flex: 1;
-  }
-
   @media (max-width: ${MOBILE_VIEW_MAX_WIDTH_PX}px) {
+    ${NavigationContainer}, ${PageContainer} {
+      width: 100%;
+    }
+
     ${props =>
       props.focusPageContainer
         ? css`
@@ -128,6 +124,16 @@ const ContentWrapper = styled.div<{ focusPageContainer?: boolean }>`
               display: none;
             }
           `}
+  }
+
+  @media (min-width: ${MOBILE_VIEW_MAX_WIDTH_PX + 1}px) {
+    ${NavigationContainer} {
+      width: 25%;
+    }
+
+    ${PageContainer} {
+      width: 75%;
+    }
   }
 `;
 
@@ -177,7 +183,10 @@ export default function NotebooksPage() {
     (state: RootState) => state.notebooks.fetchError
   );
   const dispatch: AppDispatch = useDispatch();
+  // State that specifies whether the page should is focused. If the mobile view
+  // is active, the navigation is hidden.
   const [focusPageContainer, setFocusPageContainer] = useState(false);
+  const [pageViewMode, setPageViewMode] = useState<ViewMode>('editor');
 
   // Memoize this event handler, since its passed to PageView were it is used in
   // an effect.
@@ -185,7 +194,11 @@ export default function NotebooksPage() {
     async (path: PagePath | SectionPath | NotebookPath | EmptyPath = {}) => {
       const resultAction =
         path.pageTitle === undefined
-          ? await dispatch(saveManyPostsContent({ path }))
+          ? await dispatch(
+              saveManyPostsContent({
+                path,
+              })
+            )
           : await dispatch(savePageContent({ path }));
       if (savePageContent.rejected.match(resultAction)) {
         // An error toast will be triggered by the reducer for
@@ -212,106 +225,27 @@ export default function NotebooksPage() {
     return false;
   });
 
-  // If we are currently fetching or fetching failed with an error, show the
-  // corresponding hints, since there are no notebooks to render.
-  if (isFetching) {
-    return (
-      <ContentWrapper>
-        <PageContainer>
-          <NoPageNotice>
-            <div>Notizbücher werden geladen &hellip;</div>
-            <div style={{ textAlign: 'center', marginTop: '1rem' }}>
-              <FontAwesomeIcon icon={faCircleNotch} size='2x' spin />
-            </div>
-          </NoPageNotice>
-        </PageContainer>
-      </ContentWrapper>
-    );
-  } else if (fetchError) {
-    return (
-      <ContentWrapper>
-        <PageContainer>
-          <NoPageNotice>
-            <div style={{ textAlign: 'center', marginBottom: '1rem' }}>
-              <FontAwesomeIcon icon={faExclamationTriangle} size='2x' />
-            </div>
-            <div>Notizbücher konnten nicht geladen werden</div>
-            <small
-              style={{
-                textAlign: 'center',
-                display: 'block',
-                marginTop: '0.25rem',
-              }}
-            >
-              {fetchError}
-            </small>
-          </NoPageNotice>
-        </PageContainer>
-      </ContentWrapper>
-    );
-  }
-
-  let pageContent;
-  if (path.pageTitle) {
-    const pathComponents = findPage(path, notebooks);
-    if (pathComponents) {
-      const { page } = pathComponents;
-
-      const handleContentChange = (newContent: string) => {
-        dispatch(changePageContent({ path, content: newContent }));
-      };
-
-      const hasUnsavedChanges = !!unsavedPages[path.notebookTitle]?.[
-        path.sectionTitle
-      ]?.[path.pageTitle];
-
-      pageContent = (
-        <PageContainer>
-          <PageHeader>
-            <BackButton
-              themeColor='secondary'
-              clear={true}
-              onClick={() => setFocusPageContainer(false)}
-            >
-              <FontAwesomeIcon fixedWidth={true} icon={faChevronLeft} />
-            </BackButton>
-
-            <PageBreadcrumbs
-              path={path}
-              unsavedChangesIndicator={hasUnsavedChanges}
-            />
-          </PageHeader>
-          <PageView
-            path={path}
-            content={page.content}
-            onChange={handleContentChange}
-            onSaveClick={handleSaveClick}
-            onSaveAllClick={handleSaveClick}
-          />
-        </PageContainer>
-      );
+  // Keep track on whether we are in the mobile view or not so we can use this
+  // information outside of css.
+  const [isMobileView, setIsMobileView] = useState(false);
+  useEventListener(window, 'resize', ev => {
+    const inMobileWidth = window.innerWidth <= MOBILE_VIEW_MAX_WIDTH_PX;
+    if (inMobileWidth !== isMobileView) {
+      setIsMobileView(inMobileWidth);
     }
-  }
-
-  // If we have no path or the path does not match any page, display a
-  // placeholder instead. If we are still fetching the notebooks, show a loading
-  // indicator.
-  if (!pageContent) {
-    let text;
-    if (!path.notebookTitle) {
-      text = 'Wähle ein Notizbuch aus.';
-    } else if (!path.sectionTitle) {
-      text = 'Wähle einen Abschnitt aus.';
-    } else {
-      text = 'Wähle eine Seite aus.';
+  });
+  // Whenever we go from non mobile to mobile view we go into preview view since
+  // editor doesn't work that well on mobile and we assume this is what the user
+  // want. Also split screen is entirely disabled on mobile.
+  useEffect(() => {
+    if (isMobileView) {
+      setPageViewMode('preview');
     }
-
-    pageContent = (
-      <PageContainer>
-        <NoPageNotice>{text}</NoPageNotice>
-      </PageContainer>
-    );
-  }
+  }, [isMobileView]);
+  // Set the initial value for isMobileView once.
+  useEffect(() => {
+    setIsMobileView(window.innerWidth <= MOBILE_VIEW_MAX_WIDTH_PX);
+  }, []);
 
   const handleNewPage = async (path: SectionPath, title: string) => {
     const { section } = findSection(path, notebooks) || {};
@@ -323,7 +257,12 @@ export default function NotebooksPage() {
       // Add the page, set it as current and go right into editing mode after
       // its added.
       const resultAction = await dispatch(
-        addEntity({ path: { ...path, pageTitle: collisionFreeTitle } })
+        addEntity({
+          path: {
+            ...path,
+            pageTitle: collisionFreeTitle,
+          },
+        })
       );
       if (addEntity.fulfilled.match(resultAction)) {
         // Use the path as returned from the backend in case the page title
@@ -355,7 +294,10 @@ export default function NotebooksPage() {
       // current section and set the editing mode for that section.
       const resultAction = await dispatch(
         addEntity({
-          path: { ...path, sectionTitle: collisionFreeTitle },
+          path: {
+            ...path,
+            sectionTitle: collisionFreeTitle,
+          },
         })
       );
       if (addEntity.fulfilled.match(resultAction)) {
@@ -384,7 +326,11 @@ export default function NotebooksPage() {
     // Add the notebook, set it as current and go right into editing mode after
     // its added.
     const resultAction = await dispatch(
-      addEntity({ path: { notebookTitle: collisionFreeTitle } })
+      addEntity({
+        path: {
+          notebookTitle: collisionFreeTitle,
+        },
+      })
     );
     if (addEntity.fulfilled.match(resultAction)) {
       // Use the path as returned from the backend in case the notebook title
@@ -404,10 +350,163 @@ export default function NotebooksPage() {
   };
 
   const handleChangeTitle = (path: Path, newTitle: string) => {
-    dispatch(changeEntityTitle({ path, newTitle }));
+    dispatch(
+      changeEntityTitle({
+        path,
+        newTitle,
+      })
+    );
   };
 
   const handleDelete = (path: Path) => dispatch(deleteEntity(path));
+
+  // If we are currently fetching or fetching failed with an error, show the
+  // corresponding hints, since there are no notebooks to render.
+  if (isFetching) {
+    return (
+      <ContentWrapper>
+        <PageContainer>
+          <NoPageNotice>
+            <div>Notizbücher werden geladen &hellip;</div>
+            <div
+              style={{
+                textAlign: 'center',
+                marginTop: '1rem',
+              }}
+            >
+              <FontAwesomeIcon icon={faCircleNotch} size='2x' spin />
+            </div>
+          </NoPageNotice>
+        </PageContainer>
+      </ContentWrapper>
+    );
+  } else if (fetchError) {
+    return (
+      <ContentWrapper>
+        <PageContainer>
+          <NoPageNotice>
+            <div
+              style={{
+                textAlign: 'center',
+                marginBottom: '1rem',
+              }}
+            >
+              <FontAwesomeIcon icon={faExclamationTriangle} size='2x' />
+            </div>
+            <div>Notizbücher konnten nicht geladen werden</div>
+            <small
+              style={{
+                textAlign: 'center',
+                display: 'block',
+                marginTop: '0.25rem',
+              }}
+            >
+              {fetchError}
+            </small>
+          </NoPageNotice>
+        </PageContainer>
+      </ContentWrapper>
+    );
+  }
+
+  let pageContent;
+  if (path.pageTitle) {
+    const pathComponents = findPage(path, notebooks);
+    if (pathComponents) {
+      const { page } = pathComponents;
+
+      const handleContentChange = (newContent: string) => {
+        dispatch(
+          changePageContent({
+            path,
+            content: newContent,
+          })
+        );
+      };
+
+      const hasUnsavedChanges = !!unsavedPages[path.notebookTitle]?.[
+        path.sectionTitle
+      ]?.[path.pageTitle];
+
+      pageContent = (
+        <PageContainer>
+          <PageHeader>
+            <BackButton
+              themeColor='secondary'
+              clear={true}
+              onClick={() => setFocusPageContainer(false)}
+            >
+              <FontAwesomeIcon icon={faChevronLeft} />
+            </BackButton>
+
+            <PageBreadcrumbs
+              path={path}
+              unsavedChangesIndicator={hasUnsavedChanges}
+              showOnlyLast={isMobileView}
+            />
+
+            <PageViewModeButtonGroup>
+              <Button
+                active={pageViewMode === 'editor'}
+                themeColor='light'
+                onClick={() => setPageViewMode('editor')}
+              >
+                <FontAwesomeIcon icon={faEdit} fixedWidth />
+              </Button>
+              <Button
+                active={pageViewMode === 'preview'}
+                themeColor='light'
+                onClick={() => setPageViewMode('preview')}
+              >
+                <FontAwesomeIcon icon={faSearch} fixedWidth />
+              </Button>
+              {/*
+                Hide split screen button on mobile since it doesn't really work
+                on mobile.
+              */}
+              {!isMobileView && (
+                <Button
+                  active={pageViewMode === 'side-by-side'}
+                  themeColor='light'
+                  onClick={() => setPageViewMode('side-by-side')}
+                >
+                  <FontAwesomeIcon icon={faColumns} fixedWidth />
+                </Button>
+              )}
+            </PageViewModeButtonGroup>
+          </PageHeader>
+          <PageView
+            path={path}
+            content={page.content}
+            viewMode={pageViewMode}
+            onChange={handleContentChange}
+            onSaveClick={handleSaveClick}
+            onSaveAllClick={handleSaveClick}
+          />
+        </PageContainer>
+      );
+    }
+  }
+
+  // If we have no path or the path does not match any page, display a
+  // placeholder instead. If we are still fetching the notebooks, show a loading
+  // indicator.
+  if (!pageContent) {
+    let text;
+    if (!path.notebookTitle) {
+      text = 'Wähle ein Notizbuch aus.';
+    } else if (!path.sectionTitle) {
+      text = 'Wähle einen Abschnitt aus.';
+    } else {
+      text = 'Wähle eine Seite aus.';
+    }
+
+    pageContent = (
+      <PageContainer>
+        <NoPageNotice>{text}</NoPageNotice>
+      </PageContainer>
+    );
+  }
 
   return (
     <>
@@ -434,15 +533,30 @@ export default function NotebooksPage() {
           onChangeNotebookTitle={handleChangeTitle}
           titleEditingNotebooks={titleEditing.notebooks}
           onChangeNotebookTitleEditing={(path, isEditing) =>
-            dispatch(setNotebookEditing({ path, isEditing }))
+            dispatch(
+              setNotebookEditing({
+                path,
+                isEditing,
+              })
+            )
           }
           titleEditingSections={titleEditing.sections}
           onChangeSectionTitleEditing={(path, isEditing) =>
-            dispatch(setSectionEditing({ path, isEditing }))
+            dispatch(
+              setSectionEditing({
+                path,
+                isEditing,
+              })
+            )
           }
           titleEditingPages={titleEditing.pages}
           onChangePageTitleEditing={(path, isEditing) =>
-            dispatch(setPageEditing({ path, isEditing }))
+            dispatch(
+              setPageEditing({
+                path,
+                isEditing,
+              })
+            )
           }
           onSaveClick={handleSaveClick}
         />

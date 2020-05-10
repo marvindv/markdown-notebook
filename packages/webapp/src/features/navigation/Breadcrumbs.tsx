@@ -16,7 +16,7 @@ export const Breadcrumb = styled.li`
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
-  & + &::before {
+  &:not(:first-of-type)::before {
     content: '>';
     margin: 0 0.5rem;
   }
@@ -31,10 +31,11 @@ export interface Props {
   path: Path;
   className?: string;
   unsavedChangesIndicator: boolean;
+  showOnlyLast: boolean;
 }
 
 export default function Breadcrumbs(props: Props) {
-  const { path, className, unsavedChangesIndicator } = props;
+  const { path, className, unsavedChangesIndicator, showOnlyLast } = props;
   const elements = [];
   if (path.notebookTitle) {
     elements.push(path.notebookTitle);
@@ -46,6 +47,10 @@ export default function Breadcrumbs(props: Props) {
         elements.push(path.pageTitle);
       }
     }
+  }
+
+  if (showOnlyLast && elements.length > 0) {
+    elements.splice(0, elements.length - 1);
   }
 
   return (

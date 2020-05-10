@@ -1,7 +1,7 @@
-import { DefaultTheme } from 'styled-components';
 import { darken } from 'polished';
+import { DefaultTheme } from 'styled-components';
 
-export type ThemeColors = 'primary' | 'secondary';
+export type ThemeColors = 'primary' | 'secondary' | 'light';
 
 export const BASE = {
   borderRadius: '0.25rem',
@@ -45,6 +45,14 @@ export const BUTTONS = {
       hover: darken(0.1, BASE_COLORS.secondary),
       active: darken(0.05, BASE_COLORS.secondary),
       foreground: '#fff',
+    },
+
+    light: {
+      border: darken(0.1, BASE_COLORS.lightGrey),
+      background: BASE_COLORS.lightGrey,
+      hover: darken(0.1, BASE_COLORS.lightGrey),
+      active: darken(0.05, BASE_COLORS.lightGrey),
+      foreground: '#333',
     },
   },
 };
