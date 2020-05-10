@@ -26,14 +26,22 @@ export interface Props {
   path: PagePath;
   onChange: (content: string) => void;
   onSaveClick: (path: PagePath) => void;
+  onSaveAllClick: () => void;
 }
 
 export default function PageView(props: Props) {
-  const { className, content, path, onChange, onSaveClick } = props;
+  const {
+    className,
+    content,
+    path,
+    onChange,
+    onSaveClick,
+    onSaveAllClick,
+  } = props;
   const editorRef = useRef<MonacoEditor | null>(null);
   const handler = useRef<IDisposable | null>(null);
 
-  // Emit onSaveClick on CTRL+S keypress.
+  // Emit onSaveClick on Ctrl+S keypress and onSaveAllClick on Ctrl+Alt+S.
   useEffect(() => {
     if (editorRef) {
       const editor = editorRef.current?.editor;
@@ -42,7 +50,10 @@ export default function PageView(props: Props) {
       }
 
       handler.current = editor.onKeyDown(ev => {
-        if (ev.ctrlKey && ev.keyCode === KeyCode.KEY_S) {
+        if (ev.ctrlKey && ev.altKey && ev.keyCode === KeyCode.KEY_S) {
+          ev.preventDefault();
+          onSaveAllClick();
+        } else if (ev.ctrlKey && ev.keyCode === KeyCode.KEY_S) {
           ev.preventDefault();
           onSaveClick(path);
         }
@@ -50,7 +61,7 @@ export default function PageView(props: Props) {
     }
 
     return () => handler.current?.dispose();
-  }, [onSaveClick, path]);
+  }, [onSaveClick, onSaveAllClick, path]);
 
   // Whenever another page is selected, set the focus to the editor and set the
   // cursor position to the end of the text.

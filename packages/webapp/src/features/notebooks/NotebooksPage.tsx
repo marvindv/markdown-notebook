@@ -182,7 +182,7 @@ export default function NotebooksPage() {
   // Memoize this event handler, since its passed to PageView were it is used in
   // an effect.
   const handleSaveClick = useCallback(
-    async (path: PagePath | SectionPath | NotebookPath | EmptyPath) => {
+    async (path: PagePath | SectionPath | NotebookPath | EmptyPath = {}) => {
       const resultAction =
         path.pageTitle === undefined
           ? await dispatch(saveManyPostsContent({ path }))
@@ -286,6 +286,7 @@ export default function NotebooksPage() {
             content={page.content}
             onChange={handleContentChange}
             onSaveClick={handleSaveClick}
+            onSaveAllClick={handleSaveClick}
           />
         </PageContainer>
       );
