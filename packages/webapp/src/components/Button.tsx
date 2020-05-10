@@ -4,6 +4,7 @@ import styled, { css } from 'styled-components';
 export interface Props {
   themeColor?: ThemeColors;
   clear?: boolean;
+  active?: boolean;
 }
 
 const Button = styled.button<Props>`
@@ -35,6 +36,17 @@ const Button = styled.button<Props>`
         background-color: ${props.theme.buttons.themes[props.themeColor]
           .active};
       }
+
+      ${props.active &&
+      css`
+        &:not([disabled]):hover {
+          background-color: ${props.theme.buttons.themes[props.themeColor]
+            .hover};
+        }
+
+        background-color: ${props.theme.buttons.themes[props.themeColor]
+          .active};
+      `}
     `}
 
   ${props =>
