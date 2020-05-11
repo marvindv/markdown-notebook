@@ -339,7 +339,11 @@ export default function NotebooksPage() {
       // Use the path as returned from the backend in case the notebook title
       // was altered by the backend.
       const { actualPath } = unwrapResult(resultAction);
-      dispatch(changeCurrentPath(actualPath));
+      // TODO: As soon as its possible to do, set isEditing for the new notebook
+      // and *after* the title has been edited set it as the current path. The
+      // navigation must also handle this correctly and display the section list
+      // of the new notebook.
+      // dispatch(changeCurrentPath(actualPath));
       dispatch(
         setNotebookEditing({
           path: actualPath as NotebookPath,
