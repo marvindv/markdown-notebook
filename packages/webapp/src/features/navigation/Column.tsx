@@ -1,4 +1,5 @@
-import React, { PropsWithChildren } from 'react';
+import React, { PropsWithChildren, ReactNode } from 'react';
+import Button from 'src/components/Button';
 import styled from 'styled-components';
 
 const ColumnContainer = styled.div`
@@ -21,25 +22,17 @@ const ColumnContainer = styled.div`
     border-left: ${props => props.theme.borders.width} solid
       ${props => props.theme.borders.color};
   }
+`;
 
-  button.add-element {
-    width: 100%;
-    background-color: ${props =>
-      props.theme.buttons.themes.secondary.background};
-    color: ${props => props.theme.buttons.themes.secondary.foreground};
-    border: 0;
-    border-top: ${props => props.theme.buttons.borderWidth} solid
-      ${props => props.theme.buttons.themes.secondary.border};
-
-    &:hover {
-      background-color: ${props => props.theme.buttons.themes.secondary.hover};
-    }
-  }
+const AddElementButton = styled(Button)`
+  border-radius: 0;
+  border-width: 0;
+  border-top-width: ${props => props.theme.buttons.borderWidth};
 `;
 
 export default function Column(
   props: PropsWithChildren<{
-    addButtonText: string;
+    addButtonText: ReactNode;
     onAddClick: () => void;
   }>
 ) {
@@ -47,9 +40,9 @@ export default function Column(
     <ColumnContainer>
       <ul>{props.children}</ul>
 
-      <button type='button' className='add-element' onClick={props.onAddClick}>
+      <AddElementButton onClick={props.onAddClick} themeColor='secondary'>
         {props.addButtonText}
-      </button>
+      </AddElementButton>
     </ColumnContainer>
   );
 }
