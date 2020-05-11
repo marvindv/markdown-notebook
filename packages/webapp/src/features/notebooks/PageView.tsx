@@ -107,21 +107,17 @@ export default function PageView(props: Props) {
     return () => handler.current?.dispose();
   }, [onSaveClick, onSaveAllClick, path]);
 
-  // Whenever another page is selected, set the focus to the editor and set the
-  // cursor position to the end of the text.
-  // Even though eslint complains that the useEffect dep `editorRef.current` is
-  // mutable and won't work, it at least does work in this case at least from
-  // testing and ensures that the editor is focused when we switch from preview
-  // view mode to editor view mode.
+  // By default on content change the editor selects the content starting at the
+  // length of the previous content. To avoid this set the position to (0, 0) on
+  // every path change.
   useEffect(() => {
     const editor = editorRef.current?.editor;
     if (!editor) {
       return;
     }
 
-    editor.focus();
-    editor.setPosition(new Position(Number.MAX_VALUE, Number.MAX_VALUE));
-  }, [path, editorRef.current]); // eslint-disable-line react-hooks/exhaustive-deps
+    editor.setPosition(new Position(0, 0));
+  }, [path]);
 
   useEffect(() => {
     const editor = editorRef.current?.editor;
