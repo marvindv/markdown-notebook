@@ -5,6 +5,7 @@ import Notebook, { Page } from 'src/models/notebook';
 import { PagePath, SectionPath } from 'src/models/path';
 import Column from './Column';
 import Element from './Element';
+import EmptyElement from './EmptyElement';
 
 export interface Props {
   path: SectionPath | PagePath;
@@ -56,9 +57,25 @@ function PageElement(props: Props & { page: Page }) {
   );
 }
 
+/**
+ * The navigation column that renders all pages of the currently selected
+ * section.
+ *
+ * @export
+ * @param {Props} props
+ * @returns
+ */
 export default function PageColumn(props: Props) {
   const { path, notebooks, onNewPage } = props;
   const { section } = findSection(path, notebooks) || {};
+
+  let elements = section?.pages?.length ? (
+    section.pages.map(page => (
+      <PageElement key={page.title} {...props} page={page} />
+    ))
+  ) : (
+    <EmptyElement>Dieser Abschnitt ist leer.</EmptyElement>
+  );
 
   return (
     <Column
@@ -67,9 +84,7 @@ export default function PageColumn(props: Props) {
         onNewPage({ ...path, pageTitle: undefined }, 'Neue Seite')
       }
     >
-      {section?.pages.map(page => (
-        <PageElement key={page.title} {...props} page={page} />
-      ))}
+      {elements}
     </Column>
   );
 }

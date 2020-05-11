@@ -10,6 +10,7 @@ import React, { useEffect, useState } from 'react';
 import { useHistory } from 'react-router-dom';
 import Button from 'src/components/Button';
 import { PagesWithUnsavedChangesTree } from 'src/features/notebooks/notebooksSlice';
+import { findNotebook } from 'src/features/notebooks/selection';
 import {
   EditingPages,
   EditingSections,
@@ -125,14 +126,15 @@ export default function Navigation(props: Props) {
   const history = useHistory();
   const [showHiddenColumns, setShowHiddenColumns] = useState(false);
 
-  const path = props.path;
+  const { path, notebooks } = props;
 
-  // Make sure the notebook column is visible if the path is empty.
+  // Make sure the notebook column is visible if the path is empty or the
+  // current notebook does not exist.
   useEffect(() => {
-    if (!path.notebookTitle) {
+    if (!path.notebookTitle || !findNotebook(path, notebooks)) {
       setShowHiddenColumns(true);
     }
-  }, [path]);
+  }, [path, notebooks]);
 
   const handleSaveAllClick = () => {
     props.onSaveClick({});
