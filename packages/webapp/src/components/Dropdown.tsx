@@ -72,6 +72,7 @@ export interface Props {
   show: boolean;
   toggleLabel: string | JSX.Element;
   items: DropdownItem[];
+  toggleButton?: any;
   onToggleClick?: () => void;
 }
 
@@ -86,6 +87,7 @@ export interface Props {
  */
 export default function Dropdown(props: Props) {
   const ref = useRef<HTMLDivElement>(null);
+  const ToggleButton = props.toggleButton || DropdownToggle;
 
   useOutsideClick(ref, props.show, () => {
     props.onToggleClick?.();
@@ -98,9 +100,9 @@ export default function Dropdown(props: Props) {
 
   return (
     <Container className={props.className} ref={ref}>
-      <DropdownToggle type='button' onClick={() => props.onToggleClick?.()}>
+      <ToggleButton type='button' onClick={() => props.onToggleClick?.()}>
         {props.toggleLabel}
-      </DropdownToggle>
+      </ToggleButton>
       {props.show && (
         <Menu>
           {props.items.map((item, i) => (
