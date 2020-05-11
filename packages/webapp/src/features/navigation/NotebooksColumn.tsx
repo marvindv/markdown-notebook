@@ -43,6 +43,7 @@ function NotebookElement(props: Props & { notebook: Notebook }) {
       unsavedChangesIndicatorTooltip='In diesem Notizbuch befinden sich ungespeicherte Änderungen.'
       onClick={() => onNotebookClick(n)}
       onDeleteClick={() => onDeleteNotebook({ notebookTitle: n.title })}
+      deleteConfirmText={`Willst du das Notizbuch "${n.title}" wirklich löschen?`}
       onTitleChange={newTitle =>
         onChangeNotebookTitle({ notebookTitle: n.title }, newTitle)
       }

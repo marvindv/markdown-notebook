@@ -32,6 +32,7 @@ function SectionElement(props: Props & { section: Section }) {
       onDeleteClick={() =>
         onDeleteSection({ ...path, sectionTitle: section.title })
       }
+      deleteConfirmText={`Willst du den Abschnitt "${section.title}" wirklich löschen?`}
       onTitleChange={newTitle =>
         onChangeSectionTitle({ ...path, sectionTitle: section.title }, newTitle)
       }

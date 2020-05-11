@@ -141,9 +141,10 @@ function getElementInnerWidth(element: HTMLElement): number {
 }
 
 export interface Props {
-  onClick?: () => void;
-  onDeleteClick?: () => void;
-  onTitleChange?: (newTitle: string) => void;
+  onClick: () => void;
+  onDeleteClick: () => void;
+  deleteConfirmText: string;
+  onTitleChange: (newTitle: string) => void;
   className: string;
   showUnsavedChangesIndicator: boolean;
   label: string;
@@ -212,6 +213,13 @@ export default function Element(props: Props) {
     }
   };
 
+  const handleDeleteClick = () => {
+    const decision = window.confirm(props.deleteConfirmText);
+    if (decision) {
+      props.onDeleteClick();
+    }
+  };
+
   return (
     <ElementContainer
       ref={ref}
@@ -258,7 +266,7 @@ export default function Element(props: Props) {
             onClick: props.onSaveClick,
           },
           { label: 'Name ändern', onClick: handleNameEditClick },
-          { label: 'Löschen', onClick: props.onDeleteClick },
+          { label: 'Löschen', onClick: handleDeleteClick },
         ]}
         onToggleClick={() => setShowDropdown(!showDropdown)}
       />

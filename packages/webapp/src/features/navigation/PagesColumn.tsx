@@ -46,6 +46,7 @@ function PageElement(props: Props & { page: Page }) {
       unsavedChangesIndicatorTooltip='Diese Seite enthält ungespeicherte Änderungen.'
       onClick={() => onPageClick(page)}
       onDeleteClick={() => onDeletePage({ ...path, pageTitle: page.title })}
+      deleteConfirmText={`Willst du die Seite "${page.title}" wirklich löschen?`}
       onTitleChange={newTitle =>
         onChangePageTitle({ ...path, pageTitle: page.title }, newTitle)
       }
