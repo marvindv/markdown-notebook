@@ -6,9 +6,15 @@ import {
   faTimes,
 } from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import React, { useEffect, useState } from 'react';
+import React, {
+  ButtonHTMLAttributes,
+  PropsWithChildren,
+  useEffect,
+  useState,
+} from 'react';
 import { useHistory } from 'react-router-dom';
 import Button from 'src/components/Button';
+import Dropdown from 'src/components/Dropdown';
 import { PagesWithUnsavedChangesTree } from 'src/features/notebooks/notebooksSlice';
 import { findNotebook } from 'src/features/notebooks/selection';
 import {
@@ -23,6 +29,7 @@ import Path, {
   SectionPath,
 } from 'src/models/path';
 import styled from 'styled-components';
+import exportAsZip from '../notebooks/exporter';
 import NotebooksColumn from './NotebooksColumn';
 import PagesColumn from './PagesColumn';
 import SectionsColumn from './SectionsColumn';
@@ -76,6 +83,16 @@ const Container = styled.div<{ showHiddenColumns: boolean }>`
   }
 `;
 
+const SettingsDropdownToggle = (
+  props: PropsWithChildren<ButtonHTMLAttributes<any>>
+) => {
+  return (
+    <Button {...props} themeColor='secondary' clear>
+      {props.children}
+    </Button>
+  );
+};
+
 export interface Props {
   className?: string;
   path: Path;
@@ -125,7 +142,7 @@ export interface Props {
 export default function Navigation(props: Props) {
   const history = useHistory();
   const [showHiddenColumns, setShowHiddenColumns] = useState(false);
-
+  const [showSettingsDropdown, setShowSettingsDropdown] = useState(false);
   const { path, notebooks } = props;
 
   // Make sure the notebook column is visible if the path is empty or the
@@ -150,6 +167,7 @@ export default function Navigation(props: Props) {
 
     setShowHiddenColumns(false);
   };
+
   const notebooksColumn = (
     <NotebooksColumn {...props} onNotebookClick={handleNotebookClick} />
   );
@@ -224,13 +242,25 @@ export default function Navigation(props: Props) {
 
           <span>Notizbücher</span>
 
-          <Button
-            themeColor='secondary'
-            clear={true}
-            onClick={() => history.push('/login')}
-          >
-            <FontAwesomeIcon fixedWidth={true} icon={faCog} />
-          </Button>
+          <Dropdown
+            show={showSettingsDropdown}
+            toggleLabel={<FontAwesomeIcon fixedWidth={true} icon={faCog} />}
+            items={[
+              {
+                label: 'Alles exportieren',
+                onClick: () => {
+                  setShowSettingsDropdown(false);
+                  exportAsZip(props.notebooks);
+                },
+              },
+              {
+                label: 'Speicherort ändern',
+                onClick: () => history.push('/login'),
+              },
+            ]}
+            toggleButton={SettingsDropdownToggle}
+            onToggleClick={() => setShowSettingsDropdown(!showSettingsDropdown)}
+          />
         </Header>
 
         <Columns>{notebooksColumn}</Columns>
