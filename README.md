@@ -1,5 +1,12 @@
 # Markdown Notebook
 
+markdown-notebook is a self-hosted web application to organize and write your
+notes in Markdown.
+
+Your notes are organized in a number of sections in notebooks. Each
+section contains pages which contain your Markdown notes. The backend holds the
+notes in a SQLite database.
+
 ## Docker deployment
 
 Make sure you have Docker and `docker-compose` installed.
@@ -61,13 +68,12 @@ The following tools are required:
 - TypeScript
   - Install with `npm install -g typescript`
 
-To install all dependencies, run
+To install all dependencies, run:
 
 ```bash
+$ cd packages/webapp
 $ yarn install
 ```
-
-from the **repository root**.
 
 ### Backend
 
