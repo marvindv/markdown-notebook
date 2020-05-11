@@ -1,3 +1,5 @@
+import { faPlusCircle } from '@fortawesome/free-solid-svg-icons';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import React from 'react';
 import { PagesWithUnsavedChangesTree } from 'src/features/notebooks/notebooksSlice';
 import { findNotebook } from 'src/features/notebooks/selection';
@@ -83,7 +85,11 @@ export default function SectionsColumn(props: Props) {
 
   return (
     <Column
-      addButtonText='+ Abschnitt'
+      addButtonText={
+        <>
+          <FontAwesomeIcon icon={faPlusCircle} /> Abschnitt
+        </>
+      }
       onAddClick={() => {
         onNewSection({ notebookTitle: path.notebookTitle }, 'Neuer Abschnitt');
       }}

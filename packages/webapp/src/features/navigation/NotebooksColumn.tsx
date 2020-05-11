@@ -1,3 +1,5 @@
+import { faPlusCircle } from '@fortawesome/free-solid-svg-icons';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import React from 'react';
 import { PagesWithUnsavedChangesTree } from 'src/features/notebooks/notebooksSlice';
 import Notebook from 'src/models/notebook';
@@ -65,7 +67,11 @@ export default function NotebooksColumn(props: Props) {
 
   return (
     <Column
-      addButtonText='+ Notizbuch'
+      addButtonText={
+        <>
+          <FontAwesomeIcon icon={faPlusCircle} /> Notizbuch
+        </>
+      }
       onAddClick={() => onNewNotebook('Neues Notizbuch')}
     >
       {notebooks.length ? (

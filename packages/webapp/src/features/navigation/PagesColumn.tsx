@@ -1,3 +1,5 @@
+import { faPlusCircle } from '@fortawesome/free-solid-svg-icons';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import React from 'react';
 import { PagesWithUnsavedChangesTree } from 'src/features/notebooks/notebooksSlice';
 import { findSection } from 'src/features/notebooks/selection';
@@ -79,7 +81,11 @@ export default function PageColumn(props: Props) {
 
   return (
     <Column
-      addButtonText='+ Seite'
+      addButtonText={
+        <>
+          <FontAwesomeIcon icon={faPlusCircle} /> Seite
+        </>
+      }
       onAddClick={() =>
         onNewPage({ ...path, pageTitle: undefined }, 'Neue Seite')
       }
