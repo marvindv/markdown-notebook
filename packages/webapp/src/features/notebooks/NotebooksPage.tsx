@@ -131,6 +131,11 @@ const ContentWrapper = styled.div<{ focusPageContainer?: boolean }>`
 
     ${PageContainer} {
       width: 75%;
+
+      /* For loading screen and fetch error display. */
+      &:only-child {
+        width: 100%;
+      }
     }
   }
 `;
