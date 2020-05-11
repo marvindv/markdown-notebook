@@ -86,6 +86,8 @@ export default function PageView(props: Props) {
   const handler = useRef<IDisposable | null>(null);
 
   // Emit onSaveClick on Ctrl+S keypress and onSaveAllClick on Ctrl+Alt+S.
+  // The effect must be reevaluated after path and viewMode changes since this
+  // is when the editor is potentionally rerendered.
   useEffect(() => {
     if (editorRef.current) {
       const editor = editorRef.current.editor;
@@ -105,7 +107,7 @@ export default function PageView(props: Props) {
     }
 
     return () => handler.current?.dispose();
-  }, [onSaveClick, onSaveAllClick, path]);
+  }, [onSaveClick, onSaveAllClick, path, viewMode]);
 
   // By default on content change the editor selects the content starting at the
   // length of the previous content. To avoid this set the position to (0, 0) on
