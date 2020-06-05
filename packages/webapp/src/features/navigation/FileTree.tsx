@@ -89,7 +89,7 @@ function TreeNode(
   if (node.isDirectory) {
     dropdownItems.push(
       {
-        label: 'Neue Datei',
+        label: 'Neue Notiz',
         onClick: () => {
           const name = getCollisionFreeName(
             'Neue Notiz',

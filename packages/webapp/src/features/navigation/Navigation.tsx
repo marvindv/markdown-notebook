@@ -147,7 +147,7 @@ export function Navigation(props: Props) {
           onToggleClick={() => setShowSettingsDropdown(!showSettingsDropdown)}
           items={[
             {
-              label: 'Neue Datei',
+              label: 'Neue Notiz',
               onClick: () => handleNewRootFile(),
             },
             {
