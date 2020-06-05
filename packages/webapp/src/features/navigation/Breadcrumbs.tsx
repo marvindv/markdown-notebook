@@ -14,8 +14,14 @@ const Container = styled.ol`
 
 export const Breadcrumb = styled.li`
   white-space: nowrap;
-  overflow: hidden;
+  overflow-x: hidden;
   text-overflow: ellipsis;
+
+  // Make some room for the fonts g's and j's that get cut off by the hidden
+  // overflow.
+  padding: 0.25rem 0;
+  margin: -0.25rem 0;
+
   &:not(:first-of-type)::before {
     content: '>';
     margin: 0 0.5rem;
