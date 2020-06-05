@@ -23,13 +23,18 @@ import { setNodeEditing } from './nodeNameEditingSlice';
 
 const StyledFileTree = styled(FileTree)``;
 
+const NoNodesHint = styled.div`
+  color: ${props => props.theme.typo.mutedColor};
+  padding: 1rem;
+`;
+
 const Container = styled.div`
   display: flex;
   height: 100%;
   width: 100%;
   flex-direction: column;
 
-  ${StyledFileTree} {
+  ${StyledFileTree}, ${NoNodesHint} {
     overflow-y: auto;
     height: 100%;
   }
@@ -177,19 +182,31 @@ export function Navigation(props: Props) {
         </Button>
       </Header>
 
-      <StyledFileTree
-        renderRootHead={false}
-        rootNode={rootNode}
-        unsavedNodes={unsavedNodes}
-        currentPath={currentPath}
-        onFileClick={handleFileClick}
-        onSaveClick={handleSaveClick}
-        onDeleteClick={handleDeleteClick}
-        nodeNameEditingTree={nodeNameEditingTree}
-        onNodeNameChange={handleNodeNameChange}
-        onNodeNameEditingChange={handleNodeNameEditingChange}
-        onNewNode={handleNewNode}
-      />
+      {Object.keys(rootNode.children).length > 0 ? (
+        <StyledFileTree
+          renderRootHead={false}
+          rootNode={rootNode}
+          unsavedNodes={unsavedNodes}
+          currentPath={currentPath}
+          onFileClick={handleFileClick}
+          onSaveClick={handleSaveClick}
+          onDeleteClick={handleDeleteClick}
+          nodeNameEditingTree={nodeNameEditingTree}
+          onNodeNameChange={handleNodeNameChange}
+          onNodeNameEditingChange={handleNodeNameEditingChange}
+          onNewNode={handleNewNode}
+        />
+      ) : (
+        <NoNodesHint>
+          <div>
+            <strong>Du hast noch keine Notizen.</strong>
+            <div>
+              Erstelle über das <FontAwesomeIcon icon={faBars} size={'sm'} />
+              -Menü Ordner und Notizen.
+            </div>
+          </div>
+        </NoNodesHint>
+      )}
     </Container>
   );
 }
