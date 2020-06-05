@@ -1,3 +1,4 @@
+import { transparentize } from 'polished';
 import { ThemeColors } from 'src/theme';
 import styled, { css } from 'styled-components';
 
@@ -7,7 +8,7 @@ export interface Props {
   active?: boolean;
 }
 
-const Button = styled.button<Props>`
+export const Button = styled.button<Props>`
   user-select: none;
   cursor: pointer;
   border: ${props => props.theme.buttons.borderWidth} solid;
@@ -61,6 +62,13 @@ const Button = styled.button<Props>`
       &:not([disabled]).active:hover {
         border-color: ${props.theme.buttons.themes[props.themeColor].border};
         background: transparent;
+      }
+
+      &:disabled {
+        color: ${transparentize(
+          0.5,
+          props.theme.buttons.themes[props.themeColor].background
+        )};
       }
     `}
 `;

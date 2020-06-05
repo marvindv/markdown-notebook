@@ -1,6 +1,6 @@
 import React from 'react';
 import UnsavedChangesIndicator from 'src/components/UnsavedChangesIndicator';
-import Path from 'src/models/path';
+import { Path } from 'src/models/node';
 import styled from 'styled-components';
 
 const Container = styled.ol`
@@ -28,30 +28,15 @@ const BreadcrumbsUnsavedChangesIndicator = styled(UnsavedChangesIndicator)`
 `;
 
 export interface Props {
-  path: Path;
   className?: string;
+  path: Path;
   unsavedChangesIndicator: boolean;
   showOnlyLast: boolean;
 }
 
 export default function Breadcrumbs(props: Props) {
-  const { path, className, unsavedChangesIndicator, showOnlyLast } = props;
-  const elements = [];
-  if (path.notebookTitle) {
-    elements.push(path.notebookTitle);
-
-    if (path.sectionTitle) {
-      elements.push(path.sectionTitle);
-
-      if (path.pageTitle) {
-        elements.push(path.pageTitle);
-      }
-    }
-  }
-
-  if (showOnlyLast && elements.length > 0) {
-    elements.splice(0, elements.length - 1);
-  }
+  const { className, path, unsavedChangesIndicator, showOnlyLast } = props;
+  const elements = showOnlyLast ? path.slice(-1) : path;
 
   return (
     <Container className={className}>
@@ -59,7 +44,7 @@ export default function Breadcrumbs(props: Props) {
         <Breadcrumb key={i}>{el}</Breadcrumb>
       ))}
       {unsavedChangesIndicator && (
-        <BreadcrumbsUnsavedChangesIndicator title='Diese Seite enthält ungespeicherte Änderungen' />
+        <BreadcrumbsUnsavedChangesIndicator title='Diese Datei enthält ungespeicherte Änderungen' />
       )}
     </Container>
   );

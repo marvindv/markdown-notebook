@@ -1,21 +1,16 @@
-mod notebooks;
+mod nodes;
 mod users;
 
 use rocket::{routes, Route};
 
 pub fn get_routes() -> Vec<Route> {
     routes![
-        notebooks::create_notebook,
-        notebooks::modify_notebook,
-        notebooks::delete_notebook,
-        notebooks::create_section,
-        notebooks::modify_section,
-        notebooks::delete_section,
-        notebooks::create_page,
-        notebooks::modify_page,
-        notebooks::delete_page,
-        notebooks::fetch_notebooks,
         users::auth,
-        users::profile
+        users::profile,
+        nodes::change_content,
+        nodes::change_name,
+        nodes::create_node,
+        nodes::delete,
+        nodes::get_nodes
     ]
 }

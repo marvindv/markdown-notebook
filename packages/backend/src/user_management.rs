@@ -29,7 +29,7 @@ pub fn create<'a>(
 
 /// Deletes the user associated to the given user id. Returns
 /// `BackendError::NotFound` if there is no user with the given user id.
-pub fn delete<'a>(conn: &DbConnection, user_id: UserId) -> BackendResult<()> {
+pub fn delete(conn: &DbConnection, user_id: UserId) -> BackendResult<()> {
     use crate::models::schema::users;
     let count = diesel::delete(users::table.filter(users::id.eq(user_id)))
         .execute(conn)?;

@@ -6,37 +6,32 @@ create table users
 );
 create index users__username on users (username);
 
-create table notebooks
+create table nodes
 (
-  notebook_id integer primary key not null,
-  notebook_title varchar(255) not null,
+    node_id             integer primary key           not null,
+    node_name           varchar(255)                  not null,
+    parent_id           integer,
+    parent_is_directory boolean,
+    owner_id            integer references users (id) not null,
+    is_directory        boolean                       not null,
+    content             text,
 
-  user_id integer references users (id) not null,
-
-  unique (notebook_title, user_id)
+    unique (node_name, parent_id),
+    -- Required so the following foreign key works.
+    unique (node_id, is_directory, owner_id),
+    foreign key (parent_id, parent_is_directory, owner_id)
+      references nodes (node_id, is_directory, owner_id)
+      on delete cascade,
+    foreign key (owner_id) references users (id),
+    -- A directory must not have the content set. A file must have content set.
+    check (
+      (is_directory = true and content is null) or
+      (is_directory = false and content is not null)
+    ),
+    -- The parent must be a directory and parent_owner_id must be specified if
+    -- a parent_id is not null.
+    check (
+      (parent_id is null and parent_is_directory is null) or
+      (parent_id is not null and parent_is_directory = true)
+    )
 );
-create index notebooks__user_id__notebook_title
-  on notebooks (user_id, notebook_title);
-
-create table sections
-(
-  section_id integer primary key not null,
-  section_title varchar(255) not null,
-
-  notebook_id integer references notebooks (notebook_id) not null,
-
-  unique (section_title, notebook_id)
-);
-create index sections__notebook_id on sections (notebook_id);
-
-create table pages
-(
-  page_id integer primary key not null,
-  page_title varchar(255) not null,
-  content text not null,
-
-  section_id integer references sections (section_id) not null,
-
-  unique (page_title, section_id)
-);
-create index pages__section_id on pages (section_id);

@@ -9,7 +9,7 @@ export interface Props
   showLoadingIndicator: boolean;
 }
 
-export default function LoadingIndicatorButton(props: Props) {
+export function LoadingIndicatorButton(props: Props) {
   return (
     <Button {...props} disabled={props.showLoadingIndicator || props.disabled}>
       {props.showLoadingIndicator ? (
@@ -20,3 +20,5 @@ export default function LoadingIndicatorButton(props: Props) {
     </Button>
   );
 }
+
+export default LoadingIndicatorButton;

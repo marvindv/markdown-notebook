@@ -1,10 +1,9 @@
 pub mod schema;
 
-mod notebooks;
+mod nodes;
 mod users;
 
-pub use notebooks::{
-    NewNotebook, NewPage, NewSection, Notebook, Page, PagePath, PagesTree,
-    Section,
+pub use nodes::{
+    NewNode, NewNodePayload, Node, NodeId, NodeName, OwnedPath, Path,
 };
 pub use users::{NewUser, User, UserId};

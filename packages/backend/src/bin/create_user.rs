@@ -14,14 +14,14 @@ fn main() -> Result<(), Box<dyn Error>> {
     stdin().read_line(&mut username).unwrap();
     // Drop the newline character and remove whitespaces.
     let username = &username[..(username.len() - 1)].trim();
-    if username.len() == 0 {
+    if username.is_empty() {
         panic!("Enter a username")
     }
 
     // Read the password without printing it using rpassword.
     println!("Password:");
     let password = rpassword::read_password().unwrap();
-    if password.len() == 0 {
+    if password.is_empty() {
         panic!("Please enter a password")
     }
 

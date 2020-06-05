@@ -13,10 +13,12 @@ fn main() -> Result<(), Box<dyn Error>> {
     dotenv().ok();
 
     let config = Config::build(Environment::Staging)
-        .address(env::var("MN_HOST").unwrap_or(String::from("0.0.0.0")))
+        .address(
+            env::var("MN_HOST").unwrap_or_else(|_| String::from("0.0.0.0")),
+        )
         .port(
             env::var("MN_PORT")
-                .unwrap_or(String::from("8000"))
+                .unwrap_or_else(|_| String::from("8000"))
                 .parse()
                 .expect("MN_PORT is not a valid port"),
         )

@@ -3,7 +3,7 @@ import { IDisposable, KeyCode, Position } from 'monaco-editor';
 import React, { useEffect, useRef } from 'react';
 import ReactMarkdown from 'react-markdown';
 import MonacoEditor, { EditorConstructionOptions } from 'react-monaco-editor';
-import { PagePath } from 'src/models/path';
+import { Path } from 'src/models/node';
 import styled from 'styled-components';
 
 const Container = styled.div`
@@ -65,10 +65,10 @@ export type ViewMode = 'editor' | 'preview' | 'side-by-side';
 export interface Props {
   className?: string;
   content: string;
-  path: PagePath;
+  path: Path;
   viewMode: ViewMode;
   onChange: (content: string) => void;
-  onSaveClick: (path: PagePath) => void;
+  onSaveClick: (path: Path) => void;
   onSaveAllClick: () => void;
 }
 

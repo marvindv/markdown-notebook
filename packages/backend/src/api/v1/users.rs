@@ -33,7 +33,7 @@ pub fn auth(
     )? {
         Some(user) => {
             let token =
-                jwt::Claims::from_user(user, &jwt_cfg).into_token(&jwt_cfg)?;
+                jwt::Claims::from_user(user, &jwt_cfg).to_token(&jwt_cfg)?;
             Ok(Json(AuthResponse { token }))
         }
         None => Err(BackendError::InvalidCredentials),

@@ -1,7 +1,7 @@
 import styled from 'styled-components';
 import Button from './Button';
 
-const ButtonGroup = styled.div`
+export const ButtonGroup = styled.div`
   display: flex;
 
   ${Button} {

@@ -65,7 +65,7 @@ impl Claims {
     }
 
     /// Converts the claims into a JWT. Should not fail.
-    pub fn into_token(&self, cfg: &Config) -> BackendResult<String> {
+    pub fn to_token(&self, cfg: &Config) -> BackendResult<String> {
         let token = encode(
             &Header::default(),
             self,
@@ -85,7 +85,7 @@ pub enum AuthTokenError {
 
 /// The JWT header schema including the whitespace separating the schema and the
 /// actual token.
-const JWT_HEADER_SCHEMA: &'static str = "Bearer ";
+const JWT_HEADER_SCHEMA: &str = "Bearer ";
 
 impl<'a, 'r> FromRequest<'a, 'r> for Claims {
     type Error = AuthTokenError;

@@ -2,7 +2,7 @@ import React from 'react';
 import { useSelector } from 'react-redux';
 import { Redirect, Route, Switch } from 'react-router-dom';
 import LoginPage from 'src/features/api/LoginPage';
-import NotebooksPage from 'src/features/notebooks/NotebooksPage';
+import NotebookPage from 'src/features/nodes/NotebookPage';
 import { RootState } from 'src/reducers';
 
 export default function App() {
@@ -16,7 +16,7 @@ export default function App() {
 
       <Route path='/'>
         {currentApi ? (
-          <NotebooksPage />
+          <NotebookPage />
         ) : (
           <Redirect to={{ pathname: '/login' }} />
         )}

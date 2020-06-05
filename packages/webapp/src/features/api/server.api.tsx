@@ -4,17 +4,30 @@ import React, { SyntheticEvent, useEffect, useRef, useState } from 'react';
 import Button from 'src/components/Button';
 import Input from 'src/components/Input';
 import LoadingIndicatorButton from 'src/components/LoadingIndicatorButton';
-import Notebook from 'src/models/notebook';
-import Path, { PagePath } from 'src/models/path';
+import Node, { DirectoryNode, FileNode, Path } from 'src/models/node';
 import styled from 'styled-components';
 import Api, {
   ApiError,
   ConnectionError,
   DuplicateError,
   InvalidCredentialsError,
-  InvalidPathError,
   NotFoundError,
 } from './api';
+
+/**
+ * The definition of a single node as received from the http api.
+ *
+ * @interface ApiNode
+ */
+interface ApiNode {
+  nodeId: number;
+  nodeName: string;
+
+  parentId: number | null;
+
+  isDirectory: boolean;
+  content: string | undefined;
+}
 
 const Wrapper = styled.div`
   text-align: left;
@@ -71,7 +84,6 @@ export default class ServerApi extends Api {
    */
   private readonly tokenKey = '_markdown_notebook_jwt';
 
-  // TODO: Use config
   private readonly baseUrl = '/api/v1';
 
   /**
@@ -229,8 +241,8 @@ export default class ServerApi extends Api {
    * @inheritdoc
    * @memberof ServerApi
    */
-  async fetchNotebooks(): Promise<Notebook[]> {
-    const res = await fetch(`${this.baseUrl}/notebook`, {
+  async fetchNodes(): Promise<Node[]> {
+    const res = await fetch(`${this.baseUrl}/node`, {
       headers: this.getAuthHeader(),
     });
 
@@ -238,149 +250,129 @@ export default class ServerApi extends Api {
       throw this.responseToError(res);
     }
 
-    return res.json();
+    const apiNodes: ApiNode[] = await res.json();
+
+    // Transform nodes list into tree structure with a list of root nodes.
+    // Construct a Node instance from each ApiNode and put it in a lookup object
+    // mapping the NodeId (used by the http api) to the Node instance it is
+    // associated to.
+    const lookup: { [nodeId: string]: Node } = {};
+    for (const apiNode of apiNodes) {
+      const node = this.convertApiNode(apiNode);
+      lookup[apiNode.nodeId] = node;
+    }
+
+    // For each ApiNode attach the associated Node instance to the children map
+    // of its parent or add it to the list of root nodes if the node doesn't
+    // have a parent.
+    const rootNodes: Node[] = [];
+    for (const apiNode of apiNodes) {
+      if (apiNode.parentId === null) {
+        rootNodes.push(lookup[apiNode.nodeId]);
+      } else {
+        const parent = lookup[apiNode.parentId];
+        const node = lookup[apiNode.nodeId];
+
+        if (!parent) {
+          throw new Error(
+            'Parent of a node not found: ' + JSON.stringify(apiNode)
+          );
+        }
+
+        if (!parent.isDirectory) {
+          throw new Error(
+            'Parent of a node is not a directory: ' + JSON.stringify(apiNode)
+          );
+        }
+
+        parent.children[node.name] = node;
+      }
+    }
+
+    return rootNodes;
   }
 
   /**
    * @inheritdoc
    * @memberof ServerApi
    */
-  async addEntity(path: Path): Promise<{ actualPath: Path }> {
-    let url = this.baseUrl;
-    let payload: any;
-    // The function that will be called with the response payload to construct
-    // the actual path.
-    let pathmaker: (json: any) => Path;
-
-    if (path.pageTitle) {
-      let { notebookTitle, sectionTitle, pageTitle } = path;
-
-      url += `/notebook/${notebookTitle}/section/${sectionTitle}/page`;
-      pageTitle = pageTitle.trim();
-      payload = { pageTitle, content: '' };
-      pathmaker = (json: {
-        pageId: number;
-        pageTitle: string;
-        content: string;
-        sectionId: number;
-      }) => ({
-        notebookTitle,
-        sectionTitle,
-        pageTitle: json.pageTitle,
-      });
-    } else if (path.sectionTitle) {
-      let { notebookTitle, sectionTitle } = path;
-
-      url += `/notebook/${notebookTitle}/section`;
-      payload = { sectionTitle: sectionTitle.trim() };
-      pathmaker = (json: {
-        sectionId: number;
-        sectionTitle: string;
-        notebookId: number;
-      }) => ({ notebookTitle, sectionTitle: json.sectionTitle });
-    } else if (path.notebookTitle) {
-      let { notebookTitle } = path;
-
-      url += `/notebook`;
-      payload = { notebookTitle: notebookTitle.trim() };
-      pathmaker = (json: { notebookId: number; notebookTitle: string }) => ({
-        notebookTitle: json.notebookTitle,
-      });
-    } else {
-      throw new InvalidPathError();
-    }
-
-    const res = await fetch(url, {
+  async addNode<T extends Node>(
+    parent: Path,
+    node: T
+  ): Promise<{ parent: Path; node: T }> {
+    const res = await fetch(this.baseUrl + '/node', {
       method: 'POST',
       headers: {
         ...this.contentTypeJson,
         ...this.getAuthHeader(),
       },
-      body: JSON.stringify(payload),
+      body: JSON.stringify({ parent, node }),
     });
 
     if (!res.ok) {
       throw this.responseToError(res);
     }
 
-    const json = await res.json();
-    return { actualPath: pathmaker(json) };
+    const apiNode: ApiNode = await res.json();
+    return { parent, node: this.convertApiNode(apiNode) as T };
   }
 
   /**
    * @inheritdoc
    * @memberof ServerApi
    */
-  async changeEntityTitle(
-    path: Path,
-    newTitle: string
-  ): Promise<{ oldPath: Path; newTitle: string }> {
-    let url = this.baseUrl;
-    let payload: any;
-    let newTitleSelector: (json: any) => string;
-    newTitle = newTitle.trim();
-
-    if (path.pageTitle) {
-      let { notebookTitle, sectionTitle, pageTitle } = path;
-      url += `/notebook/${notebookTitle}/section/${sectionTitle}/page/${pageTitle}`;
-      payload = { pageTitle: newTitle };
-      newTitleSelector = json => json.pageTitle;
-    } else if (path.sectionTitle) {
-      let { notebookTitle, sectionTitle } = path;
-      url += `/notebook/${notebookTitle}/section/${sectionTitle}`;
-      payload = { sectionTitle: newTitle };
-      newTitleSelector = json => json.sectionTitle;
-    } else if (path.notebookTitle) {
-      let { notebookTitle } = path;
-      url += `/notebook/${notebookTitle}`;
-      payload = { notebookTitle: newTitle };
-      newTitleSelector = json => json.notebookTitle;
-    } else {
-      throw new InvalidPathError();
-    }
-
-    const res = await fetch(url, {
+  async setPageContent(path: Path, newContent: string): Promise<void> {
+    const res = await fetch(this.baseUrl + '/node/content', {
       method: 'PUT',
       headers: {
         ...this.contentTypeJson,
         ...this.getAuthHeader(),
       },
-      body: JSON.stringify(payload),
+      body: JSON.stringify({ path, newContent }),
     });
 
     if (!res.ok) {
       throw this.responseToError(res);
     }
-
-    const json = await res.json();
-    return { oldPath: path, newTitle: newTitleSelector(json) };
   }
 
   /**
    * @inheritdoc
    * @memberof ServerApi
    */
-  async deleteEntity(path: Path): Promise<{ path: Path }> {
-    let url = this.baseUrl;
-
-    if (path.pageTitle) {
-      let { notebookTitle, sectionTitle, pageTitle } = path;
-      url += `/notebook/${notebookTitle}/section/${sectionTitle}/page/${pageTitle}`;
-    } else if (path.sectionTitle) {
-      let { notebookTitle, sectionTitle } = path;
-      url += `/notebook/${notebookTitle}/section/${sectionTitle}`;
-    } else if (path.notebookTitle) {
-      let { notebookTitle } = path;
-      url += `/notebook/${notebookTitle}`;
-    } else {
-      throw new InvalidPathError();
-    }
-
-    const res = await fetch(url, {
-      method: 'DELETE',
+  async changeNodeName(
+    path: Path,
+    newName: string
+  ): Promise<{ oldPath: Path; newName: string }> {
+    const res = await fetch(this.baseUrl + '/node/name', {
+      method: 'PUT',
       headers: {
+        ...this.contentTypeJson,
         ...this.getAuthHeader(),
       },
+      body: JSON.stringify({ path, newName }),
+    });
+
+    if (!res.ok) {
+      throw this.responseToError(res);
+    }
+
+    const apiNode: ApiNode = await res.json();
+    return { oldPath: path, newName: apiNode.nodeName };
+  }
+
+  /**
+   * @inheritdoc
+   * @memberof ServerApi
+   */
+  async deleteNode(path: Path): Promise<{ path: Path }> {
+    const res = await fetch(this.baseUrl + '/node', {
+      method: 'DELETE',
+      headers: {
+        ...this.contentTypeJson,
+        ...this.getAuthHeader(),
+      },
+      body: JSON.stringify({ path }),
     });
 
     if (!res.ok) {
@@ -390,25 +382,25 @@ export default class ServerApi extends Api {
     return { path };
   }
 
-  /**
-   * @inheritdoc
-   * @memberof ServerApi
-   */
-  async setPageContent(path: PagePath, content: string): Promise<void> {
-    let { notebookTitle, sectionTitle, pageTitle } = path;
-    const url = `${this.baseUrl}/notebook/${notebookTitle}/section/${sectionTitle}/page/${pageTitle}`;
-    const res = await fetch(url, {
-      method: 'PUT',
-      headers: {
-        ...this.contentTypeJson,
-        ...this.getAuthHeader(),
-      },
-      body: JSON.stringify({ content }),
-    });
-
-    if (!res.ok) {
-      throw this.responseToError(res);
+  private convertApiNode(apiNode: ApiNode): Node {
+    let node: Node;
+    if (apiNode.isDirectory) {
+      const dir: DirectoryNode = {
+        isDirectory: true,
+        name: apiNode.nodeName,
+        children: {},
+      };
+      node = dir;
+    } else {
+      const file: FileNode = {
+        isDirectory: false,
+        name: apiNode.nodeName,
+        content: apiNode.content || '',
+      };
+      node = file;
     }
+
+    return node;
   }
 
   private getAuthHeader() {

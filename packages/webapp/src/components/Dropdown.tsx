@@ -1,6 +1,6 @@
-import React, { useRef } from 'react';
+import React, { ButtonHTMLAttributes, useRef } from 'react';
 import useOutsideClick from 'src/hooks/useOutsideClick';
-import styled from 'styled-components';
+import styled, { css } from 'styled-components';
 
 const Container = styled.div`
   position: relative;
@@ -21,10 +21,9 @@ export const DropdownToggle = styled.button`
  * This is not supposed to be used directly and outside of the Dropdown except
  * for adjusting the style of the dropdown.
  */
-export const Menu = styled.div`
+export const Menu = styled.div<{ align: 'left' | 'right' }>`
   position: absolute;
   top: 100%;
-  right: 0;
   padding: 0.5rem 0;
   background-color: white;
   // Slightly adjusted material depth 3 shadow.
@@ -34,6 +33,15 @@ export const Menu = styled.div`
   border: ${props => props.theme.borders.width} solid
     ${props => props.theme.borders.color};
   z-index: 100;
+
+  ${props =>
+    props.align === 'left'
+      ? css`
+          left: 0;
+        `
+      : css`
+          right: 0;
+        `}
 `;
 
 /**
@@ -61,18 +69,43 @@ const Item = styled.button`
   }
 `;
 
-export interface DropdownItem {
+export interface BaseDropdownItem {
+  isSpacer?: boolean | undefined;
+  label?: string;
+  disabled?: boolean;
+  onClick?: () => void;
+}
+
+export interface SpacerDropdownItem extends BaseDropdownItem {
+  isSpacer: true;
+  label?: undefined;
+  disabled?: undefined;
+  onClick?: undefined;
+}
+
+export interface ButtonDropdownItem extends BaseDropdownItem {
+  isSpacer?: undefined;
   label: string;
   disabled?: boolean;
   onClick?: () => void;
 }
 
+export type DropdownItem = ButtonDropdownItem | SpacerDropdownItem;
+
 export interface Props {
   className?: string;
   show: boolean;
+  /**
+   * The value indicating whether the dropdown menu aligns on the left of the
+   * dropdown toggle or on the right of it. Defaults to `'right'`.
+   *
+   * @type {('left' | 'right')}
+   * @memberof Props
+   */
+  menuAlignment?: 'left' | 'right';
   toggleLabel: string | JSX.Element;
   items: DropdownItem[];
-  toggleButton?: any;
+  toggleButton?: React.ComponentType<ButtonHTMLAttributes<any>>;
   onToggleClick?: () => void;
 }
 
@@ -85,7 +118,7 @@ export interface Props {
  * @param {Props} props
  * @returns
  */
-export default function Dropdown(props: Props) {
+export function Dropdown(props: Props) {
   const ref = useRef<HTMLDivElement>(null);
   const ToggleButton = props.toggleButton || DropdownToggle;
 
@@ -93,23 +126,32 @@ export default function Dropdown(props: Props) {
     props.onToggleClick?.();
   });
 
-  const handleClick = (callback: (() => void) | undefined) => {
+  const handleClick = (
+    ev: React.MouseEvent,
+    callback: (() => void) | undefined
+  ) => {
     props.onToggleClick?.();
     callback?.();
+    ev.stopPropagation();
+  };
+
+  const handleToggleClick = (ev: React.MouseEvent) => {
+    props.onToggleClick?.();
+    ev.stopPropagation();
   };
 
   return (
     <Container className={props.className} ref={ref}>
-      <ToggleButton type='button' onClick={() => props.onToggleClick?.()}>
+      <ToggleButton type='button' onClick={handleToggleClick}>
         {props.toggleLabel}
       </ToggleButton>
       {props.show && (
-        <Menu>
+        <Menu align={props.menuAlignment || 'right'}>
           {props.items.map((item, i) => (
             <Item
               key={i}
-              onClick={() => handleClick(item.onClick)}
-              disabled={item.disabled}
+              onClick={ev => handleClick(ev, item.onClick)}
+              disabled={item.disabled || item.isSpacer}
             >
               {item.label}
             </Item>
@@ -119,3 +161,5 @@ export default function Dropdown(props: Props) {
     </Container>
   );
 }
+
+export default Dropdown;

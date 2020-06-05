@@ -17,10 +17,12 @@ export interface Props {
   title?: string;
 }
 
-export default function UnsavedChangesIndicator(props: Props) {
+export function UnsavedChangesIndicator(props: Props) {
   return (
     <Container {...props}>
       <FontAwesomeIcon icon={faCircle} />
     </Container>
   );
 }
+
+export default UnsavedChangesIndicator;

@@ -1,7 +1,7 @@
 import { createSlice, PayloadAction } from '@reduxjs/toolkit';
 import { changeCurrentApi } from 'src/features/api/apiSlice';
-import { changeEntityTitle } from 'src/features/notebooks/notebooksSlice';
-import Path from 'src/models/path';
+import { changeNodeName } from 'src/features/nodes/nodesSlice';
+import { Path } from 'src/models/node';
 
 const PATH_LOCAL_STORAGE_KEY = '_markdown_notebook_current_path';
 
@@ -32,7 +32,7 @@ function intoLocalStorage(path: Path) {
 
 const currentPathSlice = createSlice({
   name: 'currentPath',
-  initialState: fromLocalStorage() || {},
+  initialState: fromLocalStorage() || [],
   reducers: {
     changeCurrentPath(_, action: PayloadAction<Path>) {
       intoLocalStorage(action.payload);
@@ -42,34 +42,22 @@ const currentPathSlice = createSlice({
   extraReducers: builder => {
     // Whenever the api changes, i.e. on a new login, reset the current path.
     builder.addCase(changeCurrentApi, () => {
-      intoLocalStorage({});
-      return {};
+      intoLocalStorage([]);
+      return [];
     });
 
     // Update the current path if the title of one of the components changed.
-    builder.addCase(changeEntityTitle.fulfilled, (state, { payload }) => {
-      const { oldPath, newTitle } = payload;
+    builder.addCase(changeNodeName.fulfilled, (state, { payload }) => {
+      const { oldPath, newName } = payload;
 
-      if (oldPath.pageTitle) {
-        if (
-          oldPath.notebookTitle === state.notebookTitle &&
-          oldPath.sectionTitle === state.sectionTitle &&
-          oldPath.pageTitle === state.pageTitle
-        ) {
-          state.pageTitle = newTitle;
-        }
-      } else if (oldPath.sectionTitle) {
-        if (
-          oldPath.notebookTitle === state.notebookTitle &&
-          oldPath.sectionTitle === state.sectionTitle
-        ) {
-          state.sectionTitle = newTitle;
-        }
-      } else if (oldPath.notebookTitle) {
-        if (oldPath.notebookTitle === state.notebookTitle) {
-          state.notebookTitle = newTitle;
+      for (let i = 0; i < oldPath.length; i++) {
+        if (oldPath[i] !== state[i]) {
+          // Current path and path of the changed node do not match, so nothing to do.
+          return;
         }
       }
+
+      state[oldPath.length - 1] = newName;
     });
   },
 });

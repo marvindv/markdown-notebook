@@ -1,15 +1,6 @@
 import React from 'react';
 import Button from 'src/components/Button';
-import {
-  findNotebook,
-  findNotebookIndex,
-  findPage,
-  findPageIndex,
-  findSection,
-  findSectionIndex,
-} from 'src/features/notebooks/selection';
-import Notebook from 'src/models/notebook';
-import Path, { PagePath } from 'src/models/path';
+import { DirectoryNode, Node, Path } from 'src/models/node';
 import Api, { DuplicateError, InvalidPathError, NotFoundError } from './api';
 
 enum LocalStorageVersion {
@@ -18,7 +9,7 @@ enum LocalStorageVersion {
 
 interface LocalStorage {
   version: LocalStorageVersion;
-  notebooks: Notebook[];
+  root: DirectoryNode;
 }
 
 /**
@@ -29,6 +20,129 @@ interface LocalStorage {
  * @extends {Api}
  */
 export default class LocalStorageApi extends Api {
+  fetchNodes(): Promise<Node[]> {
+    const { root } = this.getLocalStorage();
+    const nodes: Node[] = [];
+    for (const rootNodeName of Object.keys(root.children)) {
+      nodes.push(root.children[rootNodeName]);
+    }
+
+    return Promise.resolve(nodes);
+  }
+
+  addNode<T extends Node>(
+    parent: Path,
+    node: T
+  ): Promise<{ parent: Path; node: T }> {
+    const { root, version } = this.getLocalStorage();
+
+    // Find the parent node.
+    let parentNode: Node = root;
+    for (const part of parent) {
+      if (!parentNode.isDirectory) {
+        // A part of the parent path is a file, which is invalid.
+        throw new NotFoundError();
+      }
+
+      parentNode = parentNode.children[part];
+    }
+
+    if (!parentNode || !parentNode.isDirectory) {
+      throw new NotFoundError();
+    }
+
+    parentNode.children[node.name] = node;
+    this.setLocalStorage({ root, version });
+    return Promise.resolve({ parent, node });
+  }
+
+  /**
+   * @inheritdoc
+   * @memberof LocalStorageApi
+   */
+  async setPageContent(path: Path, content: string): Promise<void> {
+    const storage = this.getLocalStorage();
+
+    let node: Node | undefined = storage.root;
+    for (const part of path) {
+      node = node?.children?.[part];
+    }
+
+    if (!node) {
+      throw new NotFoundError();
+    }
+
+    if (node.isDirectory) {
+      throw new InvalidPathError();
+    }
+
+    node.content = content;
+
+    this.setLocalStorage(storage);
+  }
+
+  changeNodeName(
+    path: Path,
+    newName: string
+  ): Promise<{ oldPath: Path; newName: string }> {
+    const { root, version } = this.getLocalStorage();
+    const parentPath = path.slice(0, -1);
+    let parent: Node | undefined = root;
+    for (const part of parentPath) {
+      parent = parent?.children?.[part];
+    }
+
+    const oldName = path[path.length - 1];
+    if (
+      !parent ||
+      !parent.isDirectory ||
+      !parent.children.hasOwnProperty(oldName)
+    ) {
+      throw new NotFoundError();
+    }
+
+    if (parent.children.hasOwnProperty(newName)) {
+      throw new DuplicateError();
+    }
+
+    parent.children[newName] = parent.children[oldName];
+    parent.children[newName].name = newName;
+
+    if (oldName !== newName) {
+      delete parent.children[oldName];
+    }
+
+    this.setLocalStorage({ root, version });
+    return Promise.resolve({ oldPath: path, newName });
+  }
+
+  deleteNode(path: Path): Promise<{ path: Path }> {
+    const { root, version } = this.getLocalStorage();
+    const parentPath = path.slice(0, -1);
+    const name = path[path.length - 1];
+    let parent: Node | undefined = root;
+    for (const part of parentPath) {
+      parent = parent?.children?.[part];
+    }
+
+    if (
+      !parent ||
+      !parent.isDirectory ||
+      !parent.children.hasOwnProperty(name)
+    ) {
+      throw new NotFoundError();
+    }
+
+    delete parent.children[name];
+    this.setLocalStorage({
+      root,
+      version,
+    });
+    return Promise.resolve({
+      path,
+    });
+  }
+
   private readonly key = '_markdown_notebook_storage';
 
   getLoginButtonText() {
@@ -82,177 +196,6 @@ export default class LocalStorageApi extends Api {
     //localStorage.removeItem(this.key);
   }
 
-  /**
-   * @inheritdoc
-   * @memberof LocalStorageApi
-   */
-  async fetchNotebooks(): Promise<Notebook[]> {
-    const { notebooks } = this.getLocalStorage();
-    return notebooks;
-  }
-
-  /**
-   * @inheritdoc
-   * @memberof LocalStorageApi
-   */
-  async addEntity(path: Path): Promise<{ actualPath: Path }> {
-    const storage = this.getLocalStorage();
-    // Add a page.
-    if (path.pageTitle) {
-      let { notebookTitle, sectionTitle, pageTitle } = path;
-      pageTitle = pageTitle.trim();
-
-      const { section } = findSection(path, storage.notebooks) || {};
-      if (!section) {
-        throw new NotFoundError('Parent section not found.');
-      }
-
-      if (section.pages.find(p => p.title === pageTitle)) {
-        throw new DuplicateError('There is already a page with that title.');
-      }
-
-      section.pages.push({ content: '', title: pageTitle });
-      this.setLocalStorage(storage);
-      return {
-        actualPath: { notebookTitle, sectionTitle, pageTitle },
-      };
-    }
-
-    // Add a section.
-    if (path.sectionTitle) {
-      let { notebookTitle, sectionTitle } = path;
-      sectionTitle = sectionTitle.trim();
-
-      const notebook = findNotebook(path, storage.notebooks);
-      if (!notebook) {
-        throw new NotFoundError('Parent notebook not found.');
-      }
-
-      if (notebook.sections.find(s => s.title === sectionTitle)) {
-        throw new DuplicateError('There is already a section with that title.');
-      }
-
-      notebook.sections.push({ title: sectionTitle, pages: [] });
-      this.setLocalStorage(storage);
-      return { actualPath: { notebookTitle, sectionTitle } };
-    }
-
-    // Add a notebook.
-    if (path.notebookTitle) {
-      let { notebookTitle } = path;
-      notebookTitle = notebookTitle.trim();
-
-      if (storage.notebooks.find(n => n.title === notebookTitle)) {
-        throw new DuplicateError(
-          'There is already a notebook with that title.'
-        );
-      }
-
-      storage.notebooks.push({
-        title: notebookTitle,
-        sections: [],
-      });
-      this.setLocalStorage(storage);
-      return { actualPath: { notebookTitle } };
-    }
-
-    throw new InvalidPathError();
-  }
-
-  /**
-   * @inheritdoc
-   * @memberof LocalStorageApi
-   */
-  async changeEntityTitle(
-    path: Path,
-    newTitle: string
-  ): Promise<{ oldPath: Path; newTitle: string }> {
-    newTitle = newTitle.trim();
-    const storage = this.getLocalStorage();
-    const { notebooks } = storage;
-
-    if (path.pageTitle) {
-      const { page } = findPage(path, notebooks) || {};
-      if (!page) {
-        throw new NotFoundError();
-      }
-
-      page.title = newTitle;
-    } else if (path.sectionTitle) {
-      const { section } = findSection(path, notebooks) || {};
-      if (!section) {
-        throw new NotFoundError();
-      }
-
-      section.title = newTitle;
-    } else if (path.notebookTitle) {
-      const notebook = findNotebook(path, notebooks);
-      if (!notebook) {
-        throw new NotFoundError();
-      }
-
-      notebook.title = newTitle;
-    } else {
-      throw new InvalidPathError();
-    }
-
-    this.setLocalStorage(storage);
-    return { oldPath: path, newTitle };
-  }
-
-  /**
-   * @inheritdoc
-   * @memberof LocalStorageApi
-   */
-  async deleteEntity(path: Path): Promise<{ path: Path }> {
-    const storage = this.getLocalStorage();
-    const { notebooks } = storage;
-
-    if (path.pageTitle) {
-      const { pageIndex, section } = findPageIndex(path, notebooks) || {};
-      if (pageIndex === undefined || !section) {
-        throw new NotFoundError();
-      }
-
-      section.pages.splice(pageIndex, 1);
-    } else if (path.sectionTitle) {
-      const { sectionIndex, notebook } =
-        findSectionIndex(path, notebooks) || {};
-      if (sectionIndex === undefined || !notebook) {
-        throw new NotFoundError();
-      }
-
-      notebook.sections.splice(sectionIndex, 1);
-    } else if (path.notebookTitle) {
-      const notebookIndex = findNotebookIndex(path, notebooks);
-      if (notebookIndex === undefined) {
-        throw new NotFoundError();
-      }
-
-      notebooks.splice(notebookIndex, 1);
-    } else {
-      throw new InvalidPathError();
-    }
-
-    this.setLocalStorage(storage);
-    return { path };
-  }
-
-  /**
-   * @inheritdoc
-   * @memberof LocalStorageApi
-   */
-  async setPageContent(path: PagePath, content: string): Promise<void> {
-    const storage = this.getLocalStorage();
-    const { page } = findPage(path, storage.notebooks) || {};
-    if (!page) {
-      throw new NotFoundError();
-    }
-
-    page.content = content;
-    this.setLocalStorage(storage);
-  }
-
   private getLocalStorage(): LocalStorage {
     const value = localStorage.getItem(this.key);
     let storage: LocalStorage;
@@ -276,7 +219,7 @@ export default class LocalStorageApi extends Api {
   private setDefaultStorage(): LocalStorage {
     const storage = {
       version: LocalStorageVersion.v1,
-      notebooks: [],
+      root: { name: '/', children: {}, isDirectory: true } as DirectoryNode,
     };
     this.setLocalStorage(storage);
     return storage;

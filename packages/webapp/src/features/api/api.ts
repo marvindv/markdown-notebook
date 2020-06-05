@@ -1,6 +1,5 @@
 import React from 'react';
-import Notebook from 'src/models/notebook';
-import Path, { PagePath } from 'src/models/path';
+import { Node, NodeName, Path } from 'src/models/node';
 
 /**
  * The interface each api must implement.
@@ -59,58 +58,65 @@ export default abstract class Api {
   abstract logout(): void;
 
   /**
-   * Loads all notebooks.
+   * Loads all root nodes. Each then contains their child nodes.
    *
    * @abstract
-   * @returns {Promise<Notebook[]>}
+   * @returns {Promise<Node[]>}
    * @memberof Api
    */
-  abstract async fetchNotebooks(): Promise<Notebook[]>;
+  abstract async fetchNodes(): Promise<Node[]>;
 
   /**
-   * Adds a new notebook, section or page.
+   * Creates a new node. While for a {@link FileNode} the content can be
+   * specified, children of a given {@link DirectoryNode} will be ignored and
+   * an empty directory node will be created.
+   *
+   * @abstract
+   * @template T
+   * @param {Path} parent
+   * @param {T} node
+   * @returns {Promise<{ parent: Path; node: T }>}
+   * @memberof Api
+   */
+  abstract async addNode<T extends Node>(
+    parent: Path,
+    node: T
+  ): Promise<{ parent: Path; node: T }>;
+
+  /**
+   * Changes the name of a node.
    *
    * @abstract
    * @param {Path} path
-   * @returns {Promise<{ actualPath: Path }>}
+   * @param {NodeName} newName
+   * @returns {Promise<{ oldPath: Path; newName: NodeName }>}
    * @memberof Api
    */
-  abstract async addEntity(path: Path): Promise<{ actualPath: Path }>;
-
-  /**
-   * Changes the title of a notebook, section or page.
-   *
-   * @abstract
-   * @param {Path} path
-   * @param {string} newTitle
-   * @returns {Promise<{ oldPath: Path; newTitle: string }>}
-   * @memberof Api
-   */
-  abstract async changeEntityTitle(
+  abstract async changeNodeName(
     path: Path,
-    newTitle: string
-  ): Promise<{ oldPath: Path; newTitle: string }>;
+    newName: NodeName
+  ): Promise<{ oldPath: Path; newName: NodeName }>;
 
   /**
-   * Deletes a notebook, section or page.
+   * Deletes a node and all its children if there are any.
    *
    * @abstract
    * @param {Path} path
    * @returns {Promise<{ path: Path }>}
    * @memberof Api
    */
-  abstract async deleteEntity(path: Path): Promise<{ path: Path }>;
+  abstract async deleteNode(path: Path): Promise<{ path: Path }>;
 
   /**
    * Sets the content of the page specified by the given path.
    *
    * @abstract
-   * @param {PagePath} path
+   * @param {Path} path
    * @param {string} content
    * @returns {Promise<void>}
    * @memberof Api
    */
-  abstract async setPageContent(path: PagePath, content: string): Promise<void>;
+  abstract async setPageContent(path: Path, content: string): Promise<void>;
 }
 
 /**
