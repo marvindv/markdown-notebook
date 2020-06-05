@@ -29,12 +29,12 @@ const TreeNodeHeadWrapper = styled.div<{
   .inner {
     display: flex;
     align-items: center;
-    white-space: nowrap;
-    text-overflow: ellipsis;
-    overflow: hidden;
 
     .name {
       padding: ${HEAD_TEXT_PADDING}rem;
+      white-space: nowrap;
+      text-overflow: ellipsis;
+      overflow: hidden;
     }
   }
 
