@@ -4,7 +4,7 @@ import {
   faChevronRight,
   faFileAlt as faFileAltSolid,
 } from '@fortawesome/free-solid-svg-icons';
-import React, { useMemo, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import { DropdownItem } from 'src/components/Dropdown';
 import {
   NodesWithUnsavedChangesTree,
@@ -60,6 +60,14 @@ function TreeNode(
 ) {
   const { node, unsavedNodesSubtree } = props;
   const [collapsed, setCollapse] = useState(!props.isRoot);
+
+  // If this node belongs to the path of the currently selected node but is
+  // collapsed, force uncollapse to make the selected node visible in the tree.
+  useEffect(() => {
+    if (collapsed && props.path.every((p, i) => props.selectedPath[i] === p)) {
+      setCollapse(false);
+    }
+  }, [props.selectedPath, props.path, collapsed]);
 
   const deleteConfirmText = useMemo(() => {
     if (node.isDirectory) {
