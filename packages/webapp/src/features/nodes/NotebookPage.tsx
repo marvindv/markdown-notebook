@@ -7,12 +7,13 @@ import {
   faSearch,
 } from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import React, { useCallback, useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { Prompt } from 'react-router-dom';
 import { Button, ButtonGroup } from 'src/components';
 import Breadcrumbs from 'src/features/navigation/Breadcrumbs';
 import Navigation, { Header } from 'src/features/navigation/Navigation';
+import { setNavigationWidth } from 'src/features/navigation/navigationWidthSlice';
 import useEventListener from 'src/hooks/useEventListener';
 import { Path } from 'src/models/node';
 import { RootState } from 'src/reducers';
@@ -84,7 +85,10 @@ const PageContainer = styled.div`
   z-index: 1;
 `;
 
-const ContentWrapper = styled.div<{ focusPageContainer?: boolean }>`
+const ContentWrapper = styled.div<{
+  focusPageContainer?: boolean;
+  navigationWidth?: number;
+}>`
   display: flex;
   height: 100%;
   overflow: hidden;
@@ -110,11 +114,11 @@ const ContentWrapper = styled.div<{ focusPageContainer?: boolean }>`
 
   @media (min-width: ${MOBILE_VIEW_MAX_WIDTH_PX + 1}px) {
     ${StyledNavigation} {
-      width: 25%;
+      width: ${props => props.navigationWidth || 200}px;
     }
 
     ${PageContainer} {
-      width: 75%;
+      width: calc(100% - ${props => props.navigationWidth || 200}px);
 
       /* For loading screen and fetch error display. */
       &:only-child {
@@ -130,12 +134,68 @@ const NoPageNotice = styled.div`
   color: ${props => props.theme.typo.mutedColor};
 `;
 
+const WidthGripperInner = styled.div`
+  margin: 0 -0.25rem;
+  padding: 0 0.25rem;
+  background: transparent;
+  z-index: 999;
+  cursor: col-resize;
+`;
+
+/**
+ * The component to enable navigation column resize.
+ */
+const WidthGripper = (props: { onWidthChange: (width: number) => void }) => {
+  const moveHandler = useRef<((ev: MouseEvent) => void) | null>();
+
+  const unregisterHandler = () => {
+    if (moveHandler.current) {
+      window.removeEventListener('mousemove', moveHandler.current);
+      document.body.style.removeProperty('cursor');
+      moveHandler.current = null;
+    }
+  };
+
+  // On mousedown attach a mousemove event handler to the window instead of
+  // registering it on this element so the dragging continues even if the user
+  // overshoots the mouse movement out of the bounds of this component.
+  const handleMouseDown = () => {
+    unregisterHandler();
+
+    const handler = (ev: MouseEvent) => {
+      props.onWidthChange(ev.clientX);
+    };
+    window.addEventListener('mousemove', handler);
+    moveHandler.current = handler;
+    // Set the cursor style on the body to ensure the cursor keeps being
+    // col-resize even if the user moves the mouse outside the bounds of this
+    // element. Still does not work if the user moves the mouse over a button
+    // while dragging.
+    document.body.style.setProperty('cursor', 'col-resize', 'important');
+  };
+
+  // Unregister the handler on mouse up.
+  const handleMouseUp = () => {
+    unregisterHandler();
+  };
+
+  return (
+    <WidthGripperInner
+      onMouseDown={handleMouseDown}
+      onMouseUp={handleMouseUp}
+    />
+  );
+};
+
 export default function NotebookPage(): JSX.Element {
   const dispatch: AppDispatch = useDispatch();
   // State that specifies whether the page should is focused. If the mobile view
   // is active, the navigation is hidden.
   const [focusPageContainer, setFocusPageContainer] = useState(false);
   const [pageViewMode, setPageViewMode] = useState<ViewMode>('editor');
+  const navigationWidth = useSelector(
+    (state: RootState) => state.navigationWidth
+  );
   const isFetching = useSelector((state: RootState) => state.nodes.isFetching);
   const fetchError = useSelector((state: RootState) => state.nodes.fetchError);
   const path = useSelector((state: RootState) => state.currentPath);
@@ -327,8 +387,14 @@ export default function NotebookPage(): JSX.Element {
         message='Du hast ungespeicherte Änderungen. Diese gehen verloren, wenn du diese Seite verlässt.'
       />
 
-      <ContentWrapper focusPageContainer={focusPageContainer}>
+      <ContentWrapper
+        focusPageContainer={focusPageContainer}
+        navigationWidth={navigationWidth}
+      >
         <StyledNavigation onFileClick={() => setFocusPageContainer(true)} />
+        <WidthGripper
+          onWidthChange={width => dispatch(setNavigationWidth({ width }))}
+        ></WidthGripper>
         <PageContainer>{pageContent}</PageContainer>
       </ContentWrapper>
     </>
