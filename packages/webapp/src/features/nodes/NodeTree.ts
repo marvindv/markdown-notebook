@@ -115,7 +115,7 @@ export function removePathFromTree<TPayload>(
       // We have the first parent that has more than one child node.
       // Remove the child node of that parent that belongs to the given path.
       // Note: backtrace[i - 1] will never be undefined since we start at i=1.
-      const [_, deletePathPart] = backtrack[i - 1];
+      const [, deletePathPart] = backtrack[i - 1];
       delete parent[deletePathPart];
       break;
     }
