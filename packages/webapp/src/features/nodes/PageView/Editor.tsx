@@ -1,16 +1,23 @@
 import { IDisposable, KeyCode, Position } from 'monaco-editor';
-import React, { useEffect, useRef } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import MonacoEditor, { EditorConstructionOptions } from 'react-monaco-editor';
+import { useDispatch, useSelector } from 'react-redux';
 import { Path } from 'src/models/node';
+import { RootState } from 'src/reducers';
+import { AppDispatch } from 'src/store';
 import styled from 'styled-components';
+import { setRulers, setWordWrap } from '../editorSettingsSlice';
+import EditorStatusbar from './EditorStatusbar';
 
-const Container = styled.div``;
+const Container = styled.div`
+  display: flex;
+  flex-direction: column;
+`;
 
 const EDITOR_OPTIONS: EditorConstructionOptions = {
   minimap: { enabled: false },
   lineNumbersMinChars: 3,
   automaticLayout: true,
-  wordWrap: 'on',
 };
 
 export interface Props {
@@ -32,6 +39,14 @@ export default function Editor(props: Props) {
     onSaveAll,
   } = props;
 
+  const wordWrap = useSelector(
+    (state: RootState) => state.editorSettings.wordWrap
+  );
+  const rulers = useSelector((state: RootState) => state.editorSettings.rulers);
+  const dispatch: AppDispatch = useDispatch();
+
+  const [editorPos, setEditorPos] = useState<Position | null>(null);
+  const editorPosChangeEvent = useRef<IDisposable | null>(null);
   const editorRef = useRef<MonacoEditor>(null);
   const handler = useRef<IDisposable | null>(null);
 
@@ -72,12 +87,20 @@ export default function Editor(props: Props) {
   }, [onSave, onSaveAll, path]);
 
   useEffect(() => {
+    if (editorPosChangeEvent.current) {
+      editorPosChangeEvent.current.dispose();
+    }
+
     const editor = editorRef.current?.editor;
     if (!editor) {
       return;
     }
 
     editor.layout();
+    setEditorPos(editor.getPosition());
+    editorPosChangeEvent.current = editor.onDidChangeCursorPosition(ev =>
+      setEditorPos(ev.position)
+    );
   }, [editorRef]);
 
   return (
@@ -86,8 +109,19 @@ export default function Editor(props: Props) {
         ref={editorRef}
         language='markdown'
         value={content}
-        options={EDITOR_OPTIONS}
+        options={{
+          ...EDITOR_OPTIONS,
+          rulers,
+          wordWrap: wordWrap ? 'on' : 'off',
+        }}
         onChange={content => onContentChange(content)}
+      />
+      <EditorStatusbar
+        editorPos={editorPos}
+        wordWrap={wordWrap}
+        onWordWrapChange={wordWrap => dispatch(setWordWrap(wordWrap))}
+        rulers={rulers}
+        onRulersChange={rulers => dispatch(setRulers(rulers))}
       />
     </Container>
   );
