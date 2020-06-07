@@ -42,6 +42,19 @@ impl BackendError {
                 DatabaseErrorKind::UniqueViolation,
                 _,
             )) => Status::Conflict,
+            BackendError::Diesel(diesel::result::Error::DatabaseError(
+                _,
+                err,
+            )) => {
+                // Error message by the CheckInsertUniqueRootName and
+                // CheckUpdateUniqueRootName triggers that ensure no root node
+                // name duplicates.
+                if err.message() == "root node with same name already exists" {
+                    Status::Conflict
+                } else {
+                    Status::InternalServerError
+                }
+            }
             _ => Status::InternalServerError,
         }
     }

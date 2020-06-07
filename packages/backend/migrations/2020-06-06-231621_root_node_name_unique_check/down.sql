@@ -1,0 +1,2 @@
+drop trigger CheckInsertUniqueRootName;
+drop trigger CheckUpdateUniqueRootName;
