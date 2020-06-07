@@ -10,6 +10,7 @@ const EDITOR_OPTIONS: EditorConstructionOptions = {
   minimap: { enabled: false },
   lineNumbersMinChars: 3,
   automaticLayout: true,
+  wordWrap: 'on',
 };
 
 export interface Props {
