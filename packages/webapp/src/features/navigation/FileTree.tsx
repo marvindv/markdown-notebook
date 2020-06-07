@@ -68,8 +68,11 @@ const TreeNodeContainer = styled.div<{
   // Also very important to make sure we only select direct descendants.
   // Otherwise this rule might override nested StyledTreeNodeHead after this
   // rule changed through a props change.
+  // 1.25rem + 0.25rem = 1.5rem - 1.25 is the width of a FontAwesomeIcon with
+  // "fixedWidth" set. 0.25rem is the padding of the name in TreeNodeHead.
+  // This way the indentation nicely aligns with the parents name.
   & > ${StyledTreeNodeHead} {
-    padding-left: calc(1rem + (1rem * ${props => props.indentLevel}));
+    padding-left: calc(1rem + (1.5rem * ${props => props.indentLevel}));
   }
 `;
 
