@@ -41,6 +41,42 @@ export type NodesWithUnsavedChangesTree = NodeTree<true>;
 
 export type UnsavedChangesNode = NodeTreeNode<true>;
 
+/**
+ * The characters that are not allowed in a node name.
+ */
+const FORBIDDEN_NAME_CHARS = ['\\', '/', ':', '*', '"', '<', '>', '|'];
+
+/**
+ * The error message to be used if the user entered an invalid node name.
+ */
+const INVALID_NODE_NAME_ERROR_MESSAGE = 'invalid node error name';
+
+/**
+ * Checks whether the given string is a valid node name.
+ *
+ * @param {string} name
+ * @returns {boolean}
+ */
+function isValidName(name: string): boolean {
+  for (const c of name) {
+    if (FORBIDDEN_NAME_CHARS.indexOf(c) > -1) {
+      return false;
+    }
+  }
+
+  return true;
+}
+
+/**
+ * Shows a toast error indicating that a entered node name was invalid.
+ */
+function showInvalidNodeErrorNameToast() {
+  toast.error(
+    'Ein Ordner- oder Notizname darf keines der folgenden Zeichen enthalten: ' +
+      FORBIDDEN_NAME_CHARS.join(' ')
+  );
+}
+
 export const fetchNodes = createAsyncThunk('nodes/fetch', async () => {
   const api = getApi();
   if (!api) {
@@ -54,6 +90,10 @@ export const fetchNodes = createAsyncThunk('nodes/fetch', async () => {
 export const addNode = createAsyncThunk(
   'nodes/addNode',
   async (payload: { parent: Path; node: Node }) => {
+    if (!isValidName(payload.node.name)) {
+      throw new Error(INVALID_NODE_NAME_ERROR_MESSAGE);
+    }
+
     const api = getApi();
     if (!api) {
       throw new Error('No api installed.');
@@ -67,6 +107,10 @@ export const addNode = createAsyncThunk(
 export const changeNodeName = createAsyncThunk(
   'nodes/changeNodeName',
   async (payload: { path: Path; newName: NodeName }) => {
+    if (!isValidName(payload.newName)) {
+      throw new Error(INVALID_NODE_NAME_ERROR_MESSAGE);
+    }
+
     const api = getApi();
     if (!api) {
       throw new Error('No api installed.');
@@ -251,7 +295,11 @@ const nodesSlice = createSlice({
     });
 
     builder.addCase(addNode.rejected, (state, { error }) => {
-      toast.error(`Failed to add node: ${error.name} ${error.message}`);
+      if (error.message === INVALID_NODE_NAME_ERROR_MESSAGE) {
+        showInvalidNodeErrorNameToast();
+      } else {
+        toast.error(`Failed to add node: ${error.name} ${error.message}`);
+      }
     });
 
     builder.addCase(addNode.fulfilled, (state, { payload }) => {
@@ -264,7 +312,13 @@ const nodesSlice = createSlice({
     });
 
     builder.addCase(changeNodeName.rejected, (state, { error }) => {
-      toast.error(`Failed to change node name: ${error.name} ${error.message}`);
+      if (error.message === INVALID_NODE_NAME_ERROR_MESSAGE) {
+        showInvalidNodeErrorNameToast();
+      } else {
+        toast.error(
+          `Failed to change node name: ${error.name} ${error.message}`
+        );
+      }
     });
 
     builder.addCase(changeNodeName.fulfilled, (state, { payload }) => {

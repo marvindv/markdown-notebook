@@ -168,6 +168,16 @@ impl Node {
         })
     }
 
+    /// Checks whether the given string is a valid node name.
+    fn is_name_valid(name: &str) -> bool {
+        // Based on https://stackoverflow.com/a/35352640 prevent several
+        // charactes to ensure compatibility with usual file systems.
+        name.chars().all(|c| match c {
+            '\\' | '/' | ':' | '*' | '"' | '<' | '>' | '|' => false,
+            _ => true,
+        })
+    }
+
     /// Fetches a single node represented by the given path. The given `user_id`
     /// must be the id of the owner of that node.
     pub fn fetch_by_path_for_user(
@@ -205,6 +215,10 @@ impl Node {
         parent_path: &Path,
         payload: &NewNodePayload,
     ) -> BackendResult<Node> {
+        if !Self::is_name_valid(&payload.name) {
+            return Err(BackendError::InvalidNodeName(payload.name.clone()));
+        }
+
         conn.transaction::<_, BackendError, _>(|| {
             let parent_id = if parent_path.is_empty() {
                 // New root node.
@@ -264,6 +278,10 @@ impl Node {
         conn: &DbConnection,
         new_name: &str,
     ) -> BackendResult<Node> {
+        if !Self::is_name_valid(new_name) {
+            return Err(BackendError::InvalidNodeName(String::from(new_name)));
+        }
+
         let count = diesel::update(&self)
             .set(nodes::node_name.eq(new_name))
             .execute(conn)?;

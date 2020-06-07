@@ -26,6 +26,9 @@ pub enum BackendError {
     InvalidValue,
     NotFound,
     Conflict,
+    /// Indicates that a given file or directory name contains at least one
+    /// invalid character.
+    InvalidNodeName(String),
 }
 
 impl BackendError {
@@ -42,6 +45,7 @@ impl BackendError {
                 DatabaseErrorKind::UniqueViolation,
                 _,
             )) => Status::Conflict,
+            BackendError::InvalidNodeName(_) => Status::UnprocessableEntity,
             _ => Status::InternalServerError,
         }
     }
@@ -73,6 +77,9 @@ impl fmt::Display for BackendError {
             BackendError::InvalidValue => write!(f, "Invalid value"),
             BackendError::NotFound => write!(f, "Entity not found"),
             BackendError::Conflict => write!(f, "Conflict"),
+            BackendError::InvalidNodeName(name) => {
+                write!(f, "Invalid node name: {}", name)
+            }
         }
     }
 }
@@ -94,6 +101,7 @@ impl std::error::Error for BackendError {
             BackendError::InvalidValue => "Invalid value",
             BackendError::NotFound => "Entity not found",
             BackendError::Conflict => "Conflict",
+            BackendError::InvalidNodeName(_) => "Invalid node name",
         }
     }
 }
