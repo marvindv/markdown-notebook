@@ -42,19 +42,6 @@ impl BackendError {
                 DatabaseErrorKind::UniqueViolation,
                 _,
             )) => Status::Conflict,
-            BackendError::Diesel(diesel::result::Error::DatabaseError(
-                _,
-                err,
-            )) => {
-                // Error message by the CheckInsertUniqueRootName and
-                // CheckUpdateUniqueRootName triggers that ensure no root node
-                // name duplicates.
-                if err.message() == "root node with same name already exists" {
-                    Status::Conflict
-                } else {
-                    Status::InternalServerError
-                }
-            }
             _ => Status::InternalServerError,
         }
     }
@@ -157,6 +144,17 @@ impl From<diesel::result::Error> for BackendError {
                 DatabaseErrorKind::UniqueViolation,
                 _,
             ) => BackendError::Conflict,
+            diesel::result::Error::DatabaseError(_, ref inner_err) => {
+                match inner_err.message() {
+                    // Error message by the CheckInsertUniqueRootName and
+                    // CheckUpdateUniqueRootName triggers that ensure no root
+                    // node name duplicates.
+                    "root node with same name already exists" => {
+                        BackendError::Conflict
+                    }
+                    _ => BackendError::Diesel(err),
+                }
+            }
             _ => BackendError::Diesel(err),
         }
     }
