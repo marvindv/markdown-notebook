@@ -1,6 +1,6 @@
 import { createSlice, PayloadAction } from '@reduxjs/toolkit';
 import { changeCurrentApi } from 'src/features/api/apiSlice';
-import { changeNodeName } from 'src/features/nodes/nodesSlice';
+import { changeNodeName, moveNode } from 'src/features/nodes/nodesSlice';
 import { Path } from 'src/models/node';
 
 const PATH_LOCAL_STORAGE_KEY = '_markdown_notebook_current_path';
@@ -58,6 +58,25 @@ const currentPathSlice = createSlice({
       }
 
       state[oldPath.length - 1] = newName;
+      intoLocalStorage(state);
+    });
+
+    builder.addCase(moveNode.fulfilled, (state, { payload }) => {
+      const { oldPath, newPath } = payload;
+
+      if (!oldPath.every((p, i) => state[i] === p)) {
+        // The current path does not start with the now moved path, so nothing
+        // to do.
+        return;
+      }
+
+      // Replace the old path with the new path. Keep everything after the
+      // changed path.
+      const rest = state.slice(oldPath.length);
+      const newState = [...newPath, ...rest];
+
+      intoLocalStorage(newState);
+      return newState;
     });
   },
 });

@@ -382,6 +382,31 @@ export default class ServerApi extends Api {
     return { path };
   }
 
+  /**
+   * @inheritdoc
+   * @memberof ServerApi
+   */
+  async moveNode(
+    nodePath: Path,
+    newParentPath: Path
+  ): Promise<{ oldPath: Path; newPath: Path }> {
+    const res = await fetch(this.baseUrl + '/node/parent', {
+      method: 'PUT',
+      headers: {
+        ...this.contentTypeJson,
+        ...this.getAuthHeader(),
+      },
+      body: JSON.stringify({ nodePath, newParentPath }),
+    });
+
+    if (!res.ok) {
+      throw this.responseToError(res);
+    }
+
+    const data: { oldPath: Path; newPath: Path } = await res.json();
+    return data;
+  }
+
   private convertApiNode(apiNode: ApiNode): Node {
     let node: Node;
     if (apiNode.isDirectory) {

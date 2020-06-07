@@ -81,6 +81,10 @@ export default class LocalStorageApi extends Api {
     this.setLocalStorage(storage);
   }
 
+  /**
+   * @inheritdoc
+   * @memberof LocalStorageApi
+   */
   changeNodeName(
     path: Path,
     newName: string
@@ -116,6 +120,10 @@ export default class LocalStorageApi extends Api {
     return Promise.resolve({ oldPath: path, newName });
   }
 
+  /**
+   * @inheritdoc
+   * @memberof LocalStorageApi
+   */
   deleteNode(path: Path): Promise<{ path: Path }> {
     const { root, version } = this.getLocalStorage();
     const parentPath = path.slice(0, -1);
@@ -141,6 +149,60 @@ export default class LocalStorageApi extends Api {
     return Promise.resolve({
       path,
     });
+  }
+
+  /**
+   * @inheritdoc
+   * @memberof LocalStorageApi
+   */
+  async moveNode(
+    nodePath: Path,
+    newParentPath: Path
+  ): Promise<{ oldPath: Path; newPath: Path }> {
+    const { root, version } = this.getLocalStorage();
+    const name = nodePath[nodePath.length - 1];
+    const parentPath = nodePath.slice(0, -1);
+
+    if (
+      parentPath.length === newParentPath.length &&
+      parentPath.every((p, i) => newParentPath[i] === p)
+    ) {
+      // old parent and new parent are the same so nothing to do.
+      return { oldPath: nodePath, newPath: nodePath };
+    }
+
+    let oldParent: Node | undefined = root;
+    for (const part of parentPath) {
+      oldParent = oldParent?.children?.[part];
+    }
+
+    if (
+      !oldParent ||
+      !oldParent.isDirectory ||
+      !oldParent.children.hasOwnProperty(name)
+    ) {
+      throw new NotFoundError();
+    }
+
+    let newParent: Node | undefined = root;
+    for (const part of newParentPath) {
+      newParent = newParent?.children?.[part];
+    }
+
+    if (!newParent || !newParent.isDirectory) {
+      throw new NotFoundError();
+    }
+
+    if (newParent.children.hasOwnProperty(name)) {
+      throw new DuplicateError();
+    }
+
+    newParent.children[name] = oldParent.children[name];
+    delete oldParent.children[name];
+
+    this.setLocalStorage({ root, version });
+
+    return { oldPath: nodePath, newPath: [...newParentPath, name] };
   }
 
   private readonly key = '_markdown_notebook_storage';
@@ -219,7 +281,11 @@ export default class LocalStorageApi extends Api {
   private setDefaultStorage(): LocalStorage {
     const storage = {
       version: LocalStorageVersion.v1,
-      root: { name: '/', children: {}, isDirectory: true } as DirectoryNode,
+      root: {
+        name: '/',
+        children: {},
+        isDirectory: true,
+      } as DirectoryNode,
     };
     this.setLocalStorage(storage);
     return storage;

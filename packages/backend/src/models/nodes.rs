@@ -286,4 +286,35 @@ impl Node {
 
         Ok(())
     }
+
+    /// Changes the parent of this node. If `new_parent` is `None` this node
+    /// will be attached to the root.
+    pub fn change_parent(
+        self,
+        conn: &DbConnection,
+        new_parent: Option<&Self>,
+    ) -> BackendResult<Node> {
+        let maybe_new_parent_id = new_parent.map(|node| node.node_id);
+
+        let query = match maybe_new_parent_id {
+            Some(new_parent_id) => diesel::update(&self).set((
+                nodes::parent_id.eq(Some(new_parent_id)),
+                nodes::parent_is_directory.eq(Some(true)),
+            )),
+            None => diesel::update(&self).set((
+                nodes::parent_id.eq(None),
+                nodes::parent_is_directory.eq(None),
+            )),
+        };
+
+        let count = query.execute(conn)?;
+        if count == 0 {
+            return Err(BackendError::NotFound);
+        }
+
+        Ok(Node {
+            parent_id: maybe_new_parent_id,
+            ..self
+        })
+    }
 }

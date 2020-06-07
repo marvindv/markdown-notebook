@@ -1,5 +1,7 @@
 import 'core-js/modules/es.promise.all-settled';
 import React from 'react';
+import { DndProvider } from 'react-dnd';
+import { HTML5Backend } from 'react-dnd-html5-backend';
 import ReactDOM from 'react-dom';
 import { Provider } from 'react-redux';
 import { BrowserRouter as Router } from 'react-router-dom';
@@ -15,27 +17,29 @@ import THEME from './theme';
 
 ReactDOM.render(
   <React.StrictMode>
-    <Provider store={store}>
-      <ThemeProvider theme={THEME}>
-        <GlobalStyle theme={THEME} />
+    <DndProvider backend={HTML5Backend}>
+      <Provider store={store}>
+        <ThemeProvider theme={THEME}>
+          <GlobalStyle theme={THEME} />
 
-        <ToastContainer
-          position='top-right'
-          autoClose={10000}
-          hideProgressBar={false}
-          newestOnTop={false}
-          closeOnClick
-          rtl={false}
-          pauseOnFocusLoss
-          draggable
-          pauseOnHover
-        />
+          <ToastContainer
+            position='top-right'
+            autoClose={10000}
+            hideProgressBar={false}
+            newestOnTop={false}
+            closeOnClick
+            rtl={false}
+            pauseOnFocusLoss
+            draggable
+            pauseOnHover
+          />
 
-        <Router>
-          <App />
-        </Router>
-      </ThemeProvider>
-    </Provider>
+          <Router>
+            <App />
+          </Router>
+        </ThemeProvider>
+      </Provider>
+    </DndProvider>
   </React.StrictMode>,
   document.getElementById('root')
 );

@@ -65,6 +65,66 @@ export function setLeafValue<TPayload>(
 }
 
 /**
+ * Moves the whole subtree associated to `oldPath` to the new subtree associated
+ * to `newPath`. If there is no node or subtree associated to `oldPath`, this
+ * function does nothing.
+ *
+ * @export
+ * @template TPayload
+ * @param {NodeTree<TPayload>} tree
+ * @param {Path} oldPath
+ * @param {Path} newPath
+ * @returns
+ */
+export function replaceTreePath<TPayload>(
+  tree: NodeTree<TPayload>,
+  oldPath: Path,
+  newPath: Path
+) {
+  // Find the parent of the desired node and the node itself.
+  let oldParent: NodeTree<TPayload> | undefined = tree;
+  for (const part of oldPath.slice(0, -1)) {
+    // An intermediate node does not exist or is a leaf so nothing to do since
+    // there is no node with the given path in this tree.
+    if (
+      typeof oldParent !== 'object' ||
+      !(oldParent as Object).hasOwnProperty(part)
+    ) {
+      return;
+    }
+
+    oldParent = (oldParent as any)[part];
+  }
+
+  if (!oldParent) {
+    // There is no node that matches oldPath, so nothing to do.
+    return;
+  }
+
+  let node = oldParent[oldPath[oldPath.length - 1]];
+  if (!node) {
+    // There is no node that matches oldPath, so nothing to do.
+    return;
+  }
+
+  // Now create or override the tree down until the new parent is reached.
+  let newParent: NodeTree<TPayload> = tree;
+  for (const part of newPath.slice(0, -1)) {
+    if (typeof newParent[part] !== 'object') {
+      newParent[part] = {};
+    }
+
+    newParent = newParent[part] as NodeTree<TPayload>;
+  }
+
+  // Attach the node from the old parent to new new parent.
+  newParent[newPath[newPath.length - 1]] = node;
+
+  // Remove node from the old parent.
+  delete oldParent[oldPath[oldPath.length - 1]];
+}
+
+/**
  * Removes the given path from the tree by altering the given tree object.
  *
  * @export

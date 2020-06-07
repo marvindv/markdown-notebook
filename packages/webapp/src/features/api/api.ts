@@ -117,6 +117,21 @@ export default abstract class Api {
    * @memberof Api
    */
   abstract async setPageContent(path: Path, content: string): Promise<void>;
+
+  /**
+   * Moves the node specified by `nodePath` to a new parent specified by
+   * `newParentPath`.
+   *
+   * @abstract
+   * @param {Path} nodePath
+   * @param {Path} newParentPath
+   * @returns {Promise<{ oldPath: Path, newPath: Path }>}
+   * @memberof Api
+   */
+  abstract async moveNode(
+    nodePath: Path,
+    newParentPath: Path
+  ): Promise<{ oldPath: Path; newPath: Path }>;
 }
 
 /**

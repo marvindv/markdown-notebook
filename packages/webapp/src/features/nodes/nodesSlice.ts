@@ -6,7 +6,12 @@ import {
   ThunkDispatch,
 } from '@reduxjs/toolkit';
 import { toast } from 'react-toastify';
-import { getApi, InvalidPathError } from 'src/features/api';
+import {
+  DuplicateError,
+  getApi,
+  InvalidPathError,
+  NotFoundError,
+} from 'src/features/api';
 import Node, {
   DirectoryNode,
   NodeName,
@@ -20,6 +25,7 @@ import {
   NodeTree,
   NodeTreeNode,
   removePathFromTree,
+  replaceTreePath,
   setLeafValue,
 } from './NodeTree';
 
@@ -177,6 +183,21 @@ export const saveManyPagesContent = createAsyncThunk(
   }
 );
 
+export const moveNode = createAsyncThunk(
+  'nodes/moveNode',
+  async (payload: { nodePath: Path; newParentPath: Path }) => {
+    const api = getApi();
+    if (!api) {
+      throw new Error('No api installed.');
+    }
+
+    const { nodePath, newParentPath } = payload;
+
+    const result = await api.moveNode(nodePath, newParentPath);
+    return result;
+  }
+);
+
 /**
  * Encapsulates the state that contains all notebook nodes as well as fetching,
  * error and unsaved nodes state.
@@ -309,6 +330,60 @@ const nodesSlice = createSlice({
       toast.error(
         `Failed to save multiple pages: ${error.name} ${error.message}`
       );
+    });
+
+    builder.addCase(moveNode.rejected, (state, { error }) => {
+      toast.error(`Failed to move node: ${error.name} ${error.message}`);
+    });
+
+    builder.addCase(moveNode.fulfilled, (state, action) => {
+      const { oldPath, newPath } = action.payload;
+
+      const { root } = state;
+      const name = oldPath[oldPath.length - 1];
+      const oldParentPath = oldPath.slice(0, -1);
+      const newParentPath = newPath.slice(0, -1);
+
+      if (
+        oldParentPath.length === newParentPath.length &&
+        oldParentPath.every((p, i) => newParentPath[i] === p)
+      ) {
+        // Old and new parent are the same so nothing to do.
+        return;
+      }
+
+      let oldParent: Node | undefined = root;
+      for (const part of oldParentPath) {
+        oldParent = oldParent?.children?.[part];
+      }
+
+      // This and the following error checks should obviously never happen.
+      if (
+        !oldParent ||
+        !oldParent.isDirectory ||
+        !oldParent.children.hasOwnProperty(name)
+      ) {
+        throw new NotFoundError();
+      }
+
+      let newParent: Node | undefined = root;
+      for (const part of newParentPath) {
+        newParent = newParent?.children?.[part];
+      }
+
+      if (!newParent || !newParent.isDirectory) {
+        throw new NotFoundError();
+      }
+
+      if (newParent.children.hasOwnProperty(name)) {
+        throw new DuplicateError();
+      }
+
+      newParent.children[name] = oldParent.children[name];
+      delete oldParent.children[name];
+
+      // Update unsavedChanges tree.
+      replaceTreePath(state.unsavedNodes, oldPath, newPath);
     });
   },
 });

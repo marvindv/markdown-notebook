@@ -9,6 +9,7 @@ pub fn get_routes() -> Vec<Route> {
         users::profile,
         nodes::change_content,
         nodes::change_name,
+        nodes::change_parent,
         nodes::create_node,
         nodes::delete,
         nodes::get_nodes

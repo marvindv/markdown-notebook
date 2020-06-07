@@ -8,6 +8,7 @@ import {
   addNode,
   changeNodeName,
   deleteNode,
+  moveNode,
   saveManyPagesContent,
 } from 'src/features/nodes/nodesSlice';
 import { Node, Path } from 'src/models/node';
@@ -137,6 +138,17 @@ export function Navigation(props: Props) {
     exportAsZip(rootNode);
   };
 
+  const handleNodeMove = (nodePath: Path, newParentPath: Path) => {
+    const name = nodePath[nodePath.length - 1];
+    const newPathString = '/' + newParentPath.join('/');
+    const decision = window.confirm(
+      `Möchtest du wirklich "${name}" nach "${newPathString}" verschieben?`
+    );
+    if (decision) {
+      dispatch(moveNode({ nodePath, newParentPath }));
+    }
+  };
+
   return (
     <Container className={props.className}>
       <Header>
@@ -195,6 +207,7 @@ export function Navigation(props: Props) {
           onNodeNameChange={handleNodeNameChange}
           onNodeNameEditingChange={handleNodeNameEditingChange}
           onNewNode={handleNewNode}
+          onNodeMove={handleNodeMove}
         />
       ) : (
         <NoNodesHint>

@@ -4,14 +4,20 @@ import {
   faChevronRight,
   faFileAlt as faFileAltSolid,
 } from '@fortawesome/free-solid-svg-icons';
-import React, { useMemo, useState } from 'react';
+import { transparentize } from 'polished';
+import React, { useEffect, useMemo, useRef, useState } from 'react';
+import { DragObjectWithType, useDrag, useDrop } from 'react-dnd';
+import { getEmptyImage } from 'react-dnd-html5-backend';
 import { DropdownItem } from 'src/components/Dropdown';
+import { DndItemTypes } from 'src/dnd-types';
 import {
   NodesWithUnsavedChangesTree,
   UnsavedChangesNode,
 } from 'src/features/nodes/nodesSlice';
+import useCombinedRefs from 'src/hooks/useCombinedRefs';
 import { DirectoryNode, Node, Path } from 'src/models/node';
-import styled from 'styled-components';
+import styled, { css } from 'styled-components';
+import CustomDragLayer from './CustomDragLayer';
 import { getCollisionFreeName } from './helper';
 import {
   NodeNameEditingTree,
@@ -25,14 +31,44 @@ const StyledTreeNodeHead = styled(TreeNodeHead)``;
  * An element that contains one {@link TreeNodeHead} element and none to many
  * {@link TreeNodeContainer} child elements.
  */
-const TreeNodeContainer = styled.div<{ indentLevel: number }>`
+const TreeNodeContainer = styled.div<{
+  isRoot: boolean;
+  indentLevel: number;
+  isDragging: boolean;
+  isHovering: boolean;
+}>`
   user-select: none;
   width: 100%;
+
+  // Make sure there is enough white space of the root TreeNode so the user can
+  // drop a node into the root, even if there are no files in the root.
+  ${({ isRoot }) =>
+    isRoot &&
+    css`
+      min-height: 100%;
+      padding-bottom: 3rem;
+    `}
+
+  ${({ isDragging }) =>
+    isDragging &&
+    css`
+      opacity: 0.5;
+      cursor: move;
+    `}
+
+  ${({ isHovering, theme }) =>
+    isHovering &&
+    css`
+      background: ${transparentize(0.5, theme.baseColors.secondary)};
+    `}
 
   // The usage of an IndentWidth element or something like that that gets a
   // constant width based on the indentLevel instead of using a padding might be
   // an easier starting point when implementing indent guides.
-  ${StyledTreeNodeHead} {
+  // Also very important to make sure we only select direct descendants.
+  // Otherwise this rule might override nested StyledTreeNodeHead after this
+  // rule changed through a props change.
+  & > ${StyledTreeNodeHead} {
     padding-left: calc(1rem + (1rem * ${props => props.indentLevel}));
   }
 `;
@@ -48,7 +84,13 @@ type NodeProps<T> = T & {
   onNodeNameChange: (path: Path, newName: string) => void;
   onNodeNameEditingChange: (path: Path, isTextEditing: boolean) => void;
   onNewNode: (parentPath: Path, node: Node) => void;
+  onNodeMove: (node: Path, newParent: Path) => void;
 };
+
+export interface NodeDragObject extends DragObjectWithType {
+  name: string;
+  path: Path;
+}
 
 function TreeNode(
   props: NodeProps<{
@@ -60,6 +102,7 @@ function TreeNode(
 ) {
   const { node, unsavedNodesSubtree } = props;
   const [collapsed, setCollapse] = useState(!props.isRoot);
+  const [isHovering, setHovering] = useState(false);
 
   const deleteConfirmText = useMemo(() => {
     if (node.isDirectory) {
@@ -68,6 +111,84 @@ function TreeNode(
 
     return `Möchtest du die Datei ${node.name} wirklich löschen?`;
   }, [node]);
+
+  const [{ isDragging }, dragRef, preview] = useDrag<
+    NodeDragObject,
+    {},
+    { isDragging: boolean }
+  >({
+    item: { type: DndItemTypes.Node, name: node.name, path: props.path },
+    collect: monitor => ({
+      isDragging: !!monitor.isDragging(),
+    }),
+  });
+
+  useEffect(() => {
+    preview(getEmptyImage(), { captureDraggingState: true });
+  }, [preview]);
+
+  const [{ isDropHover }, dropRef] = useDrop({
+    // Prevent drop into a file node.
+    accept: node.isDirectory ? DndItemTypes.Node : 'none',
+    drop: (ev: NodeDragObject, monitor) => {
+      if (monitor.didDrop()) {
+        // The drop event was already handled by a child element, i.e. the node
+        // was dropped in a child directory somewhere down the tree.
+        return;
+      }
+
+      props.onNodeMove(ev.path, props.path);
+    },
+    canDrop: (dropItem, monitor) => {
+      if (!monitor.isOver({ shallow: true })) {
+        return false;
+      }
+
+      // Prevent that the node can be dropped into its current parent.
+      if (dropItem.path.length - 1 === props.path.length) {
+        // The parent path of the dropItem has the same length as the node its
+        // dropped into so its possible the dropItem is dropped in its parent.
+        const parentPath = dropItem.path.slice(0, -1);
+        return !parentPath.every((part, i) => part === props.path[i]);
+      }
+
+      // Prevent a node to be dropped into itself or one of its children.
+      // The dropItem is dropped into a child if the path of this element
+      // starts with every path part of dropItem, i.e. the dropItem node is a
+      // parent of this node.
+      return !dropItem.path.every((part, i) => part === props.path[i]);
+    },
+    collect: monitor => ({
+      isDropHover: monitor.isOver({ shallow: true }) && monitor.canDrop(),
+    }),
+  });
+
+  const hoverExpandTimer: React.MutableRefObject<number | null> = useRef<
+    number
+  >(null);
+  useEffect(() => {
+    setHovering(isDropHover);
+
+    // Use no longer hovers over this element but the expand timer is still
+    // running, so stop the timer.
+    if (!isDropHover && hoverExpandTimer.current !== null) {
+      clearTimeout(hoverExpandTimer.current);
+      hoverExpandTimer.current = null;
+    }
+
+    // If the user hovers over this node and its collapsed, expand if the user
+    // hovers for at least 1 second.
+    if (
+      isDropHover &&
+      node.isDirectory &&
+      collapsed &&
+      hoverExpandTimer.current === null
+    ) {
+      hoverExpandTimer.current = setTimeout(() => setCollapse(false), 1000);
+    }
+  }, [isDropHover, collapsed, setCollapse, node.isDirectory]);
+
+  const dragDropRef = useCombinedRefs<HTMLDivElement>(dragRef, dropRef);
 
   const icon = node.isDirectory
     ? collapsed
@@ -146,7 +267,13 @@ function TreeNode(
   );
 
   return (
-    <TreeNodeContainer indentLevel={props.indentLevel}>
+    <TreeNodeContainer
+      ref={dragDropRef}
+      isRoot={props.isRoot}
+      indentLevel={props.indentLevel}
+      isDragging={isDragging}
+      isHovering={isHovering}
+    >
       {(props.renderRootHead || !props.isRoot) && (
         <StyledTreeNodeHead
           className={isActive ? 'active' : ''}
@@ -259,6 +386,7 @@ export interface Props {
   onNodeNameChange: (path: Path, newName: string) => void;
   onNodeNameEditingChange: (path: Path, isTextEditing: boolean) => void;
   onNewNode: (parentPath: Path, node: Node) => void;
+  onNodeMove: (nodePath: Path, newParent: Path) => void;
 }
 
 /**
@@ -273,6 +401,7 @@ export default function FileTree(props: Props) {
     typeof props.renderRootHead === 'boolean' ? props.renderRootHead : true;
   return (
     <FileTreeContainer className={props.className}>
+      <CustomDragLayer />
       <TreeNode
         {...props}
         renderRootHead={renderRootHead}
