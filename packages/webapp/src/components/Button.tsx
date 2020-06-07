@@ -33,7 +33,8 @@ export const Button = styled.button<Props>`
         background-color: ${props.theme.buttons.themes[props.themeColor].hover};
       }
 
-      &.active {
+      &.active,
+      &:focus {
         background-color: ${props.theme.buttons.themes[props.themeColor]
           .active};
       }
