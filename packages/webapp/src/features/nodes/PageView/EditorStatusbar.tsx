@@ -5,7 +5,11 @@ import React from 'react';
 import { Button } from 'src/components';
 import styled from 'styled-components';
 
-const StatusBarButton = styled((props: Parameters<typeof Button>[0]) => (
+export const STATUSBAR_PADDING_Y = '0.25rem';
+export const STATUSBAR_RELATIVE_FONT_SIZE = 0.75;
+export const STATUSBAR_LINE_HEIGHT = '1.15';
+
+const StatusbarButton = styled((props: Parameters<typeof Button>[0]) => (
   <Button {...props} themeColor='secondary' />
 ))`
   color: white;
@@ -14,10 +18,10 @@ const StatusBarButton = styled((props: Parameters<typeof Button>[0]) => (
   border-radius: 0;
 `;
 
-const StatusBarToggleButton = (
+const StatusbarToggleButton = (
   props: { isToggled: boolean } & Parameters<typeof Button>[0]
 ) => (
-  <StatusBarButton {...props}>
+  <StatusbarButton {...props}>
     {props.isToggled ? (
       <FontAwesomeIcon icon={faCheck} fixedWidth />
     ) : (
@@ -25,31 +29,33 @@ const StatusBarToggleButton = (
     )}
     &nbsp;
     {props.children}
-  </StatusBarButton>
+  </StatusbarButton>
 );
 
-const StatusBarLabel = styled.div``;
+const StatusbarLabel = styled.div``;
 
-const StatusBar = styled.div`
-  font-size: ${({ theme }) => theme.typo.fontSizeSm};
+const Statusbar = styled.div`
+  font-size: ${STATUSBAR_RELATIVE_FONT_SIZE * 100}%;
+  line-height: ${STATUSBAR_LINE_HEIGHT};
   background-color: ${({ theme }) => theme.baseColors.secondary};
   color: white;
   display: flex;
   padding: 0 0.5rem;
 
-  ${StatusBarButton}, ${StatusBarLabel} {
-    padding: 0.25rem;
+  ${StatusbarButton}, ${StatusbarLabel} {
+    padding: ${STATUSBAR_PADDING_Y};
   }
 
-  ${StatusBarButton} + ${StatusBarButton},
-  ${StatusBarLabel} + ${StatusBarButton},
-  ${StatusBarButton} + ${StatusBarLabel},
-  ${StatusBarLabel} + ${StatusBarLabel} {
+  ${StatusbarButton} + ${StatusbarButton},
+  ${StatusbarLabel} + ${StatusbarButton},
+  ${StatusbarButton} + ${StatusbarLabel},
+  ${StatusbarLabel} + ${StatusbarLabel} {
     margin-left: 0.5rem;
   }
 `;
 
 export interface Props {
+  className?: string;
   editorPos: Position | null;
   wordWrap: boolean;
   onWordWrapChange: (wordWrap: boolean) => void;
@@ -59,6 +65,7 @@ export interface Props {
 
 export default function EditorStatusbar(props: Props) {
   const {
+    className,
     editorPos,
     wordWrap,
     onWordWrapChange,
@@ -66,28 +73,28 @@ export default function EditorStatusbar(props: Props) {
     onRulersChange,
   } = props;
   return (
-    <StatusBar>
-      <StatusBarToggleButton
+    <Statusbar className={className}>
+      <StatusbarToggleButton
         isToggled={wordWrap}
         onClick={() => onWordWrapChange(!wordWrap)}
       >
         Word Wrap
-      </StatusBarToggleButton>
+      </StatusbarToggleButton>
 
-      <StatusBarToggleButton
+      <StatusbarToggleButton
         isToggled={rulers.length > 0}
         onClick={() => onRulersChange(rulers.length > 0 ? [] : [80])}
       >
         Ruler
-      </StatusBarToggleButton>
+      </StatusbarToggleButton>
 
       {editorPos ? (
-        <StatusBarLabel style={{ marginLeft: 'auto' }}>
+        <StatusbarLabel style={{ marginLeft: 'auto' }}>
           Zeile {editorPos.lineNumber}, Spalte {editorPos.column}
-        </StatusBarLabel>
+        </StatusbarLabel>
       ) : (
-        <StatusBarLabel>&nbsp;</StatusBarLabel>
+        <StatusbarLabel>&nbsp;</StatusbarLabel>
       )}
-    </StatusBar>
+    </Statusbar>
   );
 }

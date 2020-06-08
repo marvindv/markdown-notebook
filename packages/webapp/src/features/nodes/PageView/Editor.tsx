@@ -7,11 +7,33 @@ import { RootState } from 'src/reducers';
 import { AppDispatch } from 'src/store';
 import styled from 'styled-components';
 import { setRulers, setWordWrap } from '../editorSettingsSlice';
-import EditorStatusbar from './EditorStatusbar';
+import EditorStatusbar, {
+  STATUSBAR_LINE_HEIGHT,
+  STATUSBAR_PADDING_Y,
+  STATUSBAR_RELATIVE_FONT_SIZE,
+} from './EditorStatusbar';
+
+const StyledStatusbar = styled(EditorStatusbar)``;
 
 const Container = styled.div`
-  display: flex;
-  flex-direction: column;
+  // Reduce the height of the whole container by the Statusbar height. The
+  // MonacoEditor will use the whole height and the Statusbar overflows the
+  // container. The container + the overflowed statusbar has a 100% height.
+  // Applying max-height to MonacoEditor does not seem to work.
+  max-height: calc(
+    100% -
+      (
+        (2 * ${STATUSBAR_PADDING_Y}) +
+          (1rem * ${STATUSBAR_RELATIVE_FONT_SIZE} * ${STATUSBAR_LINE_HEIGHT})
+      )
+  );
+
+  ${StyledStatusbar} {
+    height: calc(
+      (2 * ${STATUSBAR_PADDING_Y}) +
+        (1rem * ${STATUSBAR_RELATIVE_FONT_SIZE} * ${STATUSBAR_LINE_HEIGHT})
+    );
+  }
 `;
 
 const EDITOR_OPTIONS: EditorConstructionOptions = {
@@ -116,7 +138,7 @@ export default function Editor(props: Props) {
         }}
         onChange={content => onContentChange(content)}
       />
-      <EditorStatusbar
+      <StyledStatusbar
         editorPos={editorPos}
         wordWrap={wordWrap}
         onWordWrapChange={wordWrap => dispatch(setWordWrap(wordWrap))}
