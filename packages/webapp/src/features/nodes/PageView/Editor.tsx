@@ -61,11 +61,11 @@ export default function Editor(props: Props) {
     onSaveAll,
   } = props;
 
+  const dispatch: AppDispatch = useDispatch();
   const wordWrap = useSelector(
     (state: RootState) => state.editorSettings.wordWrap
   );
   const rulers = useSelector((state: RootState) => state.editorSettings.rulers);
-  const dispatch: AppDispatch = useDispatch();
 
   const [editorPos, setEditorPos] = useState<Position | null>(null);
   const editorPosChangeEvent = useRef<IDisposable | null>(null);
@@ -124,6 +124,20 @@ export default function Editor(props: Props) {
       setEditorPos(ev.position)
     );
   }, [editorRef]);
+
+  // Update the editor dimensions whenever the navigation panel resizes.
+  // For whatever reason, `automaticLayout` doesn't do its job.
+  const navigationWidth = useSelector(
+    (state: RootState) => state.navigationWidth
+  );
+  useEffect(() => {
+    const editor = editorRef.current?.editor;
+    if (!editor) {
+      return;
+    }
+
+    editor.layout();
+  }, [navigationWidth]);
 
   return (
     <Container className={className}>
