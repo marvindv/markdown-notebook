@@ -18,7 +18,7 @@ create table new_nodes
     -- Required so the following foreign key works.
     unique (node_id, is_directory, owner_id),
     foreign key (parent_id, parent_is_directory, owner_id)
-      references nodes (node_id, is_directory, owner_id)
+      references new_nodes (node_id, is_directory, owner_id)
       on delete cascade,
     foreign key (owner_id) references users (id),
     -- A directory must not have the content set. A file must have content set.
