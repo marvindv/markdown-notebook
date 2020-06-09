@@ -3,7 +3,6 @@
 -- uniqueness was enforces globally and not per user.
 
 pragma foreign_keys = off;
-begin;
 
 create table new_nodes
 (
@@ -82,5 +81,4 @@ begin
 end;
 
 pragma foreign_key_check;
-commit;
 pragma foreign_keys = on;
