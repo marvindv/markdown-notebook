@@ -352,7 +352,9 @@ export function Navigation(props: Props) {
           onNodeNameEditingChange={handleNodeNameEditingChange}
           onNewNode={handleNewNode}
           onNodeMove={handleNodeMove}
-          onSelectCustomRoot={path => setCustomRootPath(path)}
+          onSelectCustomRoot={path =>
+            setCustomRootPath([...pathPrefix, ...path])
+          }
         />
       ) : (
         <NoNodesHint>
