@@ -279,7 +279,7 @@ export function Navigation(props: Props) {
           },
           {
             label: 'Ordner verlassen',
-            onClick: () => setCustomRootPath([]),
+            onClick: () => setCustomRootPath(null),
           },
         ]}
       />
