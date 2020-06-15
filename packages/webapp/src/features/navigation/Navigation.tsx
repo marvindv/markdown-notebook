@@ -130,6 +130,25 @@ export function Navigation(props: Props) {
     () => getNodeFromTree(nodeNameEditingTree, pathPrefix),
     [nodeNameEditingTree, pathPrefix]
   );
+  // The current path adjusted so it can be passed to the Navigation component
+  // if a custom root is selected.
+  // If there is no custom root, this is currentPath.
+  // If there is a custom root and currentPath is not in the custom root,
+  // this will be empty.
+  // If there is a custom root and currentPath is in the custom root,
+  // this will be currentPath but the path to the custom root removed from the
+  // beginning.
+  const currentPathWithCustomRoot = useMemo(() => {
+    if (pathPrefix.length === 0) {
+      return currentPath;
+    }
+
+    if (pathPrefix.every((part, i) => currentPath[i] === part)) {
+      return currentPath.slice(pathPrefix.length);
+    }
+
+    return [];
+  }, [currentPath, pathPrefix]);
 
   const handleFileClick = (path: Path) => {
     dispatch(changeCurrentPath([...pathPrefix, ...path]));
@@ -324,7 +343,7 @@ export function Navigation(props: Props) {
           renderRootHead={false}
           rootNode={customRootNode}
           unsavedNodes={unsavedNodesWithCustomRoot}
-          currentPath={currentPath}
+          currentPath={currentPathWithCustomRoot}
           nodeNameEditingTree={nodeNameEditingWithCustomRoot}
           onFileClick={handleFileClick}
           onSaveClick={handleSaveClick}
