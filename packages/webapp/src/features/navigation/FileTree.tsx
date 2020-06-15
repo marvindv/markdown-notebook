@@ -10,19 +10,13 @@ import { DragObjectWithType, useDrag, useDrop } from 'react-dnd';
 import { getEmptyImage } from 'react-dnd-html5-backend';
 import { DropdownItem } from 'src/components/Dropdown';
 import { DndItemTypes } from 'src/dnd-types';
-import {
-  NodesWithUnsavedChangesTree,
-  UnsavedChangesNode,
-} from 'src/features/nodes/nodesSlice';
+import { UnsavedChangesNode } from 'src/features/nodes/nodesSlice';
 import useCombinedRefs from 'src/hooks/useCombinedRefs';
 import { DirectoryNode, Node, Path } from 'src/models/node';
 import styled, { css } from 'styled-components';
 import CustomDragLayer from './CustomDragLayer';
 import { getCollisionFreeName } from './helper';
-import {
-  NodeNameEditingTree,
-  NodeNameEditingTreeNode,
-} from './nodeNameEditingSlice';
+import { NodeNameEditingTreeNode } from './nodeNameEditingSlice';
 import TreeNodeHead from './TreeNodeHead';
 
 const StyledTreeNodeHead = styled(TreeNodeHead)``;
@@ -88,6 +82,7 @@ type NodeProps<T> = T & {
   onNodeNameEditingChange: (path: Path, isTextEditing: boolean) => void;
   onNewNode: (parentPath: Path, node: Node) => void;
   onNodeMove: (node: Path, newParent: Path) => void;
+  onSelectCustomRoot: (node: Path) => void;
 };
 
 export interface NodeDragObject extends DragObjectWithType {
@@ -243,6 +238,10 @@ function TreeNode(
         },
       },
       {
+        label: 'Nur diesen Ordner anzeigen',
+        onClick: () => props.onSelectCustomRoot(props.path),
+      },
+      {
         isSpacer: true,
       }
     );
@@ -380,39 +379,48 @@ export interface Props {
    */
   renderRootHead?: boolean;
   rootNode: DirectoryNode;
-  unsavedNodes: NodesWithUnsavedChangesTree;
+  unsavedNodes: UnsavedChangesNode | undefined;
   currentPath: Path;
   onFileClick: (path: Path) => void;
   onSaveClick: (path: Path) => void;
   onDeleteClick: (path: Path) => void;
-  nodeNameEditingTree: NodeNameEditingTree;
+  nodeNameEditingTree: NodeNameEditingTreeNode | undefined;
   onNodeNameChange: (path: Path, newName: string) => void;
   onNodeNameEditingChange: (path: Path, isTextEditing: boolean) => void;
   onNewNode: (parentPath: Path, node: Node) => void;
   onNodeMove: (nodePath: Path, newParent: Path) => void;
+  onSelectCustomRoot: (path: Path) => void;
 }
 
 /**
  * Renders a complete file structure based on a given root node.
+ *
+ * TODO: As soon as this component is to be used somewhere other than just the
+ * Navigation component, make the dropdown items of the TreeNode component a
+ * prop so the dropdown of file and directory nodes can be adjusted to match
+ * the parents context.
  *
  * @export
  * @param {Props} props
  * @returns
  */
 export default function FileTree(props: Props) {
+  const { className, rootNode, unsavedNodes, currentPath } = props;
+
   const renderRootHead =
     typeof props.renderRootHead === 'boolean' ? props.renderRootHead : true;
+
   return (
-    <FileTreeContainer className={props.className}>
+    <FileTreeContainer className={className}>
       <CustomDragLayer />
       <TreeNode
         {...props}
         renderRootHead={renderRootHead}
         isRoot={true}
-        node={props.rootNode}
-        unsavedNodesSubtree={props.unsavedNodes}
+        node={rootNode}
+        unsavedNodesSubtree={unsavedNodes}
         path={[]}
-        selectedPath={props.currentPath}
+        selectedPath={currentPath}
         indentLevel={0}
       />
     </FileTreeContainer>
