@@ -108,6 +108,7 @@ export interface Props {
   dropdownItems: DropdownItem[];
   isTextEditing: boolean;
   onClick: () => void;
+  onDoubleClick: () => void;
   onTextChange: (newText: string) => void;
   onTextEditingChange: (isTextEditing: boolean) => void;
 }
@@ -154,6 +155,7 @@ export default function TreeNodeHead(props: Props) {
       className={props.className}
       ref={ref}
       onClick={props.onClick}
+      onDoubleClick={props.onDoubleClick}
       showDropdown={showDropdown}
       editMode={!!props.isTextEditing}
     >

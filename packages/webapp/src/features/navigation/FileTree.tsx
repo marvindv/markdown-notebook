@@ -288,6 +288,9 @@ function TreeNode(
               ? setCollapse(!collapsed)
               : props.onFileClick(props.path)
           }
+          onDoubleClick={() =>
+            node.isDirectory && props.onSelectCustomRoot(props.path)
+          }
           onTextChange={newText => props.onNodeNameChange(props.path, newText)}
           onTextEditingChange={isTextEditing =>
             props.onNodeNameEditingChange(props.path, isTextEditing)
