@@ -2,7 +2,7 @@ import React from 'react';
 import { Node, NodeName, Path } from 'src/models/node';
 
 /**
- * The interface each api must implement.
+ * Defines a set of methods each api that provides notes must implement.
  *
  * @export
  * @abstract

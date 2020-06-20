@@ -13,7 +13,7 @@ interface LocalStorage {
 }
 
 /**
- * Api to store notebooks in the browsers localStorage.
+ * Api to store notes in the browsers localStorage.
  *
  * @export
  * @class LocalStorageApi

@@ -57,7 +57,7 @@ const Form = styled.form`
 
 /**
  * API implementation for the backend server of this project, allowing for
- * centralized stored notebooks for multiple users, secured by password
+ * centralized stored notes for multiple users, secured by password
  * authentication.
  *
  * @export
