@@ -7,7 +7,7 @@ import {
   NodeTreeNode,
   removePathFromTree,
   setLeafValue,
-} from 'src/features/nodes/NodeTree';
+} from 'src/features/nodes/nodeTree';
 import { Path } from 'src/models/node';
 
 export type NodeNameEditingTree = NodeTree<true>;

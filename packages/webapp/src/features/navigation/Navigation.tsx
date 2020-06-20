@@ -17,7 +17,7 @@ import { getHasUnsavedChanges } from 'src/selectors';
 import { AppDispatch } from 'src/store';
 import styled from 'styled-components';
 import exportAsZip from '../nodes/exporter';
-import { getNodeFromTree } from '../nodes/NodeTree';
+import { getNodeFromTree } from '../nodes/nodeTree';
 import { changeCurrentPath } from './currentPathSlice';
 import FileTree from './FileTree';
 import { getCollisionFreeName } from './helper';

@@ -27,7 +27,7 @@ import {
   removePathFromTree,
   replaceTreePath,
   setLeafValue,
-} from './NodeTree';
+} from './nodeTree';
 
 export interface State {
   isFetching: boolean;
