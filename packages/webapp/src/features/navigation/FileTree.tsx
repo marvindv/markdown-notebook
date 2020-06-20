@@ -104,10 +104,10 @@ function TreeNode(
 
   const deleteConfirmText = useMemo(() => {
     if (node.isDirectory) {
-      return `Möchtest du den Ordner ${node.name} inklusive Inhalt wirklich löschen?`;
+      return `Are you sure you want to delete the ${node.name} folder and its contents?`;
     }
 
-    return `Möchtest du die Datei ${node.name} wirklich löschen?`;
+    return `Are you sure you want to delete the ${node.name} note?`;
   }, [node]);
 
   const [{ isDragging }, dragRef, preview] = useDrag<
@@ -208,10 +208,10 @@ function TreeNode(
   if (node.isDirectory) {
     dropdownItems.push(
       {
-        label: 'Neue Notiz',
+        label: 'New note',
         onClick: () => {
           const name = getCollisionFreeName(
-            'Neue Notiz',
+            'New note',
             Object.keys(node.children)
           );
           setCollapse(false);
@@ -223,10 +223,10 @@ function TreeNode(
         },
       },
       {
-        label: 'Neuer Ordner',
+        label: 'New directory',
         onClick: () => {
           const name = getCollisionFreeName(
-            'Neuer Ordner',
+            'New directory',
             Object.keys(node.children)
           );
           setCollapse(false);
@@ -238,7 +238,7 @@ function TreeNode(
         },
       },
       {
-        label: 'Nur diesen Ordner anzeigen',
+        label: 'Show only this directory',
         onClick: () => props.onSelectCustomRoot(props.path),
       },
       {
@@ -249,16 +249,16 @@ function TreeNode(
 
   dropdownItems.push(
     {
-      label: 'Speichern',
+      label: 'Save',
       disabled: !saveButtonEnabled,
       onClick: () => props.onSaveClick(props.path),
     },
     {
-      label: 'Name ändern',
+      label: 'Change name',
       onClick: () => props.onNodeNameEditingChange(props.path, true),
     },
     {
-      label: 'Löschen',
+      label: 'Delete',
       onClick: () => {
         const decision = window.confirm(deleteConfirmText);
         if (decision) {

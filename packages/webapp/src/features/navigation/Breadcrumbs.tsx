@@ -50,7 +50,7 @@ export default function Breadcrumbs(props: Props) {
         <Breadcrumb key={i}>{el}</Breadcrumb>
       ))}
       {unsavedChangesIndicator && (
-        <BreadcrumbsUnsavedChangesIndicator title='Diese Datei enthält ungespeicherte Änderungen' />
+        <BreadcrumbsUnsavedChangesIndicator title='This file contains unsaved changes' />
       )}
     </Container>
   );

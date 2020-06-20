@@ -210,8 +210,8 @@ export default class LocalStorageApi extends Api {
   getLoginButtonText() {
     return (
       <div>
-        <div>In diesem Browser</div>
-        <small>ohne Synchronisation</small>
+        <div>In this browser</div>
+        <small>without synchronization</small>
       </div>
     );
   }
@@ -221,8 +221,8 @@ export default class LocalStorageApi extends Api {
       return (
         <div>
           <div>
-            <strong>Achtung!</strong> Sobald Cookies und Browserdaten gelöscht
-            werden, gehen auch alle gespeicherten Notizen verloren.
+            <strong>Attention!</strong> As soon as cookies and browser data are
+            deleted, all your notes are lost.
           </div>
 
           <Button
@@ -231,7 +231,7 @@ export default class LocalStorageApi extends Api {
             onClick={props.onDone}
             style={{ marginTop: '1rem' }}
           >
-            Verstanden
+            Confirm
           </Button>
         </div>
       );

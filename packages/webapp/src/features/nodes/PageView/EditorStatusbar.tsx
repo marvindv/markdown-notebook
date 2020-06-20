@@ -90,7 +90,7 @@ export default function EditorStatusbar(props: Props) {
 
       {editorPos ? (
         <StatusbarLabel style={{ marginLeft: 'auto' }}>
-          Zeile {editorPos.lineNumber}, Spalte {editorPos.column}
+          Line {editorPos.lineNumber}, Column {editorPos.column}
         </StatusbarLabel>
       ) : (
         <StatusbarLabel>&nbsp;</StatusbarLabel>

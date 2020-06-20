@@ -66,7 +66,7 @@ export default function LoginPage() {
   return (
     <Container>
       <h1>markdown-notebook</h1>
-      <p>Wie möchtest du deine Notizen speichern?</p>
+      <p>How do you want to save your notes?</p>
 
       {Object.keys(apis).map(
         apiId =>

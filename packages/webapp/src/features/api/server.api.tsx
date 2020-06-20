@@ -109,7 +109,7 @@ export default class ServerApi extends Api {
     return (
       <div>
         <div>Login</div>
-        <small>auf {url}</small>
+        <small>on {url}</small>
       </div>
     );
   }
@@ -158,20 +158,19 @@ export default class ServerApi extends Api {
       if (error) {
         if (error instanceof InvalidCredentialsError) {
           errorBlock = (
-            <ErrorText>Die eingegebenen Zugangsdaten sind falsch.</ErrorText>
+            <ErrorText>The login data you entered is incorrect.</ErrorText>
           );
         } else if (error instanceof ConnectionError) {
           errorBlock = (
             <ErrorText>
-              Es konnte keiner Verbindung zum Server hergestellt werden. Bitte
-              versuche es später noch einmal.
+              A connection to the server could not be established. Please try
+              again later.
             </ErrorText>
           );
         } else {
           errorBlock = (
             <ErrorText>
-              Es ist ein Fehler aufgetreten. Bitte versuche es später noch
-              einmal.
+              An error has occurred. Please try again later.
             </ErrorText>
           );
         }
@@ -182,14 +181,14 @@ export default class ServerApi extends Api {
           {errorBlock}
 
           <Form onSubmit={handleSubmit}>
-            <label htmlFor=''>Benutzername</label>
+            <label htmlFor=''>Username</label>
             <Input
               ref={usernameInputRef}
               type='text'
               value={username}
               onChange={e => setUsername(e.target.value)}
             />
-            <label htmlFor=''>Passwort</label>
+            <label htmlFor=''>Password</label>
             <Input
               type='password'
               value={password}

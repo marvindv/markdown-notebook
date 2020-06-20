@@ -191,7 +191,7 @@ export function Navigation(props: Props) {
 
   const handleNewRootFile = () => {
     const name = getCollisionFreeName(
-      'Neue Notiz',
+      'New note',
       Object.keys(rootNode.children)
     );
     handleNewNode([], { isDirectory: false, content: '', name });
@@ -199,7 +199,7 @@ export function Navigation(props: Props) {
 
   const handleNewRootDirectory = () => {
     const name = getCollisionFreeName(
-      'Neuer Ordner',
+      'New directory',
       Object.keys(rootNode.children)
     );
     handleNewNode([], { isDirectory: true, children: {}, name });
@@ -216,7 +216,7 @@ export function Navigation(props: Props) {
     const name = nodePath[nodePath.length - 1];
     const newPathString = '/' + newParentPath.join('/');
     const decision = window.confirm(
-      `Möchtest du wirklich "${name}" nach "${newPathString}" verschieben?`
+      `Are you sure you want to move "${name}" to "${newPathString}"?`
     );
     if (decision) {
       dispatch(moveNode({ nodePath, newParentPath }));
@@ -241,11 +241,11 @@ export function Navigation(props: Props) {
         onToggleClick={() => setShowSettingsDropdown(!showSettingsDropdown)}
         items={[
           {
-            label: 'Neue Notiz',
+            label: 'New note',
             onClick: () => {
               setShowSettingsDropdown(false);
               const name = getCollisionFreeName(
-                'Neue Notiz',
+                'New note',
                 Object.keys(customRootNode.children)
               );
               // Don't pass pathPrefix here since handleNewNodes prepends the
@@ -258,11 +258,11 @@ export function Navigation(props: Props) {
             },
           },
           {
-            label: 'Neuer Ordner',
+            label: 'New directory',
             onClick: () => {
               setShowSettingsDropdown(false);
               const name = getCollisionFreeName(
-                'Neuer Ordner',
+                'New directory',
                 Object.keys(customRootNode.children)
               );
               // Don't pass pathPrefix here since handleNewNodes prepends the
@@ -278,7 +278,7 @@ export function Navigation(props: Props) {
             isSpacer: true,
           },
           {
-            label: 'Ordner verlassen',
+            label: 'Leave directory',
             onClick: () => setCustomRootPath(null),
           },
         ]}
@@ -300,20 +300,20 @@ export function Navigation(props: Props) {
         onToggleClick={() => setShowSettingsDropdown(!showSettingsDropdown)}
         items={[
           {
-            label: 'Neue Notiz',
+            label: 'New note',
             onClick: () => handleNewRootFile(),
           },
           {
-            label: 'Neuer Ordner',
+            label: 'New directory',
             onClick: () => handleNewRootDirectory(),
           },
           { isSpacer: true },
           {
-            label: 'Alles exportieren',
+            label: 'Export all',
             onClick: () => handleExportClick(),
           },
           {
-            label: 'Speicherort ändern',
+            label: 'Change storage',
             onClick: () => history.push('/login'),
           },
         ]}
@@ -329,7 +329,7 @@ export function Navigation(props: Props) {
 
         <Button
           themeColor='secondary'
-          title='Alle speichern'
+          title='Save all'
           clear={true}
           disabled={!hasUnsavedChanges}
           onClick={() => handleSaveClick()}
@@ -359,10 +359,10 @@ export function Navigation(props: Props) {
       ) : (
         <NoNodesHint>
           <div>
-            <strong>Du hast noch keine Notizen.</strong>
+            <strong>You don't have any notes yet.</strong>
             <div>
-              Erstelle über das <FontAwesomeIcon icon={faBars} size={'sm'} />
-              -Menü Ordner und Notizen.
+              Use the <FontAwesomeIcon icon={faBars} size={'sm'} /> menu to
+              create notes and folders.
             </div>
           </div>
         </NoNodesHint>

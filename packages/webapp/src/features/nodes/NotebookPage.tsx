@@ -274,7 +274,7 @@ export default function NotebookPage(): JSX.Element {
       <ContentWrapper>
         <PageContainer>
           <NoPageNotice>
-            <div>Notizen werden geladen &hellip;</div>
+            <div>Loading notes &hellip;</div>
             <div
               style={{
                 textAlign: 'center',
@@ -300,7 +300,7 @@ export default function NotebookPage(): JSX.Element {
             >
               <FontAwesomeIcon icon={faExclamationTriangle} size='2x' />
             </div>
-            <div>Notizen konnten nicht geladen werden</div>
+            <div>Failed to load notes</div>
             <small
               style={{
                 textAlign: 'center',
@@ -377,14 +377,14 @@ export default function NotebookPage(): JSX.Element {
       </>
     );
   } else {
-    pageContent = <NoPageNotice>Wähle eine Notiz aus.</NoPageNotice>;
+    pageContent = <NoPageNotice>Choose a note.</NoPageNotice>;
   }
 
   return (
     <>
       <Prompt
         when={hasUnsavedNodes}
-        message='Du hast ungespeicherte Änderungen. Diese gehen verloren, wenn du diese Seite verlässt.'
+        message='You have unsaved changes. These are lost when you leave this page.'
       />
 
       <ContentWrapper
