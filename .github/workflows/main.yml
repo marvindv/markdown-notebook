@@ -1,0 +1,48 @@
+name: CI/CD
+
+on:
+  push:
+    branches:
+      - master
+
+jobs:
+  docker:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v1
+      - name: Docker login
+        run: docker login -u ${{ secrets.DOCKER_USER }} -p ${{ secrets.DOCKER_PASSWORD }}
+
+      - name: Build and tag webapp
+        run: |
+          cd packages/webapp
+          docker build -t webapp .
+
+      - name: Build and tag backend
+        run: |
+          cd packages/backend
+          docker build -t backend .
+
+      - name: Build load-balancer
+        run: |
+          cd packages/load-balancer
+          docker build -t load-balancer .
+
+      - name: Tags
+        run: |
+          docker tag webapp ${{ secrets.DOCKER_USER }}/markdown-notebook-webapp:${{ github.sha }}
+          docker tag webapp ${{ secrets.DOCKER_USER }}/markdown-notebook-webapp:latest
+          docker tag backend ${{ secrets.DOCKER_USER }}/markdown-notebook-backend:${{ github.sha }}
+          docker tag backend ${{ secrets.DOCKER_USER }}/markdown-notebook-backend:latest
+          docker tag load-balancer ${{ secrets.DOCKER_USER }}/markdown-notebook-load-balancer:${{ github.sha }}
+          docker tag load-balancer ${{ secrets.DOCKER_USER }}/markdown-notebook-load-balancer:latest
+
+      - name: Push
+        run: |
+          docker push ${{ secrets.DOCKER_USER }}/markdown-notebook-webapp:${{ github.sha }}
+          docker push ${{ secrets.DOCKER_USER }}/markdown-notebook-webapp:latest
+          docker push ${{ secrets.DOCKER_USER }}/markdown-notebook-backend:${{ github.sha }}
+          docker push ${{ secrets.DOCKER_USER }}/markdown-notebook-backend:latest
+          docker push ${{ secrets.DOCKER_USER }}/markdown-notebook-load-balancer:${{ github.sha }}
+          docker push ${{ secrets.DOCKER_USER }}/markdown-notebook-load-balancer:latest
