@@ -11,13 +11,18 @@ jobs:
 
     steps:
       - uses: actions/checkout@v1
+
+      - name: Set commit hash var
+        id: vars
+        run: echo "::set-output name=sha_short::$(git rev-parse --short HEAD)"
+
       - name: Docker login
         run: docker login -u ${{ secrets.DOCKER_USER }} -p ${{ secrets.DOCKER_PASSWORD }}
 
       - name: Build and tag webapp
         run: |
           cd packages/webapp
-          docker build -t webapp .
+          docker build --build-arg app_version=${{ steps.vars.outputs.sha_short }} -t webapp .
 
       - name: Build and tag backend
         run: |

@@ -52,7 +52,7 @@
   },
   "scripts": {
     "start": "react-app-rewired start",
-    "build": "CI=false GENERATE_SOURCEMAP=false REACT_APP_VERSION=`git rev-parse --short HEAD` react-app-rewired build",
+    "build": "CI=false GENERATE_SOURCEMAP=false react-app-rewired build",
     "test": "react-app-rewired test",
     "eject": "react-scripts eject"
   },
