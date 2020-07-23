@@ -3,16 +3,19 @@
 markdown-notebook is a self-hosted web application to organize and write your
 notes in Markdown.
 
-Your notes are organized in files as nested in directories as you like.
+Your notes are organized in files and nested in directories as you like.
 The backend stores all your notes in a SQLite database file.
 
 ## Docker deployment
 
-Make sure you have Docker and `docker-compose` installed.
+The simplest way to deploy this is by using the prebuild docker images on
+Docker Hub for the backend, webapp and load-balancer.
 
-Create a `.env` file derived from `.env.template` and fill in a random jwt
-secret and the path to the directory where the database file should be stored on
-the host. It should look like this:
+First make sure you have Docker and `docker-compose` installed.
+
+Create a `.env` file derived from `.env.template` in an empty directory and fill
+in a random jwt secret and the path to the directory where the database file
+should be stored on the host. It should look like this:
 
 ```dotenv
 JWT_SECRET=<some random secret>
@@ -20,7 +23,9 @@ PORT=8430
 DATABASE_STORAGE_DIR=/var/lib/markdown-notebook
 ```
 
-Then the project can be run using `docker-compose`. All commands are executed
+Then copy `docker-compose.yml` from this repository into the same directory.
+
+Now the project can be run using `docker-compose`. All commands are executed
 in the directory that contains a valid `.env` and the `docker-compose.yml` file:
 
 ```bash
@@ -31,14 +36,22 @@ $ docker-compose up
 # Start webapp, backend and load balancer in the background.
 $ docker-compose up -d
 
-# Rebuild the images after changes to the source of one or more services.
-$ docker-compose build
-
 # Stop all services.
 $ docker-compose stop
 
 # Stop and remove services.
 $ docker-compose down
+```
+
+Unless you modify the compose file the services will be restarted in case they
+crash or on reboot as long as they are not stopped manually.
+
+To update to the latest version of all services, run the following commands:
+
+```bash
+$ docker-compose stop
+$ docker-compose pull
+$ docker-compose up -d
 ```
 
 Creating and deleting a user as well as changing the password is possible using
@@ -53,6 +66,20 @@ $ docker-compose run backend change_password
 
 # Delete a user:
 $ docker-compose run backend delete_user
+```
+
+## Docker deployment from source
+
+If you wish to deploy from source clone this repository, create a `.env` file
+based on `.env.template` as described above and pass the
+`docker-compose.build.yml` compose file to `docker-compose` using the `-f`
+option.
+
+Additional to the commands described above this might be helpful:
+
+```bash
+# Rebuild the images after changes to the source of one or more services.
+$ app_version=`git rev-parse --short HEAD` docker-compose -f docker-compose.build.yml build
 ```
 
 ## Install build tools and dependencies

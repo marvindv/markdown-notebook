@@ -2,11 +2,14 @@ version: "3"
 
 services:
   webapp:
-    image: marvindv/markdown-notebook-webapp:latest
+    build:
+      context: ./packages/webapp
+      args:
+        - app_version
     restart: unless-stopped
 
   backend:
-    image: marvindv/markdown-notebook-backend:latest
+    build: ./packages/backend
     environment:
       MN_PORT: 8000
       MN_DATABASE_URL: /data/markdown-notebook.sqlite
@@ -18,7 +21,7 @@ services:
   # The loadbalancer expects the webapp service to listen on port 80 and the
   # backend on port 8000.
   loadbalancer:
-    image: marvindv/markdown-notebook-load-balancer:latest
+    build: ./packages/load-balancer
     depends_on:
       - webapp
       - backend
