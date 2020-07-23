@@ -316,6 +316,8 @@ export function Navigation(props: Props) {
             label: 'Change storage',
             onClick: () => history.push('/login'),
           },
+          { isSpacer: true },
+          { label: 'Version ' + process.env.REACT_APP_VERSION, textOnly: true },
         ]}
       />
     );

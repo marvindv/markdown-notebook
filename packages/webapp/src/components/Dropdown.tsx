@@ -70,7 +70,8 @@ const Item = styled.button`
 `;
 
 export interface BaseDropdownItem {
-  isSpacer?: boolean | undefined;
+  isSpacer?: boolean;
+  textOnly?: boolean;
   label?: string;
   disabled?: boolean;
   onClick?: () => void;
@@ -78,6 +79,7 @@ export interface BaseDropdownItem {
 
 export interface SpacerDropdownItem extends BaseDropdownItem {
   isSpacer: true;
+  textOnly?: undefined;
   label?: undefined;
   disabled?: undefined;
   onClick?: undefined;
@@ -85,12 +87,24 @@ export interface SpacerDropdownItem extends BaseDropdownItem {
 
 export interface ButtonDropdownItem extends BaseDropdownItem {
   isSpacer?: undefined;
+  textOnly?: undefined;
   label: string;
   disabled?: boolean;
   onClick?: () => void;
 }
 
-export type DropdownItem = ButtonDropdownItem | SpacerDropdownItem;
+export interface TextDropdownItem extends BaseDropdownItem {
+  isSpacer?: undefined;
+  textOnly: true;
+  label: string;
+  disabled?: undefined;
+  onClick?: undefined;
+}
+
+export type DropdownItem =
+  | ButtonDropdownItem
+  | SpacerDropdownItem
+  | TextDropdownItem;
 
 export interface Props {
   className?: string;
@@ -151,7 +165,7 @@ export function Dropdown(props: Props) {
             <Item
               key={i}
               onClick={ev => handleClick(ev, item.onClick)}
-              disabled={item.disabled || item.isSpacer}
+              disabled={item.disabled || item.isSpacer || item.textOnly}
             >
               {item.label}
             </Item>
