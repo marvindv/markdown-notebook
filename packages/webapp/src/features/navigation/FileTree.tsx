@@ -13,6 +13,7 @@ import { DndItemTypes } from 'src/dnd-types';
 import { UnsavedChangesNode } from 'src/features/nodes/nodesSlice';
 import useCombinedRefs from 'src/hooks/useCombinedRefs';
 import { DirectoryNode, Node, Path } from 'src/models/node';
+import { getTreeNodePayload, hasTreeNodeChildren } from 'src/models/tree';
 import styled, { css } from 'styled-components';
 import CustomDragLayer from './CustomDragLayer';
 import { getCollisionFreeName } from './helper';
@@ -192,13 +193,14 @@ function TreeNode(
     ? collapsed
       ? faChevronRight
       : faChevronDown
-    : unsavedNodesSubtree === true
+    : unsavedNodesSubtree?.payload === true
     ? faFileAltSolid
     : faFileAltRegular;
 
   const saveButtonEnabled =
-    typeof props.unsavedNodesSubtree === 'object' ||
-    props.unsavedNodesSubtree === true;
+    unsavedNodesSubtree &&
+    (hasTreeNodeChildren(unsavedNodesSubtree) ||
+      getTreeNodePayload(unsavedNodesSubtree, []) === true);
 
   const isActive =
     !node.isDirectory &&
@@ -281,7 +283,7 @@ function TreeNode(
           className={isActive ? 'active' : ''}
           icon={icon}
           text={props.node.name}
-          isTextEditing={props.nodeNameEditingTree === true}
+          isTextEditing={props.nodeNameEditingTree?.payload === true}
           dropdownItems={dropdownItems}
           onClick={() =>
             node.isDirectory
@@ -333,11 +335,11 @@ function DirectoryTreeNodeBody(
     });
   }, [props.node.children]);
 
-  // If this is the root, discard the given indentLevel and start with 0.
   if (props.collapsed) {
     return <></>;
   }
 
+  // If this is the root, discard the given indentLevel and start with 0.
   return (
     <>
       {sortedChildrenNames.map(name => (
@@ -346,21 +348,13 @@ function DirectoryTreeNodeBody(
           isRoot={false}
           renderRootHead={false}
           node={props.node.children[name]}
-          unsavedNodesSubtree={
-            typeof props.unsavedNodesSubtree === 'object'
-              ? props.unsavedNodesSubtree[name]
-              : undefined
-          }
+          unsavedNodesSubtree={props.unsavedNodesSubtree?.children?.[name]}
           path={[...props.path, name]}
           key={name}
           indentLevel={
             !props.renderRootHead && props.isRoot ? 0 : props.indentLevel + 1
           }
-          nodeNameEditingTree={
-            typeof props.nodeNameEditingTree === 'object'
-              ? props.nodeNameEditingTree[name]
-              : undefined
-          }
+          nodeNameEditingTree={props.nodeNameEditingTree?.children?.[name]}
         />
       ))}
     </>

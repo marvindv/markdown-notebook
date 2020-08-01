@@ -21,13 +21,15 @@ import Node, {
 } from 'src/models/node';
 import {
   changeTreeNodeName,
-  getNodeFromTree,
-  NodeTree,
-  NodeTreeNode,
-  removePathFromTree,
-  replaceTreePath,
-  setLeafValue,
-} from './nodeTree';
+  createEmptyTree,
+  getTreeNode,
+  getTreeNodeChildNames,
+  hasTreeNodeChildren,
+  moveSubtree,
+  removeTreeNode,
+  setTreeNodePayload,
+  Tree,
+} from 'src/models/tree';
 
 export interface State {
   isFetching: boolean;
@@ -37,9 +39,9 @@ export interface State {
   root: DirectoryNode;
 }
 
-export type NodesWithUnsavedChangesTree = NodeTree<true>;
+export type NodesWithUnsavedChangesTree = Tree<true>;
 
-export type UnsavedChangesNode = NodeTreeNode<true>;
+export type UnsavedChangesNode = Tree<true>;
 
 /**
  * The characters that are not allowed in a node name.
@@ -182,7 +184,7 @@ async function deepSaveMany(
   path: Path,
   startUnsavedNode: UnsavedChangesNode | undefined
 ): Promise<void> {
-  if (startUnsavedNode === true) {
+  if (startUnsavedNode?.payload === true) {
     await dispatch(savePageContent({ path }));
     return;
   }
@@ -192,8 +194,8 @@ async function deepSaveMany(
   }
 
   await Promise.allSettled(
-    Object.keys(startUnsavedNode).map(child =>
-      deepSaveMany(dispatch, [...path, child], startUnsavedNode[child])
+    getTreeNodeChildNames(startUnsavedNode).map(child =>
+      deepSaveMany(dispatch, [...path, child], startUnsavedNode.children[child])
     )
   );
   return;
@@ -212,12 +214,11 @@ export const saveManyPagesContent = createAsyncThunk(
     const { unsavedNodes } = state;
 
     // Find the node matching the given path in the unsavedNodes state.
-    const unsavedNode = getNodeFromTree(unsavedNodes, path);
-
-    if (unsavedNode === true) {
+    const unsavedNode = getTreeNode(unsavedNodes, path);
+    if (unsavedNode?.payload === true) {
       // path points to a file.
       return thunkApi.dispatch(savePageContent({ path }));
-    } else if (typeof unsavedNode === 'object') {
+    } else if (unsavedNode && hasTreeNodeChildren(unsavedNode)) {
       // path points to a directory.
       return deepSaveMany(thunkApi.dispatch, path, unsavedNode);
     } else {
@@ -242,23 +243,25 @@ export const moveNode = createAsyncThunk(
   }
 );
 
+const initialState: State = {
+  isFetching: false,
+  fetchError: null,
+  savePending: false,
+  unsavedNodes: createEmptyTree(),
+  root: {
+    name: '/',
+    isDirectory: true,
+    children: {},
+  },
+};
+
 /**
  * Encapsulates the state that contains all notebook nodes as well as fetching,
  * error and unsaved nodes state.
  */
 const nodesSlice = createSlice({
   name: 'nodes',
-  initialState: {
-    isFetching: false,
-    fetchError: null,
-    savePending: false,
-    unsavedNodes: {},
-    root: {
-      name: '/',
-      isDirectory: true,
-      children: {},
-    },
-  } as State,
+  initialState,
   reducers: {
     changePageContent(
       state,
@@ -291,7 +294,7 @@ const nodesSlice = createSlice({
         state.root.children[rootNode.name] = rootNode;
       }
 
-      state.unsavedNodes = {};
+      state.unsavedNodes = createEmptyTree();
     });
 
     builder.addCase(addNode.rejected, (state, { error }) => {
@@ -437,7 +440,7 @@ const nodesSlice = createSlice({
       delete oldParent.children[name];
 
       // Update unsavedChanges tree.
-      replaceTreePath(state.unsavedNodes, oldPath, newPath);
+      moveSubtree(state.unsavedNodes, oldPath, newParentPath);
     });
   },
 });
@@ -446,7 +449,7 @@ function addToUnsavedChanges(
   path: Path,
   unsavedNodes: NodesWithUnsavedChangesTree
 ) {
-  setLeafValue(unsavedNodes, path, true);
+  setTreeNodePayload(unsavedNodes, path, true);
 }
 
 /**
@@ -483,7 +486,7 @@ function removeFromUnsavedChanges(
   path: Path,
   unsavedChanges: NodesWithUnsavedChangesTree
 ) {
-  removePathFromTree(unsavedChanges, path);
+  removeTreeNode(unsavedChanges, path);
 }
 
 export const { changePageContent } = nodesSlice.actions;

@@ -1,17 +1,16 @@
 import { createSlice, PayloadAction } from '@reduxjs/toolkit';
 import { changeCurrentApi } from 'src/features/api/apiSlice';
 import { changeNodeName } from 'src/features/nodes/nodesSlice';
+import { Path } from 'src/models/node';
 import {
   changeTreeNodeName,
-  NodeTree,
-  NodeTreeNode,
-  removePathFromTree,
-  setLeafValue,
-} from 'src/features/nodes/nodeTree';
-import { Path } from 'src/models/node';
+  createEmptyTree,
+  setTreeNodePayload,
+  Tree,
+} from 'src/models/tree';
 
-export type NodeNameEditingTree = NodeTree<true>;
-export type NodeNameEditingTreeNode = NodeTreeNode<true>;
+export type NodeNameEditingTree = Tree<true>;
+export type NodeNameEditingTreeNode = Tree<true>;
 
 /**
  * Encapsulates the state describing for which nodes their name is currently
@@ -19,7 +18,7 @@ export type NodeNameEditingTreeNode = NodeTreeNode<true>;
  */
 const nodeNameEditingSlice = createSlice({
   name: 'nodeNameEditing',
-  initialState: {} as NodeNameEditingTree,
+  initialState: createEmptyTree<true>(),
   reducers: {
     /**
      * Sets the editing state of the node associated to the given path.
@@ -33,16 +32,16 @@ const nodeNameEditingSlice = createSlice({
     ) {
       const { path, isEditing } = action.payload;
       if (isEditing) {
-        setLeafValue(state, path, true);
+        setTreeNodePayload(state, path, true);
       } else {
-        removePathFromTree(state, path);
+        setTreeNodePayload(state, path, undefined);
       }
     },
   },
   extraReducers: builder => {
     // Reset whenever the api is changed.
     builder.addCase(changeCurrentApi, () => {
-      return {};
+      return createEmptyTree();
     });
 
     builder.addCase(changeNodeName.fulfilled, (state, { payload }) => {

@@ -12,12 +12,12 @@ import {
   saveManyPagesContent,
 } from 'src/features/nodes/nodesSlice';
 import { Node, Path } from 'src/models/node';
+import { getTreeNode } from 'src/models/tree';
 import { RootState } from 'src/reducers';
 import { getHasUnsavedChanges } from 'src/selectors';
 import { AppDispatch } from 'src/store';
 import styled from 'styled-components';
 import exportAsZip from '../nodes/exporter';
-import { getNodeFromTree } from '../nodes/nodeTree';
 import { changeCurrentPath } from './currentPathSlice';
 import FileTree from './FileTree';
 import { getCollisionFreeName } from './helper';
@@ -123,11 +123,11 @@ export function Navigation(props: Props) {
   // Traverse through the unsaved changes and name editing trees to the node
   // represented by pathPrefix to match the structure of customRootNode.
   const unsavedNodesWithCustomRoot = useMemo(
-    () => getNodeFromTree(unsavedNodes, pathPrefix),
+    () => getTreeNode(unsavedNodes, pathPrefix),
     [unsavedNodes, pathPrefix]
   );
   const nodeNameEditingWithCustomRoot = useMemo(
-    () => getNodeFromTree(nodeNameEditingTree, pathPrefix),
+    () => getTreeNode(nodeNameEditingTree, pathPrefix),
     [nodeNameEditingTree, pathPrefix]
   );
   // The current path adjusted so it can be passed to the Navigation component

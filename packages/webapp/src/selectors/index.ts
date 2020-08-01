@@ -1,6 +1,7 @@
 import { createSelector } from '@reduxjs/toolkit';
 import { UnsavedChangesNode } from 'src/features/nodes/nodesSlice';
 import { Node } from 'src/models/node';
+import { hasTreeNodeChildren } from 'src/models/tree';
 import { RootState } from 'src/reducers';
 
 const getCurrentPath = (state: RootState) => state.currentPath;
@@ -28,7 +29,7 @@ export const getCurrentNode = createSelector(
  */
 export const getHasUnsavedChanges = createSelector(
   [getUnsavedNodes],
-  unsavedNodes => Object.keys(unsavedNodes).length > 0
+  unsavedNodes => hasTreeNodeChildren(unsavedNodes)
 );
 
 /**
@@ -40,14 +41,14 @@ export const getHasCurrentNodeUnsavedChanges = createSelector(
   (currentPath, unsavedNodes) => {
     let node: UnsavedChangesNode | undefined = unsavedNodes;
     for (const part of currentPath) {
-      if (typeof node !== 'object') {
+      if (!node) {
         return false;
       }
 
-      node = node?.[part];
+      node = node.children[part];
     }
 
-    if (node === true) {
+    if (node?.payload === true) {
       return true;
     }
 
