@@ -81,5 +81,10 @@
     "packages/**/*.{js,jsx,ts,tsx,json,css,scss,md}": [
       "prettier --write"
     ]
+  },
+  "jest": {
+    "moduleNameMapper": {
+      "monaco-editor": "<rootDir>/node_modules/react-monaco-editor"
+    }
   }
 }
