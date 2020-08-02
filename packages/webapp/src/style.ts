@@ -9,6 +9,11 @@ export const GlobalStyle = createGlobalStyle`
     height: 100%;
   }
 
+  body {
+    background-color: ${({ theme }) => theme.baseColors.contentBackground};
+    color: ${({ theme }) => theme.baseColors.foreground};
+  }
+
   button {
     cursor: pointer;
     border: ${props => props.theme.buttons.borderWidth} solid;

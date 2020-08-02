@@ -4,9 +4,9 @@ import MonacoEditor, { EditorConstructionOptions } from 'react-monaco-editor';
 import { useDispatch, useSelector } from 'react-redux';
 import { Path } from 'src/models/node';
 import { RootState } from 'src/reducers';
+import { setRulers, setWordWrap } from 'src/reducers/settingsSlice';
 import { AppDispatch } from 'src/store';
 import styled from 'styled-components';
-import { setRulers, setWordWrap } from '../editorSettingsSlice';
 import EditorStatusbar, {
   STATUSBAR_LINE_HEIGHT,
   STATUSBAR_PADDING_Y,
@@ -62,10 +62,9 @@ export default function Editor(props: Props) {
   } = props;
 
   const dispatch: AppDispatch = useDispatch();
-  const wordWrap = useSelector(
-    (state: RootState) => state.editorSettings.wordWrap
-  );
-  const rulers = useSelector((state: RootState) => state.editorSettings.rulers);
+  const wordWrap = useSelector((state: RootState) => state.settings.wordWrap);
+  const rulers = useSelector((state: RootState) => state.settings.rulers);
+  const currentTheme = useSelector((state: RootState) => state.settings.theme);
 
   const [editorPos, setEditorPos] = useState<Position | null>(null);
   const editorPosChangeEvent = useRef<IDisposable | null>(null);
@@ -151,6 +150,7 @@ export default function Editor(props: Props) {
           wordWrap: wordWrap ? 'on' : 'off',
         }}
         onChange={content => onContentChange(content)}
+        theme={currentTheme === 'dark' ? 'vs-dark' : 'vs'}
       />
       <StyledStatusbar
         editorPos={editorPos}

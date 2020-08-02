@@ -338,14 +338,14 @@ export default function NotebookPage(): JSX.Element {
           <PageViewModeButtonGroup>
             <Button
               active={pageViewMode === 'editor'}
-              themeColor='light'
+              themeColor='default'
               onClick={() => setPageViewMode('editor')}
             >
               <FontAwesomeIcon icon={faEdit} fixedWidth />
             </Button>
             <Button
               active={pageViewMode === 'preview'}
-              themeColor='light'
+              themeColor='default'
               onClick={() => setPageViewMode('preview')}
             >
               <FontAwesomeIcon icon={faSearch} fixedWidth />
@@ -357,7 +357,7 @@ export default function NotebookPage(): JSX.Element {
             {!isMobileView && (
               <Button
                 active={pageViewMode === 'side-by-side'}
-                themeColor='light'
+                themeColor='default'
                 onClick={() => setPageViewMode('side-by-side')}
               >
                 <FontAwesomeIcon icon={faColumns} fixedWidth />

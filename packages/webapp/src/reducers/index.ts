@@ -3,8 +3,8 @@ import apiReducer from 'src/features/api/apiSlice';
 import currentPathReducer from 'src/features/navigation/currentPathSlice';
 import navigationWidthReducer from 'src/features/navigation/navigationWidthSlice';
 import nodeNameEditingReducer from 'src/features/navigation/nodeNameEditingSlice';
-import editorSettingsReducer from 'src/features/nodes/editorSettingsSlice';
 import nodesReducer from 'src/features/nodes/nodesSlice';
+import settingsReducer from 'src/reducers/settingsSlice';
 
 const rootReducer = combineReducers({
   api: apiReducer,
@@ -12,7 +12,7 @@ const rootReducer = combineReducers({
   navigationWidth: navigationWidthReducer,
   nodeNameEditing: nodeNameEditingReducer,
   currentPath: currentPathReducer,
-  editorSettings: editorSettingsReducer,
+  settings: settingsReducer,
 });
 
 export type RootState = ReturnType<typeof rootReducer>;

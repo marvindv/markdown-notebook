@@ -21,7 +21,7 @@ const Footer = styled.div`
   bottom: 0;
   left: 0;
   right: 0;
-  background-color: ${props => props.theme.baseColors.lightGrey};
+  background-color: ${props => props.theme.baseColors.default};
   padding: 1rem;
 `;
 
@@ -43,7 +43,7 @@ const ApiLoginUiWrapper = styled.div`
   border: ${props => props.theme.borders.width}
     ${props => props.theme.borders.color} solid;
   padding: 2rem;
-  background-color: ${props => props.theme.baseColors.lightGrey};
+  background-color: ${props => props.theme.baseColors.default};
   border-bottom-left-radius: ${props => props.theme.base.borderRadius};
   border-bottom-right-radius: ${props => props.theme.base.borderRadius};
 `;

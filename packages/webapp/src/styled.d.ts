@@ -5,6 +5,10 @@
 import 'styled-components';
 
 declare module 'styled-components' {
+  // Define the theme colors here so it can be used here in `DefaultTheme`.
+  // This is reexported as `ThemeColors` from `theme.ts`.
+  export type __ThemeColors = 'primary' | 'secondary' | 'default';
+
   export interface DefaultTheme {
     base: {
       borderRadius: string;
@@ -13,8 +17,10 @@ declare module 'styled-components' {
     baseColors: {
       primary: string;
       secondary: string;
-      lightGrey: string;
+      default: string;
       danger: string;
+      contentBackground: string;
+      foreground: string;
     };
 
     borders: {
@@ -34,7 +40,7 @@ declare module 'styled-components' {
       borderWidth: string;
 
       themes: {
-        [color in ThemeColors]: {
+        [color in __ThemeColors]: {
           border: string;
           background: string;
           hover: string;

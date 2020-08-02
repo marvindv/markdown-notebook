@@ -14,6 +14,7 @@ const Container = styled.div`
 export const DropdownToggle = styled.button`
   border: 0;
   background: transparent;
+  color: ${({ theme }) => theme.baseColors.foreground};
 `;
 
 /**
@@ -25,7 +26,7 @@ export const Menu = styled.div<{ align: 'left' | 'right' }>`
   position: absolute;
   top: 100%;
   padding: 0.5rem 0;
-  background-color: white;
+  background-color: ${({ theme }) => theme.baseColors.contentBackground};
   // Slightly adjusted material depth 3 shadow.
   // From https://codepen.io/sdthornton/pen/wBZdXq
   box-shadow: 0 0px 20px rgba(0, 0, 0, 0.19), 0 0px 6px rgba(0, 0, 0, 0.23);
@@ -51,6 +52,7 @@ export const Menu = styled.div<{ align: 'left' | 'right' }>`
  */
 const Item = styled.button`
   border: 0;
+  color: ${({ theme }) => theme.baseColors.foreground};
   background: transparent;
   display: block;
   padding: 0.5rem 1rem;
@@ -60,6 +62,7 @@ const Item = styled.button`
 
   &[disabled] {
     cursor: default;
+    color: ${({ theme }) => theme.typo.mutedColor};
   }
 
   &:not([disabled]):hover {

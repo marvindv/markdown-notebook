@@ -14,6 +14,7 @@ import {
 import { Node, Path } from 'src/models/node';
 import { getTreeNode } from 'src/models/tree';
 import { RootState } from 'src/reducers';
+import { setTheme } from 'src/reducers/settingsSlice';
 import { getHasUnsavedChanges } from 'src/selectors';
 import { AppDispatch } from 'src/store';
 import styled from 'styled-components';
@@ -84,6 +85,7 @@ export function Navigation(props: Props) {
   const history = useHistory();
   const dispatch: AppDispatch = useDispatch();
   const [showSettingsDropdown, setShowSettingsDropdown] = useState(false);
+  const currentTheme = useSelector((state: RootState) => state.settings.theme);
   const currentPath = useSelector((state: RootState) => state.currentPath);
   const rootNode = useSelector((state: RootState) => state.nodes.root);
   const hasUnsavedChanges = useSelector(getHasUnsavedChanges);
@@ -223,6 +225,10 @@ export function Navigation(props: Props) {
     }
   };
 
+  const toggleDarkTheme = () => {
+    dispatch(setTheme(currentTheme === 'dark' ? 'light' : 'dark'));
+  };
+
   // Adjust the dropdown and heading depending on whether there is a custom root
   // node selected.
   let dropdown;
@@ -278,9 +284,21 @@ export function Navigation(props: Props) {
             isSpacer: true,
           },
           {
+            label:
+              currentTheme === 'dark'
+                ? 'Change to Light Theme'
+                : 'Change to Dark Theme',
+            onClick: () => toggleDarkTheme(),
+          },
+          {
+            isSpacer: true,
+          },
+          {
             label: 'Leave directory',
             onClick: () => setCustomRootPath(null),
           },
+          { isSpacer: true },
+          { label: 'Version ' + process.env.REACT_APP_VERSION, textOnly: true },
         ]}
       />
     );
@@ -306,6 +324,16 @@ export function Navigation(props: Props) {
           {
             label: 'New directory',
             onClick: () => handleNewRootDirectory(),
+          },
+          {
+            isSpacer: true,
+          },
+          {
+            label:
+              currentTheme === 'dark'
+                ? 'Change to Light Theme'
+                : 'Change to Dark Theme',
+            onClick: () => toggleDarkTheme(),
           },
           { isSpacer: true },
           {
