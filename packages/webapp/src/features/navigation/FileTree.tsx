@@ -8,14 +8,17 @@ import { transparentize } from 'polished';
 import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { DragObjectWithType, useDrag, useDrop } from 'react-dnd';
 import { getEmptyImage } from 'react-dnd-html5-backend';
+import { useDispatch } from 'react-redux';
 import { DropdownItem } from 'src/components/Dropdown';
 import { DndItemTypes } from 'src/dnd-types';
 import { UnsavedChangesNode } from 'src/features/nodes/nodesSlice';
 import useCombinedRefs from 'src/hooks/useCombinedRefs';
 import { DirectoryNode, Node, Path } from 'src/models/node';
 import { getTreeNodePayload, hasTreeNodeChildren } from 'src/models/tree';
+import { AppDispatch } from 'src/store';
 import styled, { css } from 'styled-components';
 import CustomDragLayer from './CustomDragLayer';
+import { ExpandedNodesTree, setIsNodeExpanded } from './expandedNodesSlice';
 import { getCollisionFreeName } from './helper';
 import { NodeNameEditingTreeNode } from './nodeNameEditingSlice';
 import TreeNodeHead from './TreeNodeHead';
@@ -75,10 +78,11 @@ type NodeProps<T> = T & {
   indentLevel: number;
   path: Path;
   selectedPath: Path;
+  nodeNameEditingTree: NodeNameEditingTreeNode | undefined;
+  expandedNodesTree: ExpandedNodesTree | undefined;
   onFileClick: (path: Path) => void;
   onSaveClick: (path: Path) => void;
   onDeleteClick: (path: Path) => void;
-  nodeNameEditingTree: NodeNameEditingTreeNode | undefined;
   onNodeNameChange: (path: Path, newName: string) => void;
   onNodeNameEditingChange: (path: Path, isTextEditing: boolean) => void;
   onNewNode: (parentPath: Path, node: Node) => void;
@@ -99,8 +103,9 @@ function TreeNode(
     unsavedNodesSubtree: UnsavedChangesNode | undefined;
   }>
 ) {
-  const { node, unsavedNodesSubtree } = props;
-  const [collapsed, setCollapse] = useState(!props.isRoot);
+  const { isRoot, node, path, unsavedNodesSubtree, expandedNodesTree } = props;
+  const collapsed = isRoot ? false : expandedNodesTree?.payload !== true;
+  const dispatch: AppDispatch = useDispatch();
   const [isHovering, setHovering] = useState(false);
 
   const deleteConfirmText = useMemo(() => {
@@ -183,9 +188,12 @@ function TreeNode(
       collapsed &&
       hoverExpandTimer.current === null
     ) {
-      hoverExpandTimer.current = setTimeout(() => setCollapse(false), 1000);
+      hoverExpandTimer.current = setTimeout(
+        () => dispatch(setIsNodeExpanded({ path, isExpanded: true })),
+        1000
+      );
     }
-  }, [isDropHover, collapsed, setCollapse, node.isDirectory]);
+  }, [isDropHover, collapsed, node.isDirectory]);
 
   const dragDropRef = useCombinedRefs<HTMLDivElement>(dragRef, dropRef);
 
@@ -216,7 +224,7 @@ function TreeNode(
             'New note',
             Object.keys(node.children)
           );
-          setCollapse(false);
+          dispatch(setIsNodeExpanded({ path, isExpanded: true }));
           props.onNewNode(props.path, {
             isDirectory: false,
             content: '',
@@ -231,7 +239,7 @@ function TreeNode(
             'New directory',
             Object.keys(node.children)
           );
-          setCollapse(false);
+          dispatch(setIsNodeExpanded({ path, isExpanded: true }));
           props.onNewNode(props.path, {
             isDirectory: true,
             children: {},
@@ -287,7 +295,7 @@ function TreeNode(
           dropdownItems={dropdownItems}
           onClick={() =>
             node.isDirectory
-              ? setCollapse(!collapsed)
+              ? dispatch(setIsNodeExpanded({ path, isExpanded: collapsed }))
               : props.onFileClick(props.path)
           }
           onDoubleClick={() =>
@@ -349,6 +357,7 @@ function DirectoryTreeNodeBody(
           renderRootHead={false}
           node={props.node.children[name]}
           unsavedNodesSubtree={props.unsavedNodesSubtree?.children?.[name]}
+          expandedNodesTree={props.expandedNodesTree?.children?.[name]}
           path={[...props.path, name]}
           key={name}
           indentLevel={
@@ -376,12 +385,13 @@ export interface Props {
    */
   renderRootHead?: boolean;
   rootNode: DirectoryNode;
-  unsavedNodes: UnsavedChangesNode | undefined;
   currentPath: Path;
+  unsavedNodes: UnsavedChangesNode | undefined;
+  nodeNameEditingTree: NodeNameEditingTreeNode | undefined;
+  expandedNodesTree: ExpandedNodesTree | undefined;
   onFileClick: (path: Path) => void;
   onSaveClick: (path: Path) => void;
   onDeleteClick: (path: Path) => void;
-  nodeNameEditingTree: NodeNameEditingTreeNode | undefined;
   onNodeNameChange: (path: Path, newName: string) => void;
   onNodeNameEditingChange: (path: Path, isTextEditing: boolean) => void;
   onNewNode: (parentPath: Path, node: Node) => void;

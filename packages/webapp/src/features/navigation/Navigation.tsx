@@ -95,6 +95,9 @@ export function Navigation(props: Props) {
   const nodeNameEditingTree = useSelector(
     (state: RootState) => state.nodeNameEditing
   );
+  const expandedNodesTree = useSelector(
+    (state: RootState) => state.expandedNodes
+  );
 
   // The user may choose a child of the root as the "custom root" to display
   // only children of that child in the navigation.
@@ -375,6 +378,7 @@ export function Navigation(props: Props) {
           unsavedNodes={unsavedNodesWithCustomRoot}
           currentPath={currentPathWithCustomRoot}
           nodeNameEditingTree={nodeNameEditingWithCustomRoot}
+          expandedNodesTree={expandedNodesTree}
           onFileClick={handleFileClick}
           onSaveClick={handleSaveClick}
           onDeleteClick={handleDeleteClick}
