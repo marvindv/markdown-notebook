@@ -1,4 +1,5 @@
 {
+  "typescript.tsdk": "./packages/webapp/node_modules/typescript/lib",
   "editor.codeActionsOnSave": {
     "source.organizeImports": true
   },
