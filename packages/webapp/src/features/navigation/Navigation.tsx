@@ -20,6 +20,7 @@ import { AppDispatch } from 'src/store';
 import styled from 'styled-components';
 import exportAsZip from '../nodes/exporter';
 import { changeCurrentPath } from './currentPathSlice';
+import { setIsNodeExpanded } from './expandedNodesSlice';
 import FileTree from './FileTree';
 import { getCollisionFreeName } from './helper';
 import { setNodeEditing } from './nodeNameEditingSlice';
@@ -95,19 +96,21 @@ export function Navigation(props: Props) {
   const nodeNameEditingTree = useSelector(
     (state: RootState) => state.nodeNameEditing
   );
-  const expandedNodesTree = useSelector(
-    (state: RootState) => state.expandedNodes
-  );
+  const expandedNodes = useSelector((state: RootState) => state.expandedNodes);
 
   // The user may choose a child of the root as the "custom root" to display
   // only children of that child in the navigation.
   // Use null for no custom root, i.e. using the actual root, for easy checks.
   const [customRootPath, setCustomRootPath] = useState<Path | null>(null);
 
-  // If a custom root path is specified, find the node to that path and
-  // normalize the customRootPath to the pathPrefix that is always a valid path
-  // and can be used in the Navigation event handlers to prefix paths of
-  // selected/deleted/moved etc. nodes.
+  // If a custom root path is specified, find the node to that path and return
+  // it as customRootNode along with pathPrefix.
+  // pathPrefix is either empty, i.e. pointing to the actual root, if no custom
+  // root is selected or is the custom root path. This means
+  // pathPrefix is always a valid path and therefore can always be used in the
+  // Navigation event handlers to prefix paths of selected/deleted/moved etc.
+  // nodes to get their full path since these event handlers only get the path
+  // starting from the custom root, if there is one.
   const [customRootNode, pathPrefix] = useMemo(() => {
     if (!customRootPath) {
       return [rootNode, []];
@@ -134,6 +137,10 @@ export function Navigation(props: Props) {
   const nodeNameEditingWithCustomRoot = useMemo(
     () => getTreeNode(nodeNameEditingTree, pathPrefix),
     [nodeNameEditingTree, pathPrefix]
+  );
+  const expandedNodesWithCustomRoot = useMemo(
+    () => getTreeNode(expandedNodes, pathPrefix),
+    [expandedNodes, pathPrefix]
   );
   // The current path adjusted so it can be passed to the Navigation component
   // if a custom root is selected.
@@ -226,6 +233,11 @@ export function Navigation(props: Props) {
     if (decision) {
       dispatch(moveNode({ nodePath, newParentPath }));
     }
+  };
+
+  const handleIsNodeExpandedChange = (node: Path, isExpanded: boolean) => {
+    const nodePath = [...pathPrefix, ...node];
+    dispatch(setIsNodeExpanded({ path: nodePath, isExpanded }));
   };
 
   const toggleDarkTheme = () => {
@@ -378,7 +390,7 @@ export function Navigation(props: Props) {
           unsavedNodes={unsavedNodesWithCustomRoot}
           currentPath={currentPathWithCustomRoot}
           nodeNameEditingTree={nodeNameEditingWithCustomRoot}
-          expandedNodesTree={expandedNodesTree}
+          expandedNodes={expandedNodesWithCustomRoot}
           onFileClick={handleFileClick}
           onSaveClick={handleSaveClick}
           onDeleteClick={handleDeleteClick}
@@ -389,6 +401,7 @@ export function Navigation(props: Props) {
           onSelectCustomRoot={path =>
             setCustomRootPath([...pathPrefix, ...path])
           }
+          onIsNodeExpandedChange={handleIsNodeExpandedChange}
         />
       ) : (
         <NoNodesHint>

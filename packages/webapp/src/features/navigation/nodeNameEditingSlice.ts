@@ -6,11 +6,7 @@ import {
   changeTreeNodeName,
   createEmptyTree,
   setTreeNodePayload,
-  Tree,
 } from 'src/models/tree';
-
-export type NodeNameEditingTree = Tree<true>;
-export type NodeNameEditingTreeNode = Tree<true>;
 
 /**
  * Encapsulates the state describing for which nodes their name is currently

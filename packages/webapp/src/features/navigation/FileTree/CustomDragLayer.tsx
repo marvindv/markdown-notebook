@@ -3,7 +3,7 @@ import React from 'react';
 import { useDragLayer, XYCoord } from 'react-dnd';
 import { DndItemTypes } from 'src/dnd-types';
 import styled from 'styled-components';
-import { NodeDragObject } from './FileTree';
+import { NodeDragObject } from './nodeDragObject';
 
 // Based on https://react-dnd.github.io/react-dnd/examples/drag-around/custom-drag-layer
 
@@ -96,6 +96,7 @@ export default function CustomDragLayer() {
   if (!isDragging) {
     return null;
   }
+
   return (
     <div style={layerStyles}>
       <div style={getItemStyles(initialOffset, currentOffset)}>

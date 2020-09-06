@@ -1,5 +1,5 @@
 import { createSelector } from '@reduxjs/toolkit';
-import { UnsavedChangesNode } from 'src/features/nodes/nodesSlice';
+import { UnsavedChangesTree } from 'src/features/nodes/nodesSlice';
 import { Node } from 'src/models/node';
 import { hasTreeNodeChildren } from 'src/models/tree';
 import { RootState } from 'src/reducers';
@@ -39,7 +39,7 @@ export const getHasUnsavedChanges = createSelector(
 export const getHasCurrentNodeUnsavedChanges = createSelector(
   [getCurrentPath, getUnsavedNodes],
   (currentPath, unsavedNodes) => {
-    let node: UnsavedChangesNode | undefined = unsavedNodes;
+    let node: UnsavedChangesTree | undefined = unsavedNodes;
     for (const part of currentPath) {
       if (!node) {
         return false;

@@ -35,13 +35,11 @@ export interface State {
   isFetching: boolean;
   fetchError: null | string;
   savePending: boolean;
-  unsavedNodes: NodesWithUnsavedChangesTree;
+  unsavedNodes: UnsavedChangesTree;
   root: DirectoryNode;
 }
 
-export type NodesWithUnsavedChangesTree = Tree<true>;
-
-export type UnsavedChangesNode = Tree<true>;
+export type UnsavedChangesTree = Tree<true>;
 
 /**
  * The characters that are not allowed in a node name.
@@ -176,13 +174,13 @@ function getNodeByPath(root: DirectoryNode, path: Path): Node | undefined {
  *
  * @param {ThunkDispatch<unknown, unknown, Action<any>>} dispatch
  * @param {Path} path
- * @param {(UnsavedChangesNode | undefined)} startUnsavedNode
+ * @param {(UnsavedChangesTree | undefined)} startUnsavedNode
  * @returns {Promise<void>}
  */
 async function deepSaveMany(
   dispatch: ThunkDispatch<unknown, unknown, Action<any>>,
   path: Path,
-  startUnsavedNode: UnsavedChangesNode | undefined
+  startUnsavedNode: UnsavedChangesTree | undefined
 ): Promise<void> {
   if (startUnsavedNode?.payload === true) {
     await dispatch(savePageContent({ path }));
@@ -445,10 +443,7 @@ const nodesSlice = createSlice({
   },
 });
 
-function addToUnsavedChanges(
-  path: Path,
-  unsavedNodes: NodesWithUnsavedChangesTree
-) {
+function addToUnsavedChanges(path: Path, unsavedNodes: UnsavedChangesTree) {
   setTreeNodePayload(unsavedNodes, path, true);
 }
 
@@ -479,12 +474,12 @@ function addToUnsavedChanges(
  * ```
  *
  * @param {Path} path
- * @param {NodesWithUnsavedChangesTree} unsavedChanges
+ * @param {UnsavedChangesTree} unsavedChanges
  * @returns
  */
 function removeFromUnsavedChanges(
   path: Path,
-  unsavedChanges: NodesWithUnsavedChangesTree
+  unsavedChanges: UnsavedChangesTree
 ) {
   removeTreeNode(unsavedChanges, path);
 }

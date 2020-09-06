@@ -6,18 +6,14 @@ import {
   changeTreeNodeName,
   createEmptyTree,
   setTreeNodePayload,
-  Tree,
 } from 'src/models/tree';
+import { ExpandedNodesTree } from './FileTree';
 
-/**
- * A tree to store the expanded state of nodes. A node with the payload `true`
- * is be expanded.
- */
-export type ExpandedNodesTree = Tree<true>;
+const initialState: ExpandedNodesTree = createEmptyTree<true>();
 
 const expandedNodesSlice = createSlice({
   name: 'expandedNodes',
-  initialState: createEmptyTree<true>(),
+  initialState,
   reducers: {
     setIsNodeExpanded(
       state,

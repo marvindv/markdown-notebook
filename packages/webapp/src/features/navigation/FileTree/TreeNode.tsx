@@ -6,21 +6,19 @@ import {
 } from '@fortawesome/free-solid-svg-icons';
 import { transparentize } from 'polished';
 import React, { useEffect, useMemo, useRef, useState } from 'react';
-import { DragObjectWithType, useDrag, useDrop } from 'react-dnd';
+import { useDrag, useDrop } from 'react-dnd';
 import { getEmptyImage } from 'react-dnd-html5-backend';
-import { useDispatch } from 'react-redux';
 import { DropdownItem } from 'src/components/Dropdown';
 import { DndItemTypes } from 'src/dnd-types';
-import { UnsavedChangesNode } from 'src/features/nodes/nodesSlice';
+import { UnsavedChangesTree } from 'src/features/nodes/nodesSlice';
 import useCombinedRefs from 'src/hooks/useCombinedRefs';
 import { DirectoryNode, Node, Path } from 'src/models/node';
 import { getTreeNodePayload, hasTreeNodeChildren } from 'src/models/tree';
-import { AppDispatch } from 'src/store';
 import styled, { css } from 'styled-components';
-import CustomDragLayer from './CustomDragLayer';
-import { ExpandedNodesTree, setIsNodeExpanded } from './expandedNodesSlice';
-import { getCollisionFreeName } from './helper';
-import { NodeNameEditingTreeNode } from './nodeNameEditingSlice';
+import { getCollisionFreeName } from '../helper';
+import { ExpandedNodesTree } from './expandedNodesTree';
+import { NodeDragObject } from './nodeDragObject';
+import { NodeNameEditingTree } from './nodeNameEditingTree';
 import TreeNodeHead from './TreeNodeHead';
 
 const StyledTreeNodeHead = styled(TreeNodeHead)``;
@@ -75,11 +73,14 @@ const TreeNodeContainer = styled.div<{
 `;
 
 type NodeProps<T> = T & {
+  isRoot: boolean;
+  renderRootHead: boolean;
   indentLevel: number;
   path: Path;
   selectedPath: Path;
-  nodeNameEditingTree: NodeNameEditingTreeNode | undefined;
-  expandedNodesTree: ExpandedNodesTree | undefined;
+  nodeNameEditingTree: NodeNameEditingTree | undefined;
+  expandedNodes: ExpandedNodesTree | undefined;
+  unsavedNodesSubtree: UnsavedChangesTree | undefined;
   onFileClick: (path: Path) => void;
   onSaveClick: (path: Path) => void;
   onDeleteClick: (path: Path) => void;
@@ -88,24 +89,68 @@ type NodeProps<T> = T & {
   onNewNode: (parentPath: Path, node: Node) => void;
   onNodeMove: (node: Path, newParent: Path) => void;
   onSelectCustomRoot: (node: Path) => void;
+  onIsNodeExpandedChange: (node: Path, isExpanded: boolean) => void;
 };
 
-export interface NodeDragObject extends DragObjectWithType {
-  name: string;
-  path: Path;
-}
-
-function TreeNode(
+function DirectoryTreeNodeBody(
   props: NodeProps<{
-    isRoot: boolean;
-    renderRootHead: boolean;
-    node: Node;
-    unsavedNodesSubtree: UnsavedChangesNode | undefined;
+    node: DirectoryNode;
+    collapsed: boolean;
   }>
 ) {
-  const { isRoot, node, path, unsavedNodesSubtree, expandedNodesTree } = props;
-  const collapsed = isRoot ? false : expandedNodesTree?.payload !== true;
-  const dispatch: AppDispatch = useDispatch();
+  const sortedChildrenNames = useMemo(() => {
+    return Object.keys(props.node.children).sort((a, b) => {
+      const nodeA = props.node.children[a];
+      const nodeB = props.node.children[b];
+
+      // Directory children appear before file children.
+      if (nodeA.isDirectory && !nodeB.isDirectory) {
+        return -1;
+      }
+
+      if (!nodeA.isDirectory && nodeB.isDirectory) {
+        return 1;
+      }
+
+      // Then sort by node name.
+      return nodeA.name.localeCompare(nodeB.name);
+    });
+  }, [props.node.children]);
+
+  if (props.collapsed) {
+    return <></>;
+  }
+
+  // If this is the root, discard the given indentLevel and start with 0.
+  return (
+    <>
+      {sortedChildrenNames.map(name => (
+        <TreeNode
+          {...props}
+          isRoot={false}
+          renderRootHead={false}
+          node={props.node.children[name]}
+          unsavedNodesSubtree={props.unsavedNodesSubtree?.children?.[name]}
+          expandedNodes={props.expandedNodes?.children?.[name]}
+          path={[...props.path, name]}
+          key={name}
+          indentLevel={
+            !props.renderRootHead && props.isRoot ? 0 : props.indentLevel + 1
+          }
+          nodeNameEditingTree={props.nodeNameEditingTree?.children?.[name]}
+        />
+      ))}
+    </>
+  );
+}
+
+export function TreeNode(
+  props: NodeProps<{
+    node: Node;
+  }>
+) {
+  const { isRoot, node, path, unsavedNodesSubtree, expandedNodes } = props;
+  const collapsed = isRoot ? false : expandedNodes?.payload !== true;
   const [isHovering, setHovering] = useState(false);
 
   const deleteConfirmText = useMemo(() => {
@@ -189,7 +234,7 @@ function TreeNode(
       hoverExpandTimer.current === null
     ) {
       hoverExpandTimer.current = setTimeout(
-        () => dispatch(setIsNodeExpanded({ path, isExpanded: true })),
+        () => props.onIsNodeExpandedChange(path, true),
         1000
       );
     }
@@ -224,7 +269,7 @@ function TreeNode(
             'New note',
             Object.keys(node.children)
           );
-          dispatch(setIsNodeExpanded({ path, isExpanded: true }));
+          props.onIsNodeExpandedChange(path, true);
           props.onNewNode(props.path, {
             isDirectory: false,
             content: '',
@@ -239,7 +284,7 @@ function TreeNode(
             'New directory',
             Object.keys(node.children)
           );
-          dispatch(setIsNodeExpanded({ path, isExpanded: true }));
+          props.onIsNodeExpandedChange(path, true);
           props.onNewNode(props.path, {
             isDirectory: true,
             children: {},
@@ -295,7 +340,7 @@ function TreeNode(
           dropdownItems={dropdownItems}
           onClick={() =>
             node.isDirectory
-              ? dispatch(setIsNodeExpanded({ path, isExpanded: collapsed }))
+              ? props.onIsNodeExpandedChange(path, collapsed)
               : props.onFileClick(props.path)
           }
           onDoubleClick={() =>
@@ -312,124 +357,5 @@ function TreeNode(
         <DirectoryTreeNodeBody {...props} node={node} collapsed={collapsed} />
       )}
     </TreeNodeContainer>
-  );
-}
-
-function DirectoryTreeNodeBody(
-  props: NodeProps<{
-    isRoot: boolean;
-    renderRootHead: boolean;
-    node: DirectoryNode;
-    unsavedNodesSubtree: UnsavedChangesNode | undefined;
-    collapsed: boolean;
-  }>
-) {
-  const sortedChildrenNames = useMemo(() => {
-    return Object.keys(props.node.children).sort((a, b) => {
-      const nodeA = props.node.children[a];
-      const nodeB = props.node.children[b];
-
-      // Directory children appear before file children.
-      if (nodeA.isDirectory && !nodeB.isDirectory) {
-        return -1;
-      }
-
-      if (!nodeA.isDirectory && nodeB.isDirectory) {
-        return 1;
-      }
-
-      // Then sort by node name.
-      return nodeA.name.localeCompare(nodeB.name);
-    });
-  }, [props.node.children]);
-
-  if (props.collapsed) {
-    return <></>;
-  }
-
-  // If this is the root, discard the given indentLevel and start with 0.
-  return (
-    <>
-      {sortedChildrenNames.map(name => (
-        <TreeNode
-          {...props}
-          isRoot={false}
-          renderRootHead={false}
-          node={props.node.children[name]}
-          unsavedNodesSubtree={props.unsavedNodesSubtree?.children?.[name]}
-          expandedNodesTree={props.expandedNodesTree?.children?.[name]}
-          path={[...props.path, name]}
-          key={name}
-          indentLevel={
-            !props.renderRootHead && props.isRoot ? 0 : props.indentLevel + 1
-          }
-          nodeNameEditingTree={props.nodeNameEditingTree?.children?.[name]}
-        />
-      ))}
-    </>
-  );
-}
-
-const FileTreeContainer = styled.div``;
-
-export interface Props {
-  className?: string;
-  /**
-   * The value indicating whether the root should be rendered. If `false`, the
-   * tree renders only the children of the root.
-   *
-   * Defaults to `true`.
-   *
-   * @type {boolean}
-   * @memberof Props
-   */
-  renderRootHead?: boolean;
-  rootNode: DirectoryNode;
-  currentPath: Path;
-  unsavedNodes: UnsavedChangesNode | undefined;
-  nodeNameEditingTree: NodeNameEditingTreeNode | undefined;
-  expandedNodesTree: ExpandedNodesTree | undefined;
-  onFileClick: (path: Path) => void;
-  onSaveClick: (path: Path) => void;
-  onDeleteClick: (path: Path) => void;
-  onNodeNameChange: (path: Path, newName: string) => void;
-  onNodeNameEditingChange: (path: Path, isTextEditing: boolean) => void;
-  onNewNode: (parentPath: Path, node: Node) => void;
-  onNodeMove: (nodePath: Path, newParent: Path) => void;
-  onSelectCustomRoot: (path: Path) => void;
-}
-
-/**
- * Renders a complete file structure based on a given root node.
- *
- * TODO: As soon as this component is to be used somewhere other than just the
- * Navigation component, make the dropdown items of the TreeNode component a
- * prop so the dropdown of file and directory nodes can be adjusted to match
- * the parents context.
- *
- * @export
- * @param {Props} props
- * @returns
- */
-export default function FileTree(props: Props) {
-  const { className, rootNode, unsavedNodes, currentPath } = props;
-
-  const renderRootHead =
-    typeof props.renderRootHead === 'boolean' ? props.renderRootHead : true;
-
-  return (
-    <FileTreeContainer className={className}>
-      <CustomDragLayer />
-      <TreeNode
-        {...props}
-        renderRootHead={renderRootHead}
-        isRoot={true}
-        node={rootNode}
-        unsavedNodesSubtree={unsavedNodes}
-        path={[]}
-        selectedPath={currentPath}
-        indentLevel={0}
-      />
-    </FileTreeContainer>
   );
 }
