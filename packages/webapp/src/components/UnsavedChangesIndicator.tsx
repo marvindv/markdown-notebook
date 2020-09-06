@@ -5,7 +5,7 @@ import styled from 'styled-components';
 
 const Container = styled.div`
   margin: -0.2em 0;
-  color: #333;
+  color: ${props => props.theme.baseColors.foreground};
 
   svg {
     font-size: 0.5em;
