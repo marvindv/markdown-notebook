@@ -13,7 +13,7 @@ import { DirectoryNode, Node } from 'src/models/node';
  */
 export default async function exportAsZip(root: DirectoryNode) {
   const zip = new JSZip();
-  processNode(zip, root);
+  processNode(zip, root, true);
 
   try {
     const content = await zip.generateAsync({ type: 'blob' });
@@ -23,11 +23,11 @@ export default async function exportAsZip(root: DirectoryNode) {
   }
 }
 
-function processNode(parent: JSZip, node: Node) {
+function processNode(parent: JSZip, node: Node, isRoot: boolean) {
   if (node.isDirectory) {
-    const folder = parent.folder(node.name);
+    const folder = isRoot ? parent : parent.folder(node.name);
     for (const child of Object.keys(node.children)) {
-      processNode(folder, node.children[child]);
+      processNode(folder, node.children[child], false);
     }
   } else {
     parent.file(node.name + '.md', node.content);
