@@ -1,9 +1,19 @@
-import { faBars, faEllipsisV, faSave } from '@fortawesome/free-solid-svg-icons';
+import { faFile, faFolder } from '@fortawesome/free-regular-svg-icons';
+import {
+  faAdjust,
+  faBackspace,
+  faBars,
+  faCog,
+  faDownload,
+  faEllipsisV,
+  faSave,
+} from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import React, { ButtonHTMLAttributes, useMemo, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { useHistory } from 'react-router-dom';
 import { Button, Dropdown } from 'src/components';
+import { TextDropdownItem } from 'src/components/Dropdown';
 import {
   addNode,
   changeNodeName,
@@ -248,6 +258,19 @@ export function Navigation(props: Props) {
   // node selected.
   let dropdown;
   let heading;
+  const toggleThemeItem = {
+    icon: faAdjust,
+    label:
+      currentTheme === 'dark'
+        ? 'Change to Light Theme'
+        : 'Change to Dark Theme',
+    onClick: () => toggleDarkTheme(),
+  };
+  const versionItem: TextDropdownItem = {
+    label: 'Version ' + process.env.REACT_APP_VERSION,
+    textOnly: true,
+  };
+
   if (customRootPath) {
     dropdown = (
       <Dropdown
@@ -262,6 +285,15 @@ export function Navigation(props: Props) {
         onToggleClick={() => setShowSettingsDropdown(!showSettingsDropdown)}
         items={[
           {
+            icon: faBackspace,
+            label: 'Leave directory',
+            onClick: () => setCustomRootPath(null),
+          },
+          {
+            isSpacer: true,
+          },
+          {
+            icon: faFile,
             label: 'New note',
             onClick: () => {
               setShowSettingsDropdown(false);
@@ -279,6 +311,7 @@ export function Navigation(props: Props) {
             },
           },
           {
+            icon: faFolder,
             label: 'New directory',
             onClick: () => {
               setShowSettingsDropdown(false);
@@ -298,22 +331,9 @@ export function Navigation(props: Props) {
           {
             isSpacer: true,
           },
-          {
-            label:
-              currentTheme === 'dark'
-                ? 'Change to Light Theme'
-                : 'Change to Dark Theme',
-            onClick: () => toggleDarkTheme(),
-          },
-          {
-            isSpacer: true,
-          },
-          {
-            label: 'Leave directory',
-            onClick: () => setCustomRootPath(null),
-          },
+          toggleThemeItem,
           { isSpacer: true },
-          { label: 'Version ' + process.env.REACT_APP_VERSION, textOnly: true },
+          versionItem,
         ]}
       />
     );
@@ -333,34 +353,32 @@ export function Navigation(props: Props) {
         onToggleClick={() => setShowSettingsDropdown(!showSettingsDropdown)}
         items={[
           {
+            icon: faFile,
             label: 'New note',
             onClick: () => handleNewRootFile(),
           },
           {
+            icon: faFolder,
             label: 'New directory',
             onClick: () => handleNewRootDirectory(),
           },
           {
             isSpacer: true,
           },
-          {
-            label:
-              currentTheme === 'dark'
-                ? 'Change to Light Theme'
-                : 'Change to Dark Theme',
-            onClick: () => toggleDarkTheme(),
-          },
+          toggleThemeItem,
           { isSpacer: true },
           {
+            icon: faDownload,
             label: 'Export all',
             onClick: () => handleExportClick(),
           },
           {
+            icon: faCog,
             label: 'Change storage',
             onClick: () => history.push('/login'),
           },
           { isSpacer: true },
-          { label: 'Version ' + process.env.REACT_APP_VERSION, textOnly: true },
+          versionItem,
         ]}
       />
     );

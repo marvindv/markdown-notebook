@@ -1,4 +1,6 @@
-import React, { ButtonHTMLAttributes, useRef } from 'react';
+import { IconDefinition } from '@fortawesome/fontawesome-svg-core';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import React, { ButtonHTMLAttributes, useMemo, useRef } from 'react';
 import useOutsideClick from 'src/hooks/useOutsideClick';
 import styled, { css } from 'styled-components';
 
@@ -45,6 +47,8 @@ export const Menu = styled.div<{ align: 'left' | 'right' }>`
         `}
 `;
 
+const StyledFontAwesomeIcon = styled(FontAwesomeIcon)``;
+
 /**
  * The item inside the dropdown menu.
  * This is not supposed to be used directly and outside of the Dropdown except
@@ -59,6 +63,17 @@ const Item = styled.button`
   width: 100%;
   text-align: left;
   white-space: nowrap;
+
+  .empty-icon {
+    display: inline-block;
+    // This should equal the width of a fixed-width fontawesome icon.
+    width: 1.25rem;
+  }
+
+  .empty-icon,
+  ${StyledFontAwesomeIcon} {
+    margin-right: 0.25rem;
+  }
 
   &[disabled] {
     cursor: default;
@@ -75,6 +90,7 @@ const Item = styled.button`
 export interface BaseDropdownItem {
   isSpacer?: boolean;
   textOnly?: boolean;
+  icon?: IconDefinition;
   label?: string;
   disabled?: boolean;
   onClick?: () => void;
@@ -83,6 +99,7 @@ export interface BaseDropdownItem {
 export interface SpacerDropdownItem extends BaseDropdownItem {
   isSpacer: true;
   textOnly?: undefined;
+  icon?: undefined;
   label?: undefined;
   disabled?: undefined;
   onClick?: undefined;
@@ -139,6 +156,8 @@ export function Dropdown(props: Props) {
   const ref = useRef<HTMLDivElement>(null);
   const ToggleButton = props.toggleButton || DropdownToggle;
 
+  const showIcons = useMemo(() => props.items.some(i => i.icon), [props.items]);
+
   useOutsideClick(ref, props.show, () => {
     props.onToggleClick?.();
   });
@@ -170,6 +189,12 @@ export function Dropdown(props: Props) {
               onClick={ev => handleClick(ev, item.onClick)}
               disabled={item.disabled || item.isSpacer || item.textOnly}
             >
+              {showIcons &&
+                (item.icon ? (
+                  <StyledFontAwesomeIcon fixedWidth={true} icon={item.icon} />
+                ) : (
+                  <span className='empty-icon' />
+                ))}
               {item.label}
             </Item>
           ))}

@@ -1,8 +1,16 @@
-import { faFileAlt as faFileAltRegular } from '@fortawesome/free-regular-svg-icons';
 import {
+  faFile,
+  faFileAlt as faFileAltRegular,
+  faFolder,
+} from '@fortawesome/free-regular-svg-icons';
+import {
+  faBullseye,
   faChevronDown,
   faChevronRight,
+  faEdit,
   faFileAlt as faFileAltSolid,
+  faSave,
+  faTrash,
 } from '@fortawesome/free-solid-svg-icons';
 import { transparentize } from 'polished';
 import React, { useEffect, useMemo, useRef, useState } from 'react';
@@ -263,6 +271,7 @@ export function TreeNode(
   if (node.isDirectory) {
     dropdownItems.push(
       {
+        icon: faFile,
         label: 'New note',
         onClick: () => {
           const name = getCollisionFreeName(
@@ -278,6 +287,7 @@ export function TreeNode(
         },
       },
       {
+        icon: faFolder,
         label: 'New directory',
         onClick: () => {
           const name = getCollisionFreeName(
@@ -293,6 +303,7 @@ export function TreeNode(
         },
       },
       {
+        icon: faBullseye,
         label: 'Show only this directory',
         onClick: () => props.onSelectCustomRoot(props.path),
       },
@@ -304,15 +315,18 @@ export function TreeNode(
 
   dropdownItems.push(
     {
+      icon: faSave,
       label: 'Save',
       disabled: !saveButtonEnabled,
       onClick: () => props.onSaveClick(props.path),
     },
     {
+      icon: faEdit,
       label: 'Change name',
       onClick: () => props.onNodeNameEditingChange(props.path, true),
     },
     {
+      icon: faTrash,
       label: 'Delete',
       onClick: () => {
         const decision = window.confirm(deleteConfirmText);
