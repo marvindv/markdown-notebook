@@ -12,6 +12,7 @@ import { useDispatch, useSelector } from 'react-redux';
 import { Prompt } from 'react-router-dom';
 import { Button, ButtonGroup } from 'src/components';
 import Breadcrumbs from 'src/features/navigation/Breadcrumbs';
+import { recursivlySetIsNodeExpanded } from 'src/features/navigation/expandedNodesSlice';
 import Navigation, { Header } from 'src/features/navigation/Navigation';
 import { setNavigationWidth } from 'src/features/navigation/navigationWidthSlice';
 import useEventListener from 'src/hooks/useEventListener';
@@ -228,6 +229,10 @@ export default function NotebookPage(): JSX.Element {
     }
   }, [dispatch]);
 
+  const handleBreadcrumbClick = (path: Path) => {
+    dispatch(recursivlySetIsNodeExpanded({ path, isExpanded: true }));
+  };
+
   useEffect(() => {
     dispatch(fetchNodes());
   }, [dispatch]);
@@ -333,6 +338,7 @@ export default function NotebookPage(): JSX.Element {
             path={path}
             unsavedChangesIndicator={hasCurrentPageUnsavedChanges}
             showOnlyLast={isMobileView}
+            onCrumbClick={path => handleBreadcrumbClick(path)}
           />
 
           <PageViewModeButtonGroup>

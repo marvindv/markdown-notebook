@@ -26,6 +26,20 @@ export const Breadcrumb = styled.li`
     content: '>';
     margin: 0 0.5rem;
   }
+
+  button {
+    color: ${props => props.theme.typo.mutedColor};
+    outline: none;
+    border: 0;
+    padding: 0;
+    margin: 0;
+    background: transparent;
+
+    &:hover {
+      color: ${props => props.theme.baseColors.foreground};
+      text-decoration: underline;
+    }
+  }
 `;
 
 const BreadcrumbsUnsavedChangesIndicator = styled(UnsavedChangesIndicator)`
@@ -38,16 +52,30 @@ export interface Props {
   path: Path;
   unsavedChangesIndicator: boolean;
   showOnlyLast: boolean;
+  onCrumbClick: (path: Path) => void;
 }
 
 export default function Breadcrumbs(props: Props) {
-  const { className, path, unsavedChangesIndicator, showOnlyLast } = props;
+  const {
+    className,
+    path,
+    unsavedChangesIndicator,
+    showOnlyLast,
+    onCrumbClick,
+  } = props;
   const elements = showOnlyLast ? path.slice(-1) : path;
+  const handleClick = (index: number) => {
+    onCrumbClick(elements.slice(0, index + 1));
+  };
 
   return (
     <Container className={className}>
       {elements.map((el, i) => (
-        <Breadcrumb key={i}>{el}</Breadcrumb>
+        <Breadcrumb key={i}>
+          <button type='button' onClick={ev => handleClick(i)}>
+            {el}
+          </button>
+        </Breadcrumb>
       ))}
       {unsavedChangesIndicator && (
         <BreadcrumbsUnsavedChangesIndicator title='This file contains unsaved changes' />

@@ -15,15 +15,31 @@ const expandedNodesSlice = createSlice({
   name: 'expandedNodes',
   initialState,
   reducers: {
+    /**
+     * Sets the expanded state for the given node.
+     */
     setIsNodeExpanded(
       state,
       action: PayloadAction<{ path: Path; isExpanded: boolean }>
     ) {
       const { path, isExpanded } = action.payload;
-      if (isExpanded) {
-        setTreeNodePayload(state, path, true);
-      } else {
-        setTreeNodePayload(state, path, undefined);
+      const payload = isExpanded ? true : undefined;
+
+      setTreeNodePayload(state, path, payload);
+    },
+
+    /**
+     * Sets the expanded state for each node in the given path.
+     */
+    recursivlySetIsNodeExpanded(
+      state,
+      action: PayloadAction<{ path: Path; isExpanded: boolean }>
+    ) {
+      const { path, isExpanded } = action.payload;
+      const payload = isExpanded ? true : undefined;
+
+      for (let i = 0; i < path.length; i++) {
+        setTreeNodePayload(state, path.slice(0, i + 1), payload);
       }
     },
   },
@@ -39,6 +55,9 @@ const expandedNodesSlice = createSlice({
   },
 });
 
-export const { setIsNodeExpanded } = expandedNodesSlice.actions;
+export const {
+  setIsNodeExpanded,
+  recursivlySetIsNodeExpanded,
+} = expandedNodesSlice.actions;
 
 export default expandedNodesSlice.reducer;
