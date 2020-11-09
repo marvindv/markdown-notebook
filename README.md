@@ -110,7 +110,7 @@ installed.
 - Install the `diesel-cli` with
 
 ```bash
-$ cargo install diesel_cli --no-default-features --features postgres,sqlite
+$ cargo install diesel_cli --no-default-features --features sqlite
 ```
 
 If this fails with errors like
@@ -126,7 +126,7 @@ installing them can currently be found in [https://github.com/diesel-rs/diesel/b
 For example on Debian based linux distributions run
 
 ```bash
-$ sudo apt install libsqlite3-dev libpq-dev
+$ sudo apt install libsqlite3-dev
 ```
 
-for the client libraries of sqlite and postgres.
+for the client library for sqlite.
