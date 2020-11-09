@@ -21,7 +21,7 @@ import { DndItemTypes } from 'src/dnd-types';
 import { UnsavedChangesTree } from 'src/features/nodes/nodesSlice';
 import useCombinedRefs from 'src/hooks/useCombinedRefs';
 import { DirectoryNode, Node, Path } from 'src/models/node';
-import { getTreeNodePayload, hasTreeNodeChildren } from 'src/models/tree';
+import { getTreeNodePayload, hasTreeNodeChildren, Tree } from 'src/models/tree';
 import styled, { css } from 'styled-components';
 import { getCollisionFreeName } from '../helper';
 import { ExpandedNodesTree } from './expandedNodesTree';
@@ -40,6 +40,7 @@ const TreeNodeContainer = styled.div<{
   indentLevel: number;
   isDragging: boolean;
   isHovering: boolean;
+  isHighlighted: boolean;
 }>`
   user-select: none;
   width: 100%;
@@ -66,16 +67,26 @@ const TreeNodeContainer = styled.div<{
       background: ${transparentize(0.5, theme.baseColors.secondary)};
     `}
 
-  // The usage of an IndentWidth element or something like that that gets a
-  // constant width based on the indentLevel instead of using a padding might be
-  // an easier starting point when implementing indent guides.
-  // Also very important to make sure we only select direct descendants.
-  // Otherwise this rule might override nested StyledTreeNodeHead after this
-  // rule changed through a props change.
-  // 1.25rem + 0.25rem = 1.5rem - 1.25 is the width of a FontAwesomeIcon with
-  // "fixedWidth" set. 0.25rem is the padding of the name in TreeNodeHead.
-  // This way the indentation nicely aligns with the parents name.
+  ${({ isHighlighted, theme }) =>
+    isHighlighted &&
+    css`
+      & > ${StyledTreeNodeHead} {
+        background: ${transparentize(0.5, theme.baseColors.primary)};
+      }
+    `}
+
   & > ${StyledTreeNodeHead} {
+    transition: background 0.2s ease-out;
+
+    // The usage of an IndentWidth element or something like that that gets a
+    // constant width based on the indentLevel instead of using a padding might be
+    // an easier starting point when implementing indent guides.
+    // Also very important to make sure we only select direct descendants.
+    // Otherwise this rule might override nested StyledTreeNodeHead after this
+    // rule changed through a props change.
+    // 1.25rem + 0.25rem = 1.5rem - 1.25 is the width of a FontAwesomeIcon with
+    // "fixedWidth" set. 0.25rem is the padding of the name in TreeNodeHead.
+    // This way the indentation nicely aligns with the parents name.
     padding-left: calc(1rem + (1.5rem * ${props => props.indentLevel}));
   }
 `;
@@ -89,6 +100,8 @@ type NodeProps<T> = T & {
   nodeNameEditingTree: NodeNameEditingTree | undefined;
   expandedNodes: ExpandedNodesTree | undefined;
   unsavedNodesSubtree: UnsavedChangesTree | undefined;
+  pendingFocusedNodes: Tree<true> | undefined;
+  highlightedNodes: Tree<true> | undefined;
   onFileClick: (path: Path) => void;
   onSaveClick: (path: Path) => void;
   onDeleteClick: (path: Path) => void;
@@ -98,6 +111,7 @@ type NodeProps<T> = T & {
   onNodeMove: (node: Path, newParent: Path) => void;
   onSelectCustomRoot: (node: Path) => void;
   onIsNodeExpandedChange: (node: Path, isExpanded: boolean) => void;
+  onNodeFocused: (node: Path) => void;
 };
 
 function DirectoryTreeNodeBody(
@@ -140,6 +154,8 @@ function DirectoryTreeNodeBody(
           node={props.node.children[name]}
           unsavedNodesSubtree={props.unsavedNodesSubtree?.children?.[name]}
           expandedNodes={props.expandedNodes?.children?.[name]}
+          pendingFocusedNodes={props.pendingFocusedNodes?.children?.[name]}
+          highlightedNodes={props.highlightedNodes?.children?.[name]}
           path={[...props.path, name]}
           key={name}
           indentLevel={
@@ -157,8 +173,20 @@ export function TreeNode(
     node: Node;
   }>
 ) {
-  const { isRoot, node, path, unsavedNodesSubtree, expandedNodes } = props;
+  const {
+    isRoot,
+    node,
+    path,
+    unsavedNodesSubtree,
+    expandedNodes,
+    pendingFocusedNodes,
+    highlightedNodes,
+    onIsNodeExpandedChange,
+    onNodeFocused,
+  } = props;
   const collapsed = isRoot ? false : expandedNodes?.payload !== true;
+  const isFocusPending = pendingFocusedNodes?.payload === true;
+  const isHighlighted = highlightedNodes?.payload === true;
   const [isHovering, setHovering] = useState(false);
 
   const deleteConfirmText = useMemo(() => {
@@ -168,6 +196,15 @@ export function TreeNode(
 
     return `Are you sure you want to delete the ${node.name} note?`;
   }, [node]);
+
+  // Scroll this tree node into view if isFocused changes to true.
+  const containerRef = useRef<HTMLDivElement>(null);
+  useEffect(() => {
+    if (isFocusPending && containerRef.current) {
+      containerRef.current.scrollIntoView({ behavior: 'smooth' });
+      onNodeFocused(path);
+    }
+  }, [isFocusPending, onNodeFocused, path]);
 
   const [{ isDragging }, dragRef, preview] = useDrag<
     NodeDragObject,
@@ -242,13 +279,13 @@ export function TreeNode(
       hoverExpandTimer.current === null
     ) {
       hoverExpandTimer.current = setTimeout(
-        () => props.onIsNodeExpandedChange(path, true),
+        () => onIsNodeExpandedChange(path, true),
         1000
       );
     }
-  }, [isDropHover, collapsed, node.isDirectory]);
+  }, [isDropHover, collapsed, node.isDirectory, path, onIsNodeExpandedChange]);
 
-  const dragDropRef = useCombinedRefs<HTMLDivElement>(dragRef, dropRef);
+  const ref = useCombinedRefs<HTMLDivElement>(containerRef, dragRef, dropRef);
 
   const icon = node.isDirectory
     ? collapsed
@@ -339,11 +376,12 @@ export function TreeNode(
 
   return (
     <TreeNodeContainer
-      ref={dragDropRef}
+      ref={ref}
       isRoot={props.isRoot}
       indentLevel={props.indentLevel}
       isDragging={isDragging}
       isHovering={isHovering}
+      isHighlighted={isHighlighted}
     >
       {(props.renderRootHead || !props.isRoot) && (
         <StyledTreeNodeHead

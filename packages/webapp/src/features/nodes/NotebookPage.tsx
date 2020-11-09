@@ -15,6 +15,10 @@ import Breadcrumbs from 'src/features/navigation/Breadcrumbs';
 import { recursivlySetIsNodeExpanded } from 'src/features/navigation/expandedNodesSlice';
 import Navigation, { Header } from 'src/features/navigation/Navigation';
 import { setNavigationWidth } from 'src/features/navigation/navigationWidthSlice';
+import {
+  flashNode,
+  requestNodeFocus,
+} from 'src/features/navigation/nodeFocusSlice';
 import useEventListener from 'src/hooks/useEventListener';
 import { Path } from 'src/models/node';
 import { RootState } from 'src/reducers';
@@ -231,6 +235,8 @@ export default function NotebookPage(): JSX.Element {
 
   const handleBreadcrumbClick = (path: Path) => {
     dispatch(recursivlySetIsNodeExpanded({ path, isExpanded: true }));
+    dispatch(requestNodeFocus({ path }));
+    dispatch(flashNode({ path }));
   };
 
   useEffect(() => {

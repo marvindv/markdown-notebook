@@ -1,6 +1,7 @@
 import React from 'react';
 import { UnsavedChangesTree } from 'src/features/nodes/nodesSlice';
 import { DirectoryNode, Node, Path } from 'src/models/node';
+import { Tree } from 'src/models/tree';
 import styled from 'styled-components';
 import CustomDragLayer from './CustomDragLayer';
 import { ExpandedNodesTree } from './expandedNodesTree';
@@ -26,6 +27,8 @@ export interface Props {
   unsavedNodes: UnsavedChangesTree | undefined;
   nodeNameEditingTree: NodeNameEditingTree | undefined;
   expandedNodes: ExpandedNodesTree | undefined;
+  pendingFocusedNodes: Tree<true> | undefined;
+  highlightedNodes: Tree<true> | undefined;
   onFileClick: (path: Path) => void;
   onSaveClick: (path: Path) => void;
   onDeleteClick: (path: Path) => void;
@@ -35,6 +38,7 @@ export interface Props {
   onNodeMove: (nodePath: Path, newParent: Path) => void;
   onSelectCustomRoot: (path: Path) => void;
   onIsNodeExpandedChange: (node: Path, isExpanded: boolean) => void;
+  onNodeFocused: (node: Path) => void;
 }
 
 /**

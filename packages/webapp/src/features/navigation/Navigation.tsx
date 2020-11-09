@@ -33,6 +33,7 @@ import { changeCurrentPath } from './currentPathSlice';
 import { setIsNodeExpanded } from './expandedNodesSlice';
 import FileTree from './FileTree';
 import { getCollisionFreeName } from './helper';
+import { resetNodeFocus } from './nodeFocusSlice';
 import { setNodeEditing } from './nodeNameEditingSlice';
 
 const StyledFileTree = styled(FileTree)``;
@@ -107,6 +108,12 @@ export function Navigation(props: Props) {
     (state: RootState) => state.nodeNameEditing
   );
   const expandedNodes = useSelector((state: RootState) => state.expandedNodes);
+  const pendingFocusedNodes = useSelector(
+    (state: RootState) => state.nodeFocus.isFocusNodePendingTree
+  );
+  const highlightedNodes = useSelector(
+    (state: RootState) => state.nodeFocus.highlightedNodeTree
+  );
 
   // The user may choose a child of the root as the "custom root" to display
   // only children of that child in the navigation.
@@ -151,6 +158,14 @@ export function Navigation(props: Props) {
   const expandedNodesWithCustomRoot = useMemo(
     () => getTreeNode(expandedNodes, pathPrefix),
     [expandedNodes, pathPrefix]
+  );
+  const pendingFocusedNodesWithCustomRoot = useMemo(
+    () => getTreeNode(pendingFocusedNodes, pathPrefix),
+    [pendingFocusedNodes, pathPrefix]
+  );
+  const highlightedNodesWithCustomRoot = useMemo(
+    () => getTreeNode(highlightedNodes, pathPrefix),
+    [highlightedNodes, pathPrefix]
   );
   // The current path adjusted so it can be passed to the Navigation component
   // if a custom root is selected.
@@ -248,6 +263,11 @@ export function Navigation(props: Props) {
   const handleIsNodeExpandedChange = (node: Path, isExpanded: boolean) => {
     const nodePath = [...pathPrefix, ...node];
     dispatch(setIsNodeExpanded({ path: nodePath, isExpanded }));
+  };
+
+  const handleNodeFocused = (node: Path) => {
+    const nodePath = [...pathPrefix, ...node];
+    dispatch(resetNodeFocus({ path: nodePath }));
   };
 
   const toggleDarkTheme = () => {
@@ -409,6 +429,8 @@ export function Navigation(props: Props) {
           currentPath={currentPathWithCustomRoot}
           nodeNameEditingTree={nodeNameEditingWithCustomRoot}
           expandedNodes={expandedNodesWithCustomRoot}
+          pendingFocusedNodes={pendingFocusedNodesWithCustomRoot}
+          highlightedNodes={highlightedNodesWithCustomRoot}
           onFileClick={handleFileClick}
           onSaveClick={handleSaveClick}
           onDeleteClick={handleDeleteClick}
@@ -420,6 +442,7 @@ export function Navigation(props: Props) {
             setCustomRootPath([...pathPrefix, ...path])
           }
           onIsNodeExpandedChange={handleIsNodeExpandedChange}
+          onNodeFocused={handleNodeFocused}
         />
       ) : (
         <NoNodesHint>
