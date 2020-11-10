@@ -1,10 +1,10 @@
 # Markdown Notebook
 
 markdown-notebook is a self-hosted web application to organize and write your
-notes in Markdown.
+notes in Markdown. It allows you to create multiple users whose notes are
+organized in files and nested in directories as they like.
 
-Your notes are organized in files and nested in directories as you like.
-The backend stores all your notes in a SQLite database file.
+The backend stores all notes in a SQLite database file.
 
 ## Docker deployment
 
