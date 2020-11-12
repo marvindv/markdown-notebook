@@ -239,8 +239,11 @@ export default function NotebookPage(): JSX.Element {
     dispatch(flashNode({ path }));
   };
 
+  // Load all nodes and focus the current node in the navigation.
   useEffect(() => {
-    dispatch(fetchNodes());
+    dispatch(fetchNodes()).then(() => {
+      dispatch(requestNodeFocus({ path }));
+    });
   }, [dispatch]);
 
   // Prevent reload and navigation as long as there are unsaved changes.
