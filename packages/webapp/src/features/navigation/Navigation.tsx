@@ -9,7 +9,7 @@ import {
   faSave,
 } from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import React, { ButtonHTMLAttributes, useMemo, useState } from 'react';
+import React, { useMemo, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { useHistory } from 'react-router-dom';
 import { Button, Dropdown } from 'src/components';
@@ -294,13 +294,12 @@ export function Navigation(props: Props) {
   if (customRootPath) {
     dropdown = (
       <Dropdown
-        toggleButton={(props: ButtonHTMLAttributes<any>) => (
-          <Button {...props} themeColor='secondary' clear={true}>
+        toggleButton={React.forwardRef((props, ref) => (
+          <Button {...props} ref={ref} themeColor='secondary' clear={true}>
             {props.children}
           </Button>
-        )}
+        ))}
         toggleLabel={<FontAwesomeIcon fixedWidth={true} icon={faEllipsisV} />}
-        menuAlignment='left'
         show={showSettingsDropdown}
         onToggleClick={() => setShowSettingsDropdown(!showSettingsDropdown)}
         items={[
@@ -362,13 +361,13 @@ export function Navigation(props: Props) {
   } else {
     dropdown = (
       <Dropdown
-        toggleButton={(props: ButtonHTMLAttributes<any>) => (
-          <Button {...props} themeColor='secondary' clear={true}>
+        menuAlignment='bottom-end'
+        toggleButton={React.forwardRef((props, ref) => (
+          <Button {...props} ref={ref} themeColor='secondary' clear={true}>
             {props.children}
           </Button>
-        )}
+        ))}
         toggleLabel={<FontAwesomeIcon fixedWidth={true} icon={faBars} />}
-        menuAlignment='left'
         show={showSettingsDropdown}
         onToggleClick={() => setShowSettingsDropdown(!showSettingsDropdown)}
         items={[

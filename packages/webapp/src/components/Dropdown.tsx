@@ -1,8 +1,18 @@
 import { IconDefinition } from '@fortawesome/fontawesome-svg-core';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import React, { ButtonHTMLAttributes, useMemo, useRef } from 'react';
+import { Placement } from '@popperjs/core';
+import React, {
+  ButtonHTMLAttributes,
+  ForwardRefExoticComponent,
+  PropsWithoutRef,
+  RefAttributes,
+  useMemo,
+  useRef,
+  useState,
+} from 'react';
+import { usePopper } from 'react-popper';
 import useOutsideClick from 'src/hooks/useOutsideClick';
-import styled, { css } from 'styled-components';
+import styled from 'styled-components';
 
 const Container = styled.div`
   position: relative;
@@ -24,9 +34,7 @@ export const DropdownToggle = styled.button`
  * This is not supposed to be used directly and outside of the Dropdown except
  * for adjusting the style of the dropdown.
  */
-export const Menu = styled.div<{ align: 'left' | 'right' }>`
-  position: absolute;
-  top: 100%;
+export const Menu = styled.div`
   padding: 0.5rem 0;
   background-color: ${({ theme }) => theme.baseColors.contentBackground};
   // Slightly adjusted material depth 3 shadow.
@@ -36,15 +44,6 @@ export const Menu = styled.div<{ align: 'left' | 'right' }>`
   border: ${props => props.theme.borders.width} solid
     ${props => props.theme.borders.color};
   z-index: 100;
-
-  ${props =>
-    props.align === 'left'
-      ? css`
-          left: 0;
-        `
-      : css`
-          right: 0;
-        `}
 `;
 
 const StyledFontAwesomeIcon = styled(FontAwesomeIcon)``;
@@ -130,16 +129,19 @@ export interface Props {
   className?: string;
   show: boolean;
   /**
-   * The value indicating whether the dropdown menu aligns on the left of the
-   * dropdown toggle or on the right of it. Defaults to `'right'`.
+   * The value indicating the position of the menu in relation to the dropdown
+   * toggle. Defaults to `'bottom'`.
    *
-   * @type {('left' | 'right')}
+   * @type {Placement}
    * @memberof Props
    */
-  menuAlignment?: 'left' | 'right';
+  menuAlignment?: Placement;
   toggleLabel: string | JSX.Element;
   items: DropdownItem[];
-  toggleButton?: React.ComponentType<ButtonHTMLAttributes<any>>;
+  toggleButton?: ForwardRefExoticComponent<
+    PropsWithoutRef<ButtonHTMLAttributes<any>> &
+      RefAttributes<HTMLButtonElement>
+  >;
   onToggleClick?: () => void;
 }
 
@@ -162,6 +164,17 @@ export function Dropdown(props: Props) {
     props.onToggleClick?.();
   });
 
+  const [
+    referenceElement,
+    setReferenceElement,
+  ] = useState<HTMLButtonElement | null>(null);
+  const [popperElement, setPopperElement] = useState<HTMLDivElement | null>(
+    null
+  );
+  const { styles, attributes } = usePopper(referenceElement, popperElement, {
+    placement: props.menuAlignment || 'bottom',
+  });
+
   const handleClick = (
     ev: React.MouseEvent,
     callback: (() => void) | undefined
@@ -178,11 +191,19 @@ export function Dropdown(props: Props) {
 
   return (
     <Container className={props.className} ref={ref}>
-      <ToggleButton type='button' onClick={handleToggleClick}>
+      <ToggleButton
+        type='button'
+        onClick={handleToggleClick}
+        ref={setReferenceElement}
+      >
         {props.toggleLabel}
       </ToggleButton>
       {props.show && (
-        <Menu align={props.menuAlignment || 'right'}>
+        <Menu
+          ref={setPopperElement}
+          style={styles.popper}
+          {...attributes.popper}
+        >
           {props.items.map((item, i) => (
             <Item
               key={i}
