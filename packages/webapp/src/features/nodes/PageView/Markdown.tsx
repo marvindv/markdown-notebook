@@ -1,3 +1,4 @@
+import { darken } from 'polished';
 import React from 'react';
 import ReactMarkdown from 'react-markdown';
 import styled from 'styled-components';
@@ -13,6 +14,13 @@ const Container = styled.div`
 
     @media (max-width: 767px) {
       padding: 15px;
+    }
+
+    color: ${props => props.theme.baseColors.foreground};
+
+    pre {
+      background-color: ${props =>
+        darken(0.05, props.theme.baseColors.contentBackground)};
     }
   }
 
