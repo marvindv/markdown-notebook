@@ -315,6 +315,8 @@ const nodesSlice = createSlice({
     builder.addCase(changeNodeName.rejected, (state, { error }) => {
       if (error.message === INVALID_NODE_NAME_ERROR_MESSAGE) {
         showInvalidNodeErrorNameToast();
+      } else if (error.name === 'DuplicateError') {
+        toast.error(`There is already a node with this name.`);
       } else {
         toast.error(
           `Failed to change node name: ${error.name} ${error.message}`
