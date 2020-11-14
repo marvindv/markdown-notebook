@@ -240,11 +240,17 @@ export default function NotebookPage(): JSX.Element {
   };
 
   // Load all nodes and focus the current node in the navigation.
-  useEffect(() => {
-    dispatch(fetchNodes()).then(() => {
-      dispatch(requestNodeFocus({ path }));
-    });
-  }, [dispatch]);
+  useEffect(
+    () => {
+      dispatch(fetchNodes()).then(() => {
+        dispatch(requestNodeFocus({ path }));
+      });
+    },
+    // Make sure the notebooks are only loaded once. With path added as a dep
+    // the notebooks are loaded on every path change.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    []
+  );
 
   // Prevent reload and navigation as long as there are unsaved changes.
   useEventListener(window, 'beforeunload', ev => {
