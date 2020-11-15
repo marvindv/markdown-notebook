@@ -10,12 +10,17 @@ import React, {
   useRef,
   useState,
 } from 'react';
-import { usePopper } from 'react-popper';
 import useOutsideClick from 'src/hooks/useOutsideClick';
 import styled from 'styled-components';
+import { Container as PopoverContainer, Popover } from './Popover';
 
 const Container = styled.div`
   position: relative;
+
+  ${PopoverContainer} {
+    padding-left: 0;
+    padding-right: 0;
+  }
 `;
 
 /**
@@ -27,23 +32,6 @@ export const DropdownToggle = styled.button`
   border: 0;
   background: transparent;
   color: ${({ theme }) => theme.baseColors.foreground};
-`;
-
-/**
- * The menu containing the dropdown items.
- * This is not supposed to be used directly and outside of the Dropdown except
- * for adjusting the style of the dropdown.
- */
-export const Menu = styled.div`
-  padding: 0.5rem 0;
-  background-color: ${({ theme }) => theme.baseColors.contentBackground};
-  // Slightly adjusted material depth 3 shadow.
-  // From https://codepen.io/sdthornton/pen/wBZdXq
-  box-shadow: 0 0px 20px rgba(0, 0, 0, 0.19), 0 0px 6px rgba(0, 0, 0, 0.23);
-  border-radius: 0.25rem;
-  border: ${props => props.theme.borders.width} solid
-    ${props => props.theme.borders.color};
-  z-index: 100;
 `;
 
 const StyledFontAwesomeIcon = styled(FontAwesomeIcon)``;
@@ -168,12 +156,6 @@ export function Dropdown(props: Props) {
     referenceElement,
     setReferenceElement,
   ] = useState<HTMLButtonElement | null>(null);
-  const [popperElement, setPopperElement] = useState<HTMLDivElement | null>(
-    null
-  );
-  const { styles, attributes } = usePopper(referenceElement, popperElement, {
-    placement: props.menuAlignment || 'bottom',
-  });
 
   const handleClick = (
     ev: React.MouseEvent,
@@ -198,29 +180,27 @@ export function Dropdown(props: Props) {
       >
         {props.toggleLabel}
       </ToggleButton>
-      {props.show && (
-        <Menu
-          ref={setPopperElement}
-          style={styles.popper}
-          {...attributes.popper}
-        >
-          {props.items.map((item, i) => (
-            <Item
-              key={i}
-              onClick={ev => handleClick(ev, item.onClick)}
-              disabled={item.disabled || item.isSpacer || item.textOnly}
-            >
-              {showIcons &&
-                (item.icon ? (
-                  <StyledFontAwesomeIcon fixedWidth={true} icon={item.icon} />
-                ) : (
-                  <span className='empty-icon' />
-                ))}
-              {item.label}
-            </Item>
-          ))}
-        </Menu>
-      )}
+      <Popover
+        show={props.show}
+        referenceElement={referenceElement}
+        menuAlignment={props.menuAlignment}
+      >
+        {props.items.map((item, i) => (
+          <Item
+            key={i}
+            onClick={ev => handleClick(ev, item.onClick)}
+            disabled={item.disabled || item.isSpacer || item.textOnly}
+          >
+            {showIcons &&
+              (item.icon ? (
+                <StyledFontAwesomeIcon fixedWidth={true} icon={item.icon} />
+              ) : (
+                <span className='empty-icon' />
+              ))}
+            {item.label}
+          </Item>
+        ))}
+      </Popover>
     </Container>
   );
 }
